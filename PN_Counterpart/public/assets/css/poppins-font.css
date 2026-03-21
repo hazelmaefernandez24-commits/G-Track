@@ -1,0 +1,23 @@
+/* Poppins Font - Local Version */
+/* You can download the font files from Google Fonts and place them in public/assets/fonts/ */
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/poppins-v20-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/poppins-v20-latin-700.woff2') format('woff2');
+}
+
+/* Fallback to system fonts if local fonts fail to load */
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}

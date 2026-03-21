@@ -1,0 +1,1941 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+.hidden { display: none !important; }
+html, body, body { font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 30px;
+      left: 20px;
+      z-index: 1001;
+      background: #22BBEA;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Student view specific styles */
+    .student-readonly-notice {
+      background: #e3f2fd;
+      color: #1565c0;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 20px 0;
+      font-weight: 500;
+    }
+
+    .student-readonly-status {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      background: #f5f5f5;
+      color: #666;
+    }
+
+    .student-readonly-status.checked {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .student-readonly-status.wrong {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    /* Page header */
+    .page-header {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    /* Layout: keep sidebar and main content side-by-side */
+    .main-container {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    /* Sidebar sizing: keep in normal flow so content sits directly beside it */
+    .sidebar-container {
+      width: var(--sidebar-width);
+      flex: 0 0 var(--sidebar-width);
+      box-sizing: border-box;
+      position: relative; /* changed from fixed to relative to remove extra offset */
+      top: auto;
+      left: auto;
+      height: auto;
+      background: #ffffff;
+      z-index: 100;
+      overflow-y: auto;
+    }
+
+    /* Main content area next to sidebar */
+    .main-container > .content-container {
+      flex: 1 1 auto;
+      padding: 12px 18px;
+      box-sizing: border-box;
+      margin-left: 0; /* removed sidebar offset so content sits flush beside sidebar */
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0;
+      text-align: center;
+    }
+
+    /* Room details section */
+    .room-details-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .room-title-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .room-title-section h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0;
+    }
+
+    .room-title-section i {
+      color: #22BBEA;
+      font-size: 1.5rem;
+    }
+
+    /* Time selection controls */
+    .time-selection-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 340px; /* main controls + calendar column */
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* Checklist card should visually align with calendar card */
+    .checklist-wrapper {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      width: 100%;
+    }
+
+    /* Table header styling to match screenshot accent */
+    #taskTable thead th {
+      background: #22BBEA;
+      color: #fff;
+      font-weight: 700;
+      text-align: left;
+      vertical-align: middle;
+      padding: 12px 16px;
+    }
+
+    #taskTable tbody td { padding: 12px 16px; vertical-align: middle; }
+
+    .time-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .time-select {
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #374151;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .time-select:focus {
+      outline: none;
+      border-color: #22BBEA;
+      box-shadow: 0 0 0 3px rgba(34, 187, 234, 0.1);
+    }
+
+    .time-select:hover {
+      border-color: #22BBEA;
+    }
+
+    /* Calendar styles */
+    .calendar-container {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      min-width: 320px;
+    }
+  .calendar-container.collapsed { padding: 8px; max-width: 220px; min-width: 180px; overflow: hidden; }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .calendar-nav-btn {
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .calendar-nav-btn:hover {
+      background: #22BBEA;
+      color: white;
+      border-color: #22BBEA;
+    }
+
+    .calendar-grid {
+      width: 100%;
+    }
+
+    .calendar-weekdays,
+    .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .calendar-weekdays {
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 8px;
+      font-size: 0.875rem;
+      text-align: center;
+    }
+
+    .calendar-day,
+    .calendar-day-other {
+      padding: 8px 4px;
+      text-align: center;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .calendar-day:hover {
+      background: #f3f4f6;
+    }
+
+    .calendar-day-other {
+      color: #9ca3af;
+      opacity: 0.6;
+    }
+
+    .calendar-day-today {
+      background: #dbeafe;
+      color: #1e40af;
+      font-weight: 600;
+    }
+
+    .calendar-day-selected {
+      background: #22BBEA;
+      color: white;
+      font-weight: 600;
+    }
+
+  /* Highlight dates that have scheduled assignments */
+  .calendar-day-scheduled {
+    box-shadow: inset 0 -3px 0 0 #0b58a8;
+    border-radius: 6px;
+  }
+
+    .selected-date-display {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 0.875rem;
+      color: #6b7280;
+      text-align: center;
+    }
+
+    /* Responsive design */
+    @media (max-width: 1024px) {
+      .time-selection-wrapper {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .calendar-container {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+
+    /* Desktop: keep checklist aligned with left column and leave space for calendar on the right */
+    @media (min-width: 1100px) {
+  .time-selection-wrapper { grid-template-columns: 1fr 360px; }
+  /* Let the grid column sizing handle the available space; avoid forcing calc widths which can cause overflow */
+  .checklist-wrapper { width: 100%; max-width: none; }
+  .calendar-container { width: 360px; }
+    }
+
+    /* Tablet / small desktop: ensure layout remains usable */
+    @media (min-width: 768px) and (max-width: 1099px) {
+  .time-selection-wrapper { grid-template-columns: 1fr 320px; }
+  /* Avoid calc-based widths to prevent horizontal overflow */
+  .checklist-wrapper { width: 100%; max-width: none; }
+  .calendar-container { width: 320px; }
+    }
+
+    /* Mobile: stack everything full width */
+    @media (max-width: 767px) {
+      .main-container { flex-direction: column; }
+      .sidebar-container { width: 100%; transform: translateX(0); }
+      .time-selection-wrapper { grid-template-columns: 1fr; }
+      .checklist-wrapper { width: 100% !important; }
+      .calendar-container { width: 100% !important; }
+      #taskTable thead th { font-size: 0.9rem; }
+    }
+
+    /* Table responsiveness */
+    #taskTable { width: 100%; table-layout: auto; }
+    @media (max-width: 480px) { #taskTable td, #taskTable th { padding: 8px; } }
+
+    @media (max-width: 768px) {
+      .sidebar-container {
+        transform: translateX(-100%);
+      }
+
+      .sidebar-container.open {
+        transform: translateX(0);
+      }
+
+      .content-container {
+        margin-left: 0;
+        padding: 15px;
+      }
+
+      .sidebar-toggle {
+        display: block;
+      }
+
+      .time-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .page-title {
+        font-size: 1.5rem;
+      }
+
+      .room-title-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .content-container {
+        padding: 10px;
+      }
+
+      .page-header,
+      .room-details-card {
+        padding: 15px;
+      }
+
+      /* Align checklist and feedback with content and avoid horizontal scroll */
+  .checklist-wrapper { max-width: 100% !important; margin: 10px 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important; overflow-x: visible !important; }
+      .content-main-row { overflow-x: hidden; }
+
+
+  .feedback-section { max-width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
+      table.table { width: 100%; }
+
+
+      .calendar-container {
+        padding: 10px;
+      }
+    }
+    /* Enhanced modal styles */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 3000; }
+    .modal-overlay.show { display: flex; }
+  .modal-card { width: 92%; max-width: 640px; background: #fff; border-radius: 12px; box-shadow: 0 18px 40px rgba(6,24,44,0.35); overflow: hidden; border: 1px solid #e6eef7; }
+    .modal-header { padding: 16px 20px; border-bottom: 1px solid #eef3f8; display:flex; justify-content: space-between; align-items:center; gap:12px; }
+    .modal-header #taskModalTitle { font-size: 1.125rem; font-weight: 600; color: #0f172a; }
+    .modal-header .btn-outline { border-radius: 8px; padding: 6px 10px; font-size: 0.95rem; }
+  .modal-body { padding: 18px 20px; background: #fbfdff; }
+    .modal-footer { padding: 14px 20px; border-top: 1px solid #eef3f8; display:flex; gap:12px; justify-content: flex-end; background: #fff; }
+  /* Ensure Poppins is used inside modal and form controls (higher specificity) */
+  .modal-card, .modal-card *, .modal-body .form-control, .modal-body .form-select, .modal-body textarea { font-family: 'Poppins', sans-serif !important; }
+  .modal-body .form-control, .modal-body .form-select, .modal-body textarea { margin-bottom: 12px; font-size: 0.98rem; }
+    .modal-body label { display:block; margin-bottom:6px; font-weight:500; color:#0b1220; }
+    .btn-outline { background: #fff; border:1px solid #d1d9ea; color:#213248; border-radius: 8px; padding: 8px 12px; }
+    .btn-primary { background:#1976d2; border:1px solid #1976d2; color:#fff; border-radius: 8px; padding: 10px 14px; }
+    .btn-primary:hover { background:#125ea8; border-color:#125ea8; }
+    .btn-danger { background:#e53935; border:1px solid #e53935; color:#fff; border-radius: 8px; padding: 8px 12px; }
+
+    /* Input fields inside modal */
+    .modal-body input[type="text"], .modal-body input[type="date"], .modal-body select, .modal-body textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d6e2ef;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .modal-body input:focus, .modal-body select:focus, .modal-body textarea:focus { outline: none; border-color: #1976d2; box-shadow: 0 6px 18px rgba(25,118,210,0.06); }
+
+  /* Lined textarea style for written-looking description */
+    #modalDesc {
+      min-height: 120px;
+      line-height: 1.6;
+      background-image: repeating-linear-gradient(to bottom, rgba(3,37,65,0.04) 0px, rgba(3,37,65,0.04) 1px, transparent 1px, transparent 32px);
+      background-color: #fff;
+      background-size: 100% 32px;
+      padding: 12px 14px;
+      font-family: 'Poppins', sans-serif;
+      resize: vertical;
+      border-radius: 8px;
+      border: 1px solid #d6e2ef;
+    }
+
+  /* Add subtle separators between form rows to create boxed/line look */
+  .modal-body .mb-2 { padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #eef6fb; }
+  .modal-body .mb-2:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  /* Make inputs appear inset with faint inner border so form feels boxed */
+  .modal-body input[type="text"], .modal-body input[type="date"], .modal-body select { background-clip: padding-box; }
+
+    /* Subtle label + helper text */
+    .modal-body small.text-muted { color: #6b7280; display:block; margin-top:6px; }
+
+    /* Improve modal footer button layout */
+    .modal-footer .btn { min-width: 100px; }
+    .modal-footer .btn-primary { min-width: 120px; }
+
+    /* Enhanced button styles for actions */
+    .btn {
+      display: inline-block;
+      padding: 6px 12px;
+      margin: 2px;
+      font-size: 0.875rem;
+      font-weight: 400;
+      line-height: 1.5;
+      text-align: center;
+      text-decoration: none;
+      vertical-align: middle;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      border-radius: 3px;
+    }
+
+    .btn-outline-primary {
+      color: #007bff;
+      border-color: #007bff;
+      background-color: transparent;
+    }
+
+    .btn-outline-primary:hover {
+      background-color: #007bff;
+      border-color: #007bff;
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-outline-danger {
+      color: #dc3545;
+      border-color: #dc3545;
+      background-color: transparent;
+    }
+
+    .btn-outline-danger:hover {
+      background-color: #dc3545;
+      border-color: #dc3545;
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn:focus {
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    /* Action buttons specific styling */
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .action-buttons .btn {
+      min-width: 60px;
+      white-space: nowrap;
+      /* ensure buttons sit above any overlays and accept pointer events */
+      position: relative;
+      z-index: 1002;
+      pointer-events: auto;
+    }
+
+    /* Loading spinner animation */
+    .fa-spinner {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Notification styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      min-width: 300px;
+      padding: 12px 16px;
+      border-radius: 4px;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease;
+    }
+
+    .notification.success {
+      background-color: #28a745;
+    }
+
+    .notification.error {
+      background-color: #dc3545;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+
+:root {
+  --sidebar-width: 300px; /* unified sidebar width used across layouts */
+  /* reduce left gutter so content sits nearer the sidebar (small gap) */
+  --left-gutter: calc(var(--sidebar-width) + 16px);
+  --checklist-max: 1650px; /* visual width for centered checklist */
+}
+
+header {
+  background-color: #22BBEA;
+  color: white;
+  padding: 20px 30px;
+}
+
+.logo {
+          margin-left: none;
+        }
+
+        .logo img {
+            width: 250px;
+            height: auto;
+            margin-left: none;
+        }
+
+h1.page-title {
+    text-align: center;
+    margin-top: 20px;
+    font-weight: 600;
+}
+
+
+
+.sidebar {
+  background-color: #ffffff;
+  padding: 20px 20px 30px 20px;
+  /* let Bootstrap grid set the width for .col-md-2 */
+  /* border switched to a pseudo-element so it can span the viewport height */
+  /* Ensure Poppins font and consistent text rendering inside the sidebar */
+  font-family: 'Poppins', sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Add a vertical accent line to the right of the sidebar (dashboard-like) */
+.sidebar { position: relative; }
+.sidebar::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0;
+  width: 3px; height: 100%;
+  background: #22BBEA;
+  /* make sure the accent is visible above siblings */
+  z-index: 4;
+}
+
+
+.sidebar {
+  z-index: 4;
+  font-family: 'Poppins', sans-serif !important;
+  color: #0b1220;
+  /* visible accent line in case pseudo-element is not positioned due to layout */
+  border-right: 4px solid #22BBEA;
+    height: 100vh;
+  
+}
+
+/* Ensure links and icons inside the sidebar inherit the Poppins font */
+.sidebar, .sidebar * {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* Some views render the sidebar using the class .sidebar-container or the id #sidebar
+   (see roomtask.blade.php). Ensure those selectors also inherit Poppins and show the
+   same blue accent as the dashboard. */
+.sidebar-container, #sidebar {
+  font-family: 'Poppins', sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #0b1220;
+  background-color: #ffffff;
+  position: relative;
+  z-index: 2;
+  /* fallback visible border if pseudo-element doesn't render */
+  border-right: 1px solid #22BBEA;
+}
+
+.sidebar-container *, #sidebar * {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+#sidebar::after, .sidebar-container::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0;
+  width: 3px; height: 100%;
+  background: #22BBEA;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.sidebar ul li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 500;
+  color: #16324b;
+  text-decoration: none;
+}
+
+.sidebar ul li a img.sidebar-icon { width: 20px; height: 20px; }
+
+.sidebar ul li a:hover {
+  background: #22BBEA;
+  color: white;
+}
+
+.sidebar .logo, .sidebar .logo * {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+ .sidebar-icon {
+  width: 30px;
+  height: 30px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.row{
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.sidebar h3 {
+    margin-top: 0;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding-left: 0;
+    color: black;
+}
+
+.sidebar ul li {
+    margin: 15px 0;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: black;
+}
+
+
+.sidebar ul li:hover {
+    background: #fa5408;
+    color: white;
+    max-width: 100%;
+    max-height: fit-content;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+  .sidebar ul li:hover a {
+    color: white;
+    transition: color 0.3s ease;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.content {
+    flex: 1;
+    padding: 30px;
+    font-display: center;
+}
+
+table{
+    width: 100%;
+    border-color: #d6d6d6 !important;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+th, td, tr {
+    border: 2px solid black;
+    padding: 10px;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+th {
+    background-color: #22BBEA !important;
+    color: black !important; /* White text for contrast, or change as desired */
+}
+
+.table thead th {
+    background-color: #22BBEA !important;
+    color: black !important;
+}
+
+th:last-child,
+td:last-child {
+    width: 150px;
+    text-align: center;
+}
+
+.status-btn.active.check-btn {
+  background-color: #119416;
+  color: white;
+  align-items: center;
+}
+
+.status-btn.active.wrong-btn {
+  background-color: #e22a1d;
+  color: white;
+    align-items: center;
+}
+
+.status-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.status-btn {
+    width: 10px;
+    height: 10px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 20px;
+    padding: 0;
+    margin: 0;
+    min-width: 45px;
+    min-height: 45px;
+    box-sizing: border-box;
+}
+
+.check-btn {
+    background-color: #d6f5ffea;
+    color: black;
+}
+
+.check-btn.active {
+    background-color: #08a821;
+    color: white;
+    border-color: #08a821;
+}
+
+.wrong-btn {
+    background-color: #d6f5ffea;
+    color: black;
+}
+
+.wrong-btn.active {
+    background-color: #e61515;
+    color: white;
+    border-color: #e61515;
+}
+
+/* Adjusting the checklist table width */
+.checklist-container {
+    width: calc(100% - var(--left-gutter)); /* reserve space for sidebar */
+}
+
+.status-btn:disabled.check-btn.active {
+    background-color: #08a821 !important;
+    color: white !important;
+    border-color: #08a821 !important;
+    opacity: 1 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-btn:disabled.wrong-btn.active {
+    background-color: #e61515 !important;
+    color: white !important;
+    border-color: #e61515 !important;
+    opacity: 1 !important;
+}
+
+.status-btn:disabled:not(.active) {
+    opacity: 0.3;
+}
+
+.file-info {
+    margin-top: 10px;
+}
+
+.file-name {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 14px;
+    color: #333;
+}
+
+.error-message {
+    margin-top: 5px;
+}
+
+.day-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 10px;
+    font-size: 20px;
+}
+
+.day-nav button {
+    padding: 8px 14px;
+    font-size: 18px;
+    background-color: #22BBEA;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.day-nav span {
+    font-weight: bold;
+}
+
+body, h1, h2, h3, h4, h5, h6, p, input, button, textarea, select, label, span {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* === TASK BUTTONS === */
+.task-buttons {
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+}
+
+.task-buttons button {
+    background-color: #3490dc;
+    color: black;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 5px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.task-buttons button:hover {
+    background-color: #2779bd;
+}
+
+/* === FORM STYLES === */
+#taskFormContainer {
+    margin: 20px 0;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 550px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#taskFormContainer.hidden {
+    display: none;
+}
+
+#taskForm label {
+    display: block;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+#taskForm input,
+#taskForm select,
+#taskForm textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+#taskForm textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+#taskForm button[type="submit"],
+#taskForm button[type="cancel"] {
+    padding: 8px 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    min-width: 100px;
+    max-width: 140px;
+    font-size: 15px;
+    width: 120px;
+    box-sizing: border-box;
+}
+
+#taskForm button[type="submit"] {
+    background-color: #119416;
+    color: white;
+}
+
+#taskForm button[type="submit"]:hover {
+    background-color: #119416;
+}
+
+#taskForm button[type="cancel"] {
+    background-color: #e22a1d;
+    color: white;
+}
+
+#taskForm button[type="cancel"]:hover {
+    background-color: #e22a1d;
+}
+    /* Feedback card style for feedback section only */
+    .feedback-card {
+      background: #5ed1ff;
+      border-radius: 12px;
+      padding: 18px 18px 12px 18px;
+      margin-bottom: 22px;
+      box-shadow: 0 2px 8px #e5e9f2;
+      position: relative;
+      margin-top: 26px;
+    }
+    .feedback-card img {
+      width: 120px;
+      height: 90px;
+      margin-top: 10px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #dbe4f3;
+    }
+    .feedback-card .btn {
+      font-size: 13px;
+      padding: 2px 10px;
+      border-radius: 6px;
+    }
+
+
+  .feedback-section {
+  /* match checklist-wrapper sizing and centering so feedback aligns with table */
+  margin-top: 0px; /* checklist-wrapper has 10px bottom -> creates 10px gap */
+  margin-bottom: 30px;
+    box-sizing: border-box;
+    padding: 20px 18px 20px 10px;
+    background-color: #cdeaf3;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    overflow-x: auto;
+    margin-right: auto;
+    margin-left: auto;
+    width: 100%;
+}
+
+.feedback-section h3 {
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 15px;
+}
+
+textarea {
+    font-family: 'Poppins', sans-serif;
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    resize: vertical;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.custom-file-input input[type="file"] {
+    display: none;
+}
+
+.custom-file-input label {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color:none;
+    color: rgb(20, 20, 20);
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+}
+.custom-file-input label {
+    background-color: #ffffff;
+    border: 1px solid #3a3a3a;
+    color: rgb(2, 2, 2);
+}
+
+
+.file-name {
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+button[type="submit"] {
+    margin-top: 15px;
+    background-color: #22BBEA;
+    color: rgb(0, 0, 0);
+    border: none;
+    padding: 10px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+}
+
+button[type="submit"]:hover {
+    font-family: 'Poppins', sans-serif;
+    background-color: #199cc9;
+}
+
+.feedback {
+    font-family: 'Poppins', sans-serif;
+    width: 100%;
+    max-width: 700px;
+    margin-top: 20px;
+    padding: 15px;
+    border: 2px solid black;
+    background-color:rgb(245, 245, 245);
+    text-align: left;
+}
+
+.feedback h2 {
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 10px;
+    font-size: 22px;
+}
+
+.feedback textarea {
+    font-family: 'Poppins', sans-serif;
+    width: 95%;
+    height: 80px;
+    padding: 10px;
+    border: 1px solid black;
+    font-size: 18px;
+}
+
+.feedback input[type="file"] {
+    font-family: 'Poppins', sans-serif;
+    font-size: 25px;
+    margin-top: 10px;
+}
+
+.feedback .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.feedback .button-group button {
+    font-family: 'Poppins', sans-serif;
+    padding: 10px 20px;
+    background: #22BBEA;
+    color: black;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 5px;
+}
+
+.feedback .button-group button:hover {
+    background: rgb(50, 170, 210);
+}
+
+/* Floor and Room Selection Buttons */
+.floor-buttons {
+    display: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 1200px;
+}
+
+.floor-buttons.show {
+    display: flex;
+}
+
+.floor-btn {
+    background-color: #22BBEA;
+    color: black;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    min-width: 140px;
+    transition: all 0.3s ease;
+}
+
+.floor-btn:hover {
+    background-color: #fa5408;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Room Selection and Status */
+.room-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.action-btn {
+    background-color: #f5f5f5;
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+/* Status Button Styling */
+.status-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    text-align: center;
+}
+
+.status-btn.completed {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.status-btn.pending {
+    background-color: white;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.status-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Room Box Layout */
+.room-box {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+.room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eee;
+}
+
+.room-title {
+    font-size: 20px;
+    color: #333;
+    margin: 0;
+}
+
+.room-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.room-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .floor-buttons {
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .floor-btn {
+        min-width: 120px;
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    .room-controls {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .status-btn {
+        min-width: 100px;
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .floor-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .floor-btn {
+        width: 100%;
+        max-width: 200px;
+    }
+
+    .room-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .room-controls {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Selection Controls */
+.selection-controls {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 15px;
+    margin: 20px 0 20px 20px;
+    padding: 0;
+}
+
+/* Ensure the layout uses Bootstrap columns (sidebar + content) without fixing the sidebar */
+@media (min-width: 768px) {
+    .sidebar {
+        position: relative; /* allow pseudo-element positioning */
+        top: auto;
+        left: auto;
+        height: auto;
+        width: auto; /* allow Bootstrap column width to control sizing */
+        z-index: auto;
+        overflow: visible;
+        min-height: auto; /* restore natural flow so row height matches content */
+    }
+
+    /* vertical accent line that spans the viewport and stays beside the content */
+    .sidebar::after {
+        content: "";
+        position: fixed;
+        top: 0; /* start from top of viewport */
+        right: calc(100% - var(--left-gutter)); /* align with sidebar edge */
+        width: 4px; /* visible thickness */
+        height: 100vh; /* full viewport height */
+        background: #22BBEA;
+        z-index: 1; /* behind content */
+        pointer-events: none;
+    }
+
+    /* reduce top spacing so checklist sits directly under calendar */
+    .content {
+        padding-top: 12px;
+
+    /* Ensure the accent line persists on very tall pages */
+  /* Make body a positioned container so its pseudo-element can span full document height */
+  body {
+    position: relative;
+  }
+
+  body:after {
+    content: "";
+    position: absolute;
+    left: calc(var(--left-gutter) - 4px); /* align to the visible accent */
+    top: 0;
+    width: 4px; /* visible accent thickness for full document height */
+    height: 100%; /* span full document height */
+    background: #22BBEA;
+    z-index: 0; /* keep behind content */
+    pointer-events: none;
+  }
+
+        padding-bottom: 20px;
+        position: relative;
+        z-index: 2; /* keep content above the sidebar accent */
+    }
+
+    .content-main-row {
+        margin-top: 6px !important;
+    }
+
+    .checklist-wrapper {
+        margin-top: 0 !important;
+    }
+
+    /* Main content should not be offset by a fixed sidebar; use padding for inner gutters */
+    .content.col-md-10 {
+        margin-left: 0;
+        padding-left: var(--left-gutter); /* fixed left gutter so checklist never reaches sidebar line */
+        padding-right: 30px;
+        min-width: 0; /* allow content to shrink on zoom */
+    }
+
+    .content .row {
+        margin-right: 0;
+    }
+}
+
+/* Checklist wrapper constrained to the content column and centered */
+.checklist-wrapper {
+  margin-top: 36px;
+  margin-bottom: 15px;
+    box-sizing: border-box;
+    max-width: var(--checklist-max); /* visual center width */
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 18px;
+    overflow-x: auto; /* allow horizontal scroll when zoomed */
+    /* Visually center the wrapper between the left gutter (sidebar) and right edge.
+       margin-left = left gutter + half of remaining space after reserving max width */
+    margin-left: calc(var(--left-gutter) + ((100% - var(--left-gutter) - var(--checklist-max)) / 2));
+    margin-right: auto;
+}
+
+/* Make checklist start at left of content area and stretch to available width */
+
+/* Center the table inside the content column */
+.content .checklist-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding-left: 10px;
+}
+
+.content .checklist-wrapper table {
+    width: 100%; /* fill the wrapper */
+    max-width: var(--checklist-max);
+    margin: 0 auto; /* ensure the table itself is centered inside wrapper */
+    table-layout: fixed; /* predictable columns and wrapping */
+}
+
+/* wrapping rules so description doesn't force overlap */
+.content .checklist-wrapper th,
+.content .checklist-wrapper td{
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Align feedback section edges with checklist table */
+.checklist-wrapper .feedback-section {
+    max-width: var(--checklist-max);
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+
+/* Responsive tweaks for roomtask layout */
+@media (max-width: 1200px) {
+  :root { --left-gutter: calc(var(--sidebar-width) + 10px); }
+  .content.col-md-10 { padding-left: var(--left-gutter); padding-right: 20px; }
+}
+@media (max-width: 992px) {
+  :root { --left-gutter: calc(var(--sidebar-width) - 50px); }
+  .sidebar { position: static; }
+  .sidebar::after { display: none; } /* hide fixed accent on small screens */
+  .content.col-md-10 { padding-left: 16px; padding-right: 16px; }
+  .checklist-wrapper { margin-left: auto; margin-right: auto; max-width: 100%; padding-left: 12px; padding-right: 12px; }
+  .content .checklist-wrapper table { table-layout: auto; }
+}
+@media (max-width: 576px) {
+  .day-nav { gap: 10px; }
+  .time-selection { flex-direction: column; }
+  .calendar-container { max-width: 100%; flex: 1 1 100%; }
+  .status-buttons { display: flex; gap: 6px; justify-content: center; }
+  .status-btn { padding: 6px 10px; }
+}
+
+    padding-left: 10px;
+    padding-right: 18px;
+    box-sizing: border-box;
+}
+
+/* Fallback: if feedback-section is placed directly under .content, align it like the checklist */
+.content > .feedback-section {
+    max-width: var(--checklist-max);
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 18px;
+    box-sizing: border-box;
+    margin-left: calc(var(--left-gutter) + ((100% - var(--left-gutter) - var(--checklist-max)) / 2));
+    margin-right: auto;
+}
+
+
+
+@media (max-width: 1400px) {
+    .checklist-wrapper {
+    max-width: 100%;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: auto; /* fallback: center normally inside content on smaller screens */
+    margin-right: auto;
+    }
+
+    .feedback-section {
+    max-width: 100%;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: auto; /* fallback: center normally inside content on smaller screens */
+    margin-right: auto;
+    }
+}
+
+.form-group select, /* Target select elements inside form-group */
+#floorSelect,
+#roomSelect {
+    font-size: 16px;
+    padding: 8px 16px;
+    background-color: #22BBEA;
+    color: black;
+    border: 1px solid black;
+    border-radius: 5px;
+    cursor: pointer;
+    min-width: 200px;
+    text-align: left;
+    transition: all 0.3s ease;
+}
+
+.form-group select:hover,
+#floorSelect:hover,
+#roomSelect:hover {
+    background-color: #199cc9;
+}
+
+.form-group select option,
+#floorSelect option,
+#roomSelect option {
+    background-color: white;
+    color: black;
+    padding: 8px;
+}
+
+/* Add a custom dropdown arrow */
+select.floorSelect,
+select.roomSelect {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .selection-controls {
+        margin: 15px 0 15px 15px;
+        gap: 10px;
+    }
+
+    .form-group select,
+    #floorSelect,
+    #roomSelect {
+        min-width: 300px;
+    }
+}
+
+.mark-all-btn {
+    background-color: #125f16;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-left: auto;
+    display: block;
+    margin-right: 10px; /* Align with Add and Edit Task buttons */
+}
+
+.mark-all-btn:hover {
+    background-color: #2e9632; /* Green color */
+}
+
+.task-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    padding-right: 10px; /* Align with the table's last column */
+}
+
+.room-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 20px;
+}
+
+.time-selection {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.time-select {
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #22BBEA;
+    color: black;
+    cursor: pointer;
+    min-width: 200px;
+    transition: all 0.3s ease;
+}
+
+.time-select:hover {
+    background-color: #199cc9;
+}
+
+.time-select option {
+    background-color: white;
+    color: black;
+}
+
+/* Responsive adjustments for time selection */
+@media (max-width: 768px) {
+    .room-details {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .time-selection {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+}
+
+:root {
+  --header-height: 96px; /* 20px padding top + 56px logo + 20px padding bottom */
+}
+
+header {
+  font-family: 'Poppins', sans-serif;
+  background-color: #22BBEA;
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100; /* ensure header is above sidebar/content */
+  box-sizing: border-box;
+  min-height: var(--header-height);
+}
+
+.logo {
+  font-family: 'Poppins', sans-serif;
+  margin-left: 0;
+}
+.logo img {
+  /* constrain logo height so header stays compact */
+  height: 56px;
+  width: auto;
+  margin-left: 0;
+  display: block;
+}
+
+.header-right {
+  font-family: 'Poppins', sans-serif;
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Small helper for header title */
+.header-title {
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Sidebar fixed under header */
+.sidebar-container, #sidebar {
+  position: fixed !important;
+  top: var(--header-height) !important; /* sits directly under header */
+  left: 0 !important;
+  bottom: 0 !important;
+  width: var(--sidebar-width, 260px) !important;
+  overflow: auto !important;
+  z-index: 1100 !important;
+  background-color: #fff !important;
+  border-right: 1px solid #22BBEA !important;
+}
+
+/* Ensure the accent line pseudo-element aligns correctly when sidebar is fixed */
+#sidebar::after, .sidebar-container::after {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  height: 100% !important;
+}
+
+/* Main content must be pushed right and down so it doesn't sit under header/sidebar */
+.main-container {
+  margin-top: var(--header-height) !important; /* below header */
+  margin-left: var(--sidebar-width, 260px) !important; /* leave room for fixed sidebar */
+  box-sizing: border-box !important;
+}
+
+/* When page uses .main-container > .content-container, ensure inner content has padding */
+.main-container > .content-container, .content {
+  padding: 20px !important;
+}
+
+/* Keep sidebar toggle visible above header */
+.sidebar-toggle {
+  position: fixed !important;
+  top: 14px !important;
+  left: calc(var(--sidebar-width, 260px) - 44px) !important; /* place toggle near sidebar edge */
+  z-index: 1250 !important;
+  display: none !important; /* default hidden on desktop */
+}
+
+/* Responsive behavior: on small screens make sidebar collapsible and reset margins */
+@media (max-width: 992px) {
+  .sidebar-container, #sidebar {
+  transform: translateX(-100%) !important;
+  left: 0 !important;
+  width: 260px !important;
+  top: var(--header-height) !important;
+  }
+
+  .sidebar-container.open, #sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  .main-container {
+    margin-left: 0 !important;
+  }
+
+  .sidebar-toggle {
+    display: block !important;
+    left: 12px !important;
+    top: 14px !important;
+  }
+
+  header { padding-left: 56px !important; }
+}
+
+/* Time controls / dropdown layout */
+.time-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.time-select {
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(0,0,0,0.12) !important;
+  background: #22BBEA !important;
+  color: #fff !important;
+  min-width: 170px !important;
+  box-shadow: none !important;
+}
+.time-select option { color: #000 !important; }
+
+/* Student occupants styling */
+.student-occupants {
+  margin-bottom: 18px;
+}
+.student-occupants > strong { display: block; margin-bottom: 8px; }
+.student-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 6px 12px;
+}
+.student-list li {
+  background: #f1fbff;
+  border: 1px solid rgba(34,187,234,0.12);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #0b6b75;
+}
+
+/* Select Date button styles */
+.select-date-btn {
+  background: #fff;
+  color: #22BBEA;
+  border: 1px solid rgba(34,187,234,0.2);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.select-date-btn:hover { background: #f8faff; }
+
+/* Extra safety: ensure modals and notifications appear above fixed header/sidebar */
+.modal-overlay, .notification, .modal-card {
+  z-index: 3000 !important;
+}
+
+/* End of overrides */
+
+    /* Use Poppins globally for this page */
+    html, body, input, select, textarea, button {
+      font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    /* Small style for room header icon (flaticon) */
+    .room-title-section { display:flex; align-items:center; gap:12px; }
+    .room-title-section .room-icon { width:24px; height:24px; display:inline-block; }
+
+    /* Student info cards */
+    .student-info-cards { gap:12px; align-items:flex-start; }
+    .student-info-cards .info-card { min-width:160px; padding:12px; }
+
+    /* Roommate avatar small and aligned */
+    .roommate-avatar { width:20px; height:20px; border-radius:50%; display:inline-block; vertical-align:middle; background:#e9f7fd; padding:2px; }
+
+    /* Tighter room header spacing */
+    .room-details-card { margin-top:8px; }
+    .student-list { list-style:none; padding:0; margin:8px 0 0 0; display:flex; gap:8px; flex-wrap:wrap; }
+    .student-list li { background:#e9f7fd; padding:8px 12px; border-radius:6px; }
+
+    /* Add extra spacing between student name chips and the dropdown/date controls
+       and make dropdowns align nicely with consistent gaps. */
+    .student-list { margin:12px 0 12px 0; gap:10px; }
+    .time-selection-wrapper { display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap; }
+    .time-selection-wrapper .form-select, .time-selection-wrapper select, .time-selection-wrapper .btn, .time-selection-wrapper .dropdown {
+      margin-right:6px;
+    }
+    /* Ensure the Select Date button sits a little apart on narrow screens */
+    .time-selection-wrapper .select-date-btn { margin-left:6px; }
+
+  /* Static-readonly mode: hide interactive controls when a specific date is selected */
+  body.static-view .actions-col,
+  body.static-view .action-buttons,
+  body.static-view .status-buttons,
+  body.static-view #addTaskButton,
+  body.static-view #markAllCompleted,
+  body.static-view .task-buttons,
+  body.static-view .card.schedule-card,
+  body.static-view #taskFormContainer,
+  body.static-view .task-modal-close,
+  body.static-view #taskModal { display: none !important; }
+
+  /* Keep status badges visible in static mode */
+  body.static-view .student-readonly-status, body.static-view .badge { display: inline-block !important; }
+  body.static-view .checklist-wrapper {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    margin-bottom: 18px;
+  }
+
+  body.static-view .checklist-wrapper table {
+    margin: 0; /* remove extra spacing so table fills the card */
+    background: transparent;
+  }
+
+  /* Slightly tighten table cells in static student view for a cleaner look */
+  body.static-view #taskTable td, body.static-view #taskTable th {
+    padding: 12px 14px;
+  }
+ .form-buttons {
+  display: flex;
+  gap: 6px;               /* space between buttons */
+  justify-content: flex-end; /* align buttons to the right */
+  align-items: center;     /* vertically center the buttons */
+  padding-top: 12px;       /* optional: space above buttons */
+}
+
+.task-form-btn {
+  min-width: 120px;
+  height: 30px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.task-form-btn.btn-secondary {
+  background: #6c757d;
+  color: #fff;
+  margin-left: 8px;
+  /* remove manual vertical offset so it lines up with the primary button */
+  position: static;
+  top: auto;
+}
+
+
+.task-form-btn.btn-primary {
+  background: #119416; /* use green to match your override */
+  color: #fff;
+}
+
+/* Stronger override for legacy task form */
+#taskFormContainer .form-buttons .btn,
+#taskFormContainer .form-buttons button {
+  min-width: 120px !important;
+  height: 40px !important;
+  padding: 8px 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+}
+
+#taskFormContainer .form-buttons .btn.btn-primary {
+  background: #119416 !important;
+  color: #fff !important;
+}
+
+#taskFormContainer .form-buttons .btn.btn-secondary {
+  background: #6c757d !important;
+  color: #fff !important;
+}
+
+

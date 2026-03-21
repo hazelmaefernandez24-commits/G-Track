@@ -1,0 +1,81 @@
+ :root {
+  --brand-success: #198754;
+  --brand-danger:  #dc3545;
+  --card-radius:  .5rem;
+}
+
+/* Sticky tabs + global search */
+#global-search {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.nav-pills {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding: .5rem 0;
+  z-index: 100;
+  margin-bottom: 1rem;
+}
+
+/* Cards & tables */
+.card,
+.table-responsive,
+.payment-card {
+  border-radius: var(--card-radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  background: #fff;
+}
+
+/* Desktop table only */
+.table-responsive {
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+}
+@media (max-width: 767px) {
+  .table-responsive { display: none; }
+}
+
+/* Mobile card list only */
+.payment-card {
+  display: none;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+@media (max-width: 767px) {
+  .payment-card { display: block; }
+}
+
+/* Card-style for each payment */
+.payment-card.approved   { border-left: 4px solid var(--brand-success); }
+.payment-card.declined   { border-left: 4px solid var(--brand-danger); }
+.payment-card .fw-semibold { font-weight: 600; }
+
+/* Table row hover */
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Hide built-in DataTables filters, info & length */
+.dataTables_filter,
+.dataTables_info,
+.dataTables_length {
+  display: none;
+}
+
+/* Search input styling */
+.dataTables_filter input {
+  border-radius: .25rem;
+}
+
+/* Mini doughnut */
+.chart-container {
+  width: 120px;
+  margin: 1.5rem auto;
+}
+.chart-container canvas {
+  width: 100% !important;
+  height: auto !important;
+}

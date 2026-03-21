@@ -1,0 +1,42 @@
+#!/usr/bin/env php
+<?php
+
+use Illuminate\Foundation\Application;
+use Symfony\Component\Console\Input\ArgvInput;
+
+define('LARAVEL_START', microtime(true));
+
+// Ensure a sane memory limit for CLI before loading Composer autoloader.
+// Some environments default to 2M which will crash during autoloading.
+try {
+    $currentLimit = ini_get('memory_limit');
+    $toBytes = function($val) {
+        $val = trim((string)$val);
+        if ($val === '' || $val === '-1') return -1; // unlimited
+        $unit = strtolower(substr($val, -1));
+        $num = (int)$val;
+        switch ($unit) {
+            case 'g': return $num * 1024 * 1024 * 1024;
+            case 'm': return $num * 1024 * 1024;
+            case 'k': return $num * 1024;
+            default: return (int)$val;
+        }
+    };
+    $bytes = $toBytes($currentLimit);
+    if ($bytes !== -1 && $bytes < 268435456) { // 256M
+        @ini_set('memory_limit', '512M');
+    }
+} catch (\Throwable $e) {
+    // ignore
+}
+
+// Register the Composer autoloader...
+require __DIR__.'/vendor/autoload.php';
+
+// Bootstrap Laravel and handle the command...
+/** @var Application $app */
+$app = require_once __DIR__.'/bootstrap/app.php';
+
+$status = $app->handleCommand(new ArgvInput);
+
+exit($status);

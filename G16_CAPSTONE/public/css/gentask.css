@@ -1,0 +1,1302 @@
+body {
+      background: #eef2f7;
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      /* reserve space for the fixed header so content and sidebar are not hidden */
+      padding-top: 60px;
+      overflow-x: hidden;
+    }
+    
+    /* Prevent any unwanted overlay elements */
+    body::before,
+    body::after,
+    *::before,
+    *::after {
+      pointer-events: none;
+    }
+    
+    /* Reset any problematic pseudo-elements */
+    .main-content::before,
+    .main-content::after {
+      display: none !important;
+    }
+
+    /* Header layout - move logout to right side */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 85px;
+      background: linear-gradient(135deg, #22BBEA 0%, #1e90ff 100%);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo img {
+      height: 50px;
+      width: auto;
+    }
+
+    /* Logout container - positioned on right */
+    .logout-container {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+    }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .logout-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .logout-btn svg {
+      width: 24px;
+      height: 24px;
+      transition: transform 0.2s ease;
+    }
+
+    .logout-btn:hover svg {
+      transform: scale(1.1);
+    }
+
+    .row {
+      font-family: 'Poppins', sans-serif;
+      font-size: 20px;
+      font-weight: 450; 
+    }
+
+
+
+
+    /* ===== NAVIGATION STYLES ===== */
+    .nav-buttons {
+      margin-top: 15px;
+    }
+
+    .nav-btn {
+      background-color: rgba(255,255,255,0.2);
+      color: white !important;
+      border: 2px solid rgba(255,255,255,0.3);
+      padding: 10px 25px;
+      border-radius: 25px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-btn:hover {
+      background-color: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.6);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      color: white !important;
+    }
+
+    .nav-btn.active {
+      background-color: white;
+      color: #22BBEA !important;
+      border-color: white;
+      font-weight: 700;
+    }
+
+    .nav-btn.active:hover {
+      background-color: #f8f9fa;
+      color: #22BBEA !important;
+    }
+
+
+    /* ===== SHARED SIDEBAR STYLES (matches partials.sidebar) ===== */
+    .sidebar-container {
+      width: 300px !important;
+      background: #ffffff !important;
+      color: #374151 !important;
+      padding: 0 !important;
+      position: fixed !important;
+      top: 60px !important;
+      left: 0 !important;
+      height: calc(100vh - 60px) !important;
+      overflow-y: auto !important;
+      z-index: 90 !important;
+      border-right: 3px solid #22BBEA !important;
+    }
+
+    .sidebar-container .nav-link {
+      color: #374151 !important;
+      font-weight: 400 !important;
+      font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+      font-size: 15px !important;
+    }
+
+    .sidebar-container .nav-link img { 
+      vertical-align: middle !important; 
+      width:26px !important; 
+      height:26px !important; 
+      margin-right:14px !important; 
+    }
+
+    .sidebar-container .nav-link:hover {
+      background: #f1f5f9 !important;
+      color: #111827 !important;
+    }
+
+    .sidebar-container .nav-link.active,
+    .sidebar-container .nav-link.active:hover {
+      background: #e0f2fe !important;
+      color: #0f172a !important;
+      font-weight: 400 !important;
+    }
+
+    .sidebar-icon {
+      font-family: 'Poppins', sans-serif;
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .sidebar h3 {
+      margin-top: 0;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .sidebar ul li {
+      margin: 15px 0;
+    }
+
+    .sidebar ul li:first-child {
+      margin-top: 20px; /* proper spacing from top */
+    }
+
+    .sidebar ul li a {
+      font-size: 16px;
+      text-decoration: none;
+      color: black;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+    }
+
+    .sidebar ul li:hover {
+      background: #fa5408;
+      color: white;
+      max-width: 100%;
+      border-radius: 5px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .sidebar ul li:hover a {
+      color: white;
+      transition: color 0.3s ease;
+    }
+
+    /* ===== CONTENT STYLES ===== */
+    .content {
+      flex: 1;
+      padding: 30px;
+      margin-top: 0;
+      padding-top: 20px;
+      font-display: center;
+    }
+
+    /* Main content layout and styling */
+    .main-content {
+      border: none !important;
+      border-bottom: none !important;
+      padding: 20px;
+      min-height: calc(100vh - 60px);
+      margin-left: 250px;
+      background: #eef2f7;
+      overflow-y: auto;
+      width: calc(100% - 250px);
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;  /* Changed from center to flex-start for left alignment */
+      justify-content: flex-start;
+    }
+    
+    /* Wrapper for all content - align to left instead of center */
+    .main-content > * {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 0 0 0;  /* Changed from 'margin: 0 auto' to align left */
+    }
+    
+    /* Ensure no overlay elements interfere */
+    .main-content * {
+      position: relative;
+      z-index: 2;
+    }
+    
+    /* Override centering for button container - align to left */
+    .main-content .d-flex.justify-content-start {
+      margin-left: 0 !important;
+      margin-right: auto !important;
+      max-width: none !important;
+      width: auto !important;
+    }
+    
+    /* Force headers and paragraphs to align left, but NOT task cards */
+    .main-content h2, .main-content h3, .main-content p:not(.category-card p) {
+      text-align: left !important;
+      margin-left: 0 !important;
+    }
+    
+    /* Keep task cards centered */
+    .main-content .category-card {
+      text-align: center !important;
+    }
+    
+    /* Ensure content inside task cards stays centered */
+    .main-content .category-card * {
+      text-align: center !important;
+    }
+    
+    /* Override any centering in the main content area */
+    .main-content .row {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+
+    .container-fluid {
+      border: none !important;
+      border-bottom: none !important;
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      border-bottom: none !important;
+    }
+
+    /* Responsive design for main content */
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 15px !important;
+      }
+      
+      .main-content > * {
+        max-width: 100% !important;
+        padding: 0 10px !important;
+      }
+    }
+
+    .dashboard-title {
+      font-weight: 700;
+      color: #333;
+    }
+    .category-card {
+      position: relative;
+      border: none;
+      border-radius: 20px;
+      padding: 25px;
+      transition: all 0.4s ease;
+      color: #333;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      cursor: pointer;
+      user-select: none;
+      max-height: 300px;
+      overflow-y: auto;
+      backdrop-filter: blur(10px);
+    }
+
+    /* Individual Pastel Colors for Each Category */
+    .category-card:nth-child(1) {
+      background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 50%, #f48fb1 100%);
+      border: 2px solid #f8bbd9;
+    }
+
+    .category-card:nth-child(2) {
+      background: linear-gradient(135deg, #e3f2fd 0%, #90caf9 50%, #64b5f6 100%);
+      border: 2px solid #90caf9;
+    }
+
+    .category-card:nth-child(3) {
+      background: linear-gradient(135deg, #e8f5e8 0%, #a5d6a7 50%, #81c784 100%);
+      border: 2px solid #a5d6a7;
+    }
+
+    .category-card:nth-child(4) {
+      background: linear-gradient(135deg, #fff8e1 0%, #ffcc02 50%, #ffc107 100%);
+      border: 2px solid #ffcc02;
+    }
+
+    .category-card:nth-child(5) {
+      background: linear-gradient(135deg, #f3e5f5 0%, #ce93d8 50%, #ba68c8 100%);
+      border: 2px solid #ce93d8;
+    }
+
+    .category-card:nth-child(6) {
+      background: linear-gradient(135deg, #fff3e0 0%, #ffab91 50%, #ff8a65 100%);
+      border: 2px solid #ffab91;
+    }
+    .category-label {
+      font-size: 22px;
+      font-weight: 800;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .category-label::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4), rgba(255,255,255,0.8));
+      border-radius: 2px;
+    }
+    .task-list {
+      list-style-type: none;
+      padding-left: 0;
+      margin-bottom: 0;
+      font-size: 9px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .task-list li {
+      padding: 3px 0;
+      border-bottom: 1px solid #ccc3;
+    }
+    .btn-custom {
+      border-radius: 30px;
+      padding: 8px 20px;
+      font-weight: 500;
+    }
+    .table-container {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    }
+    .student-row td {
+      vertical-align: middle;
+    }
+    .category-card:hover {
+      transform: translateY(-12px) scale(1.03);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }
+
+    /* Enhanced hover effects for each category */
+    .category-card:nth-child(1):hover {
+      box-shadow: 0 15px 40px rgba(244, 143, 177, 0.4);
+    }
+
+    .category-card:nth-child(2):hover {
+      box-shadow: 0 15px 40px rgba(100, 181, 246, 0.4);
+    }
+
+    .category-card:nth-child(3):hover {
+      box-shadow: 0 15px 40px rgba(129, 199, 132, 0.4);
+    }
+
+    .category-card:nth-child(4):hover {
+      box-shadow: 0 15px 40px rgba(255, 204, 2, 0.4);
+    }
+
+    .category-card:nth-child(5):hover {
+      box-shadow: 0 15px 40px rgba(186, 104, 200, 0.4);
+    }
+
+    .category-card:nth-child(6):hover {
+      box-shadow: 0 15px 40px rgba(255, 171, 145, 0.4);
+    }
+    nav.navbar-custom {
+      background-color: #0d6efd;
+      color: white;
+    }
+    nav.navbar-custom .navbar-brand,
+    nav.navbar-custom .nav-link {
+      color: white;
+      font-weight: 600;
+    }
+    nav.navbar-custom .nav-link:hover {
+      color: #ffd43b;
+    }
+
+    /* Centered Form Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      width: 1400px;
+      max-width: 95vw;
+      margin: 0 auto;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      position: relative;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      background: #dc3545;
+      border: none;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      line-height: 22px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    .close-btn:hover {
+      background: #a71d2a;
+    }
+
+    /* Student Assignment Modal */
+    #studentAssignModal {
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #studentAssignModal .modal-content {
+      width: 1400px !important;
+      max-width: 98vw;
+      min-height: 420px;
+      transition: width 0.3s, min-height 0.3s;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: stretch;
+      font-size: 1.15rem;
+    }
+    #studentAssignModal .modal-content .fw-bold {
+      font-size: 1.3rem;
+    }
+    #studentAssignModal .modal-content .coordinator-label {
+      font-weight: 500;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+      color: #444;
+      text-align: left;
+    }
+    #studentAssignModal .modal-content .coordinator-name {
+      font-weight: 400;
+      font-size: 1.15rem;
+      margin-left: 3px;
+      color: #222;
+    }
+    #studentAssignModal .modal-content ul.list-group-flush li {
+      font-size: 1.08rem;
+      padding: 8px 0;
+    }
+
+    /* Task Assignment History Modal */
+    #historyModal.show {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+    }
+    #historyModal .modal-dialog {
+      margin: 1.75rem auto;
+      max-width: 95%;
+      width: 95%;
+    }
+    #historyModal .modal-content {
+      width: 100%;
+      max-width: 2000px;
+      position: relative;
+      margin: 0 auto;
+    }
+
+    /* Add spacing to history modal table cells */
+    #historyModal .table-bordered td {
+      padding: 15px !important;
+    }
+
+    #historyModal .table-sm td {
+      padding: 8px 12px !important;
+      border: 1px solid #dee2e6 !important;
+    }
+
+    #historyModal .table-sm th {
+      padding: 10px 12px !important;
+      border: 1px solid #dee2e6 !important;
+    }
+
+    /* Timeline Styles */
+    .timeline-item {
+      position: relative;
+      padding-left: 30px;
+      margin-bottom: 20px;
+    }
+    .timeline-item .dot {
+      position: absolute;
+      left: 0;
+      top: 5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .dot-blue { background: #0d6efd; }
+    .dot-pink { background: #e83e8c; }
+    .dot-green { background: #28a745; }
+    .timeline-item { background: #f8f9fa; border-radius: 10px; padding: 12px 16px; }
+
+    /* Custom container width for maximum space utilization */
+    .container-fluid {
+      --bs-gutter-x: 1rem;
+      --bs-gutter-y: 0;
+      max-width: 100vw;
+      width: 100%;
+      padding-right: calc(var(--bs-gutter-x) * .5);
+      padding-left: calc(var(--bs-gutter-x) * .5);
+      margin: 0;
+    }
+
+    /* Optimize main content spacing */
+    main.col-md-10 {
+      padding: 15px !important;
+      margin: 0;
+    }
+
+    /* Optimize row and column spacing */
+    .row {
+      --bs-gutter-x: 1rem;
+      --bs-gutter-y: 1rem;
+      margin: 0;
+    }
+
+    .col-lg-4, .col-md-6 {
+      padding-left: 3px;
+      padding-right: 3px;
+      margin-bottom: 10px;
+    }
+
+    /* Reduce unnecessary margins */
+    .dashboard-title {
+      margin-bottom: 10px !important;
+    }
+
+    .text-muted.mb-4 {
+      margin-bottom: 20px !important;
+    }
+
+    /* Edit Button with Blue Line Styling */
+    .btn-edit-blue {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      border: 2px solid #007bff;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 9px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-edit-blue:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-edit-blue:hover {
+      background: linear-gradient(135deg, #0056b3, #004085);
+      border-color: #0056b3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-edit-blue:hover:before {
+      left: 100%;
+    }
+
+    .btn-edit-blue:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(0, 123, 255, 0.2);
+    }
+
+    /* Coordinator highlighting styles for View Members modal */
+    .coordinator-highlight-cell {
+      background-color: #f5e6a3 !important;
+      border: 1px solid #d4c69a !important;
+      padding: 8px !important;
+    }
+
+    .coordinator-name {
+      font-weight: 600 !important;
+      color: #856404 !important;
+    }
+
+    /* Coordinator highlighting for View History rows */
+    .coordinator-highlight-row {
+      background-color: #fff3cd !important;
+      border: 1px solid #ffeaa7 !important;
+      padding: 4px 8px !important;
+      border-radius: 4px !important;
+      margin-bottom: 2px !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    /* Make all member names in View History single line */
+    .modal-body .row .col div {
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      line-height: 1.4 !important;
+      margin-bottom: 2px !important;
+    }
+
+    /* Coordinator highlighting for Edit Members modal */
+    .coordinator-highlight-edit {
+      background-color: #f5e6a3 !important;
+      border: 1px solid #d4c69a !important;
+      border-radius: 6px !important;
+    }
+
+    .coordinator-highlight-edit:hover {
+      border-color: #ff9800 !important;
+      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.5) !important;
+    }
+
+    /* Coordinator highlighting styles */
+    .coordinator-highlight-cell {
+      background-color: #f5e6a3 !important;
+      border: 1px solid #d4c69a !important;
+      padding: 15px !important;
+    }
+    
+    /* Ensure all coordinator cells get highlighted regardless of batch */
+    td.coordinator-highlight-cell {
+      background-color: #f5e6a3 !important;
+      border: 1px solid #d4c69a !important;
+      padding: 15px !important;
+    }
+
+    .coordinator-name {
+      font-weight: 600 !important;
+      color: #856404 !important;
+    }
+
+    /* Edit Member Styles */
+    .member-list-container {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+
+    .member-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      margin-bottom: 8px;
+      background-color: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      transition: all 0.2s ease;
+    }
+
+    .member-row:hover {
+      border-color: #007bff;
+      box-shadow: 0 1px 4px rgba(0,123,255,0.15);
+    }
+
+    .member-info {
+      flex: 1;
+    }
+
+    .member-name {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+      font-size: 0.95em;
+    }
+
+    .member-comment {
+      font-size: 0.85em;
+      color: #666;
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    .comment-edit-area {
+      margin-top: 8px;
+    }
+
+    .comment-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    .member-actions {
+      display: flex;
+      gap: 8px;
+      margin-left: 15px;
+    }
+
+    .btn-edit-small, .btn-save-small {
+      padding: 6px 16px;
+      font-size: 0.8em;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      min-width: 50px;
+    }
+
+    .btn-edit-small {
+      background: #17a2b8;
+      color: white;
+    }
+
+    .btn-edit-small:hover {
+      background: #138496;
+    }
+
+    .btn-save-small {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-save-small:hover {
+      background: #1e7e34;
+    }
+
+    .btn-save-small:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .comment-input {
+      width: 100%;
+      padding: 4px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .member-comment {
+      font-size: 9px;
+      color: #666;
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    /* ===== PASTEL TASK CARD COLORS ===== */
+    :root {
+      --pastel-pink: #fce4ec;
+      --pastel-blue: #e3f2fd;
+      --pastel-green: #e8f5e8;
+      --pastel-yellow: #fff8e1;
+      --pastel-purple: #f3e5f5;
+      --pastel-orange: #fff3e0;
+      --pastel-teal: #e0f2f1;
+      --pastel-lavender: #f8f4ff;
+      --pastel-peach: #ffeee6;
+      --pastel-mint: #e8f8f5;
+      --pastel-coral: #ffe8e8;
+      --pastel-sky: #e6f3ff;
+    }
+
+    /* Task Card Pastel Styling - Soft & Easy on Eyes */
+    .col-lg-4:nth-child(1) .category-card > div {
+      background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%) !important;
+      border: 1px solid #f8bbd9 !important;
+      box-shadow: 0 4px 15px rgba(248, 187, 217, 0.2) !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .col-lg-4:nth-child(1) .category-card > div:hover {
+      transform: translateY(-3px) !important;
+      box-shadow: 0 8px 25px rgba(248, 187, 217, 0.3) !important;
+    }
+
+    .col-lg-4:nth-child(1) .category-label {
+      color: #ad1457 !important;
+    }
+
+    .col-lg-4:nth-child(2) .category-card > div {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+      border: 1px solid #bbdefb !important;
+      box-shadow: 0 4px 15px rgba(187, 222, 251, 0.2) !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .col-lg-4:nth-child(2) .category-card > div:hover {
+      transform: translateY(-3px) !important;
+      box-shadow: 0 8px 25px rgba(187, 222, 251, 0.3) !important;
+    }
+
+    .col-lg-4:nth-child(2) .category-label {
+      color: #1565c0 !important;
+    } 
+
+    .col-lg-4:nth-child(3) .category-card > div {
+      background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%) !important;
+      border: 1px solid #c8e6c9 !important;
+      box-shadow: 0 4px 15px rgba(200, 230, 201, 0.2) !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .col-lg-4:nth-child(3) .category-card > div:hover {
+      transform: translateY(-3px) !important;
+      box-shadow: 0 8px 25px rgba(200, 230, 201, 0.3) !important;
+    }
+
+    .col-lg-4:nth-child(3) .category-label {
+      color: #2e7d32 !important;
+    }
+
+    .col-lg-4:nth-child(4) .category-card > div {
+      background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%) !important;
+      border: 1px solid #fff3c4 !important;
+      box-shadow: 0 4px 15px rgba(255, 243, 196, 0.2) !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .col-lg-4:nth-child(4) .category-card > div:hover {
+      transform: translateY(-3px) !important;
+      box-shadow: 0 8px 25px rgba(255, 243, 196, 0.3) !important;
+    }
+
+    .col-lg-4:nth-child(4) .category-label {
+      color: #f57c00 !important;
+    }
+
+    .col-lg-4:nth-child(5) .category-card > div {
+      background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%) !important;
+      border: 1px solid #e1bee7 !important;
+      box-shadow: 0 4px 15px rgba(225, 190, 231, 0.2) !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .col-lg-4:nth-child(5) .category-card > div:hover {
+      transform: translateY(-3px) !important;
+      box-shadow: 0 8px 25px rgba(225, 190, 231, 0.3) !important;
+    }
+
+    .col-lg-4:nth-child(5) .category-label {
+      color: #6a1b9a !important;
+    }
+
+    .col-lg-4:nth-child(6) .category-card > div {
+      background: linear-gradient(135deg, #fff3e0 0%, #ffcc80 100%) !important;
+      border: 1px solid #ffcc80 !important;
+      box-shadow: 0 4px 15px rgba(255, 204, 128, 0.2) !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .col-lg-4:nth-child(6) .category-card > div:hover {
+      transform: translateY(-3px) !important;
+      box-shadow: 0 8px 25px rgba(255, 204, 128, 0.3) !important;
+    }
+
+    .col-lg-4:nth-child(6) .category-label {
+      color: #ef6c00 !important;
+    }
+
+    /* Enhanced badge styling for pastel cards */
+    .category-card .badge {
+      border-radius: 20px !important;
+      padding: 8px 15px !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      margin: 0 5px !important;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Enhanced button styling for pastel cards */
+    .category-card .btn {
+      border-radius: 25px !important;
+      padding: 10px 20px !important;
+      font-weight: 600 !important;
+      transition: all 0.3s ease !important;
+      box-shadow: 0 4px 1    /* Task Checklist Modal Styles - Enhanced Tabular Format */
+    .table {
+      border-collapse: collapse !important;
+      margin: 0 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    }
+
+    /* Enhanced table headers */
+    .table thead th {
+      background-color: transparent !important;
+      border: 1px solid #dee2e6 !important;
+      font-weight: 600 !important;
+      text-align: center !important;
+      padding: 12px 8px !important;
+      color: #333 !important;
+      font-size: 13px !important;
+    }
+
+    /* Task Checklist Modal - Remove ONLY header backgrounds, keep category colors */
+    #taskChecklistModal .table thead th {
+      background-color: transparent !important;
+      background: none !important;
+      border: 1px solid #dee2e6 !important;
+      color: #333 !important;
+    }
+
+    /* Override Bootstrap table-bordered default styling for task checklist headers only */
+    #taskChecklistModal .table-bordered thead th {
+      background-color: transparent !important;
+      background: none !important;
+      border: 1px solid #dee2e6 !important;
+    }
+
+    /* Remove any Bootstrap table header backgrounds but keep category cell colors */
+    #taskChecklistModal .table > thead > tr > th {
+      background-color: transparent !important;
+      background: none !important;
+      border: 1px solid #dee2e6 !important;
+    }
+
+    /* Keep category cell colors - DO NOT override these */
+    #taskChecklistModal .table tbody td[style*="background-color: #90EE90"],
+    #taskChecklistModal .table tbody td[style*="background: linear-gradient"] {
+      /* Keep original background colors for category cells */
+    }
+
+    /* Vertical text rotation for category cells */
+    .vertical-text {
+      writing-mode: vertical-lr;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      white-space: nowrap;
+    }
+
+    /* Category headers with better styling */
+    .table thead th.category-header {
+      background-color: transparent !important;
+      font-weight: 600 !important;
+      font-size: 14px !important;
+      color: #333 !important;
+    }
+
+    /* Week headers */
+    .table thead th.week-header {
+      background-color: transparent !important;
+      font-weight: 600 !important;
+      font-size: 13px !important;
+      color: #333 !important;
+    }
+
+    /* Day headers */
+    .table thead th.day-header {
+      background-color: transparent !important;
+      font-weight: 600 !important;
+      font-size: 11px !important;
+      color: #333 !important;
+    }
+
+    .table td, .table th {
+      border: 1px solid #000 !important;
+      padding: 2px !important;
+      vertical-align: middle !important;
+      line-height: 1.2 !important;
+    }
+
+    .status-buttons {
+      display: flex !important;
+      gap: 2px !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+
+    .status-btn {
+      width: 30px !important;
+      height: 30px !important;
+      border: 2px solid #000 !important;
+      background: white !important;
+      border-radius: 4px !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      font-size: 12px !important;
+      font-weight: bold !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    .status-btn:hover {
+      background: #e3f2fd !important;
+      border-color: #007bff !important;
+      box-shadow: 0 0 0 2px rgba(0,123,255,0.25) !important;
+    }
+
+    .status-btn.completed {
+      background: #28a745 !important;
+      color: white !important;
+      border-color: #28a745 !important;
+    }
+
+    .status-btn.pending {
+      background: #ffc107 !important;
+      color: #212529 !important;
+      border-color: #ffc107 !important;
+    }
+
+    .status-btn.not-started {
+      background: #dc3545 !important;
+      color: white !important;
+      border-color: #dc3545 !important;
+    }
+
+    /* Task description cells */
+    .task-description-cell {
+      padding: 12px !important;
+      border: 1px solid #333 !important;
+      width: 300px !important;
+      vertical-align: middle !important;
+      background-color: #f8f9fa !important;
+      font-size: 16px !important;
+      line-height: 1.4 !important;
+      color: #000000 !important;
+      font-weight: normal !important;
+    }
+
+    /* Checkbox cells styling */
+    .checkbox-cell {
+      background-color: #fafafa !important;
+      border: 1px solid #333 !important;
+      padding: 6px !important;
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
+
+    /* Single checkbox styling */
+    .single-checkbox {
+      border: 2px solid #333 !important;
+      background-color: #ffffff !important;
+      border-radius: 4px !important;
+      transition: all 0.2s ease !important;
+    }
+
+    .single-checkbox:hover {
+      border-color: #007bff !important;
+      box-shadow: 0 0 0 2px rgba(0,123,255,0.25) !important;
+    }
+
+    /* Remarks cells - Enhanced Tabular Format */
+    .remarks-cell {
+      padding: 12px !important;
+      border: 1px solid #333 !important;
+      width: 400px !important;
+      vertical-align: middle !important;
+      background-color: #fff5f5 !important;
+    }
+
+    /* Category cells - Enhanced styling */
+    .category-cell {
+      border: 2px solid #333 !important;
+      font-weight: bold !important;
+      text-align: center !important;
+      vertical-align: middle !important;
+      padding: 12px 8px !important;
+      line-height: 1.3 !important;
+    }
+
+    /* Remarks input styling */
+    .remarks-input {
+      width: 100% !important;
+      height: 60px !important;
+      border: 1px solid #ccc !important;
+      border-radius: 3px !important;
+      padding: 12px !important;
+      font-size: 16px !important;
+      background-color: #ffffff !important;
+      resize: vertical !important;
+      font-family: Arial, sans-serif !important;
+    }
+
+    .remarks-input:focus {
+      border-color: #007bff !important;
+      box-shadow: 0 0 0 2px rgba(0,123,255,0.25) !important;
+      outline: none !important;
+    }
+
+    /* Table row styling */
+    .table tbody tr {
+      border-bottom: 1px solid #dee2e6 !important;
+    }
+
+    /* Kitchen Assignment Modal Centering */
+    #kitchenAssignmentModal .modal-dialog {
+      max-width: 900px;
+      margin: 1.75rem auto;
+    }
+    
+    #kitchenAssignmentModal .modal-content {
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    
+    #kitchenAssignmentModal .assignment-grid {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    /* Food Preparation task styling for Kitchen modal */
+    #kitchenAssignmentModal .task-label.prep {
+      background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%) !important;
+      color: white !important;
+      font-size: 10px !important;
+      box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3) !important;
+    }
+
+    @media (max-width: 768px) {
+      #kitchenAssignmentModal .modal-dialog {
+        max-width: 95%;
+        margin: 1rem auto;
+      }
+    }
+
+    /* Enhanced Add Task Area Modal Styles */
+    .area-type-card {
+      transition: all 0.3s ease !important;
+    }
+    
+    .area-type-card:hover {
+      border-color: #007bff !important;
+      background-color: #f8f9ff !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15) !important;
+    }
+    
+    .area-type-card input[type="radio"]:checked + label {
+      color: #007bff !important;
+    }
+    
+    .area-type-card:has(input[type="radio"]:checked) {
+      border-color: #007bff !important;
+      background-color: #f8f9ff !important;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1) !important;
+    }
+    
+    #addTaskAreaModal .form-control:focus,
+    #addTaskAreaModal .form-select:focus {
+      border-color: #007bff !important;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1) !important;
+    }
+    
+    #addTaskAreaModal .btn-primary {
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+      border: none !important;
+      transition: all 0.3s ease !important;
+    }
+    
+    #addTaskAreaModal .btn-primary:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3) !important;
+    }
+    
+    #addTaskAreaModal .btn-primary:disabled {
+      background: #6c757d !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Enhanced delete button styling */
+    .delete-capacity-btn {
+      transition: all 0.3s ease !important;
+    }
+    
+    .delete-capacity-btn:hover {
+      color: #dc3545 !important;
+      transform: scale(1.1) !important;
+      text-shadow: 0 0 8px rgba(220, 53, 69, 0.5) !important;
+    }
+    
+    .delete-capacity-btn:disabled {
+      opacity: 0.6 !important;
+      transform: none !important;
+      pointer-events: none !important;
+    }
+
+    /* Deletion animation styles */
+    .deleting-card {
+      animation: deleteAnimation 0.6s ease-in-out forwards !important;
+    }
+    
+    @keyframes deleteAnimation {
+      0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+      50% {
+        opacity: 0.5;
+        transform: scale(0.9) translateY(-10px);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px);
+      }
+    };
+

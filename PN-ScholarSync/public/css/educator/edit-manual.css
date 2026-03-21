@@ -1,0 +1,287 @@
+/* Prevent horizontal scrolling globally */
+html, body {
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 100%;
+    width: 100%;
+    padding: 20px;
+}
+
+
+.main-content {
+    width: 83.5%;
+    max-width: 100%;
+}
+
+.category-section {
+    margin-bottom: 30px;
+}
+
+.category-header {
+    display: fixed;
+    align-items: center;
+    margin-bottom: 15px;
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border-left: 4px solid #28a745;
+}
+
+.category-number {
+    font-size: 20px;
+    color: #28a745;
+}
+
+.category-name-input {
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.table th, .table td {
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.editable-cell {
+    position: relative;
+}
+
+.editable-cell textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.penalty-select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.new-violation-row {
+    background-color: #e9f7ef;
+}
+
+.add-violation-btn {
+    margin-bottom: 15px;
+}
+
+/* Align Add Violation buttons under the Action column */
+.d-flex.justify-content-end.align-items-center.mt-3 {
+    margin-left: 80%; /* Align with the Action column (after #, Violation Name, and Severity columns) */
+    margin-top: 10px !important;
+    margin-bottom: 20px !important;
+    width: 20%; /* Match the Action column width */
+    justify-content: center !important;
+}
+
+.add-category-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-bottom: 30px;
+    width: 100%; /* Match the width of existing violation tables */
+}
+
+.section-title {
+    background-color: #f0f0f0;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    border-left: 4px solid #28a745;
+}
+
+.card-section {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #fff;
+}
+
+.empty-form-alert {
+    display: none;
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.char-counter {
+    text-align: right;
+    margin-top: 5px;
+}
+
+.char-limit-warning {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+.action-buttons {
+    position: fixed;
+    bottom: 20px;
+    left: 270px; /* 250px sidebar width + 20px margin */
+    z-index: 1000;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    gap: 12px;
+    min-width: 300px;
+}
+
+.action-buttons .btn {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons .btn:active {
+    transform: translateY(0);
+}
+
+/* Add bottom padding to the form to prevent content from being hidden behind sticky buttons */
+#manualForm {
+    padding-bottom: 100px;
+}
+
+.btn-remove {
+    color: #dc3545;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-remove:hover {
+    color: #bd2130;
+}
+
+.alert {
+    margin-bottom: 20px;
+}
+
+/* Responsive adjustments for sticky buttons */
+@media (max-width: 768px) {
+    .action-buttons {
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        min-width: auto;
+        width: calc(100% - 40px);
+    }
+    
+    .action-buttons .btn {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 576px) {
+    .action-buttons {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        width: calc(100% - 20px);
+        padding: 12px 16px;
+    }
+    
+    .action-buttons .btn {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+}
+
+/* Animation for success message */
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Severity Text Styling for Existing Violations */
+.severity-text {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    text-align: center;
+    min-width: 80px;
+    border: 1px solid transparent;
+}
+
+.severity-low {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.severity-medium {
+    background-color: #fff3cd;
+    color: #856404;
+    border-color: #ffeaa7;
+}
+
+.severity-high {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+.severity-very-high {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+    font-weight: 600;
+}
+
+.severity-unknown {
+    background-color: #e2e8f0;
+    color: #4a5568;
+    border-color: #cbd5e0;
+    font-style: italic;
+}

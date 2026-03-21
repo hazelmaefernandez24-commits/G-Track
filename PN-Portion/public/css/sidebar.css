@@ -1,0 +1,135 @@
+/* Common Sidebar Styles */
+.sidebar {
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-right: 1px solid #dee2e6;
+    height: 100vh;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    padding-left: 3rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.sidebar-title {
+    margin: 0;
+    font-weight: 600;
+}
+
+.sidebar-body {
+    padding: 1rem;
+}
+
+.sidebar-category {
+    font-size: 0.7rem;
+    color: #6c757d;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 1rem;
+}
+
+.nav-item {
+    margin-bottom: 0.3rem;
+}
+
+.sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.7rem;
+    color: #6b7280;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background-color: #22bbea;
+    color: white;
+}
+
+.nav-link:hover .icon,
+.nav-link.active .icon {
+    color: white;
+}
+
+.icon {
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+}
+
+.nav-link:hover .icon {
+    transform: scale(1.1);
+}
+
+.logout-btn {
+    color: #dc3545;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem;
+    border-radius: 0.35rem;
+    display: flex;
+    align-items: center;
+}
+
+.logout-btn:hover {
+    background-color: #dc3545;
+    color: white !important;
+}
+
+.logout-btn:hover .icon {
+    color: white !important;
+}
+
+hr {
+    border-top: 1px solid #dee2e6;
+    margin: 1rem 0;
+    opacity: 0.25;
+}
+
+/* Role-specific colors */
+.admin-portal .sidebar-title {
+    color: #ff9933;
+}
+
+.kitchen-portal .sidebar-title {
+    color: #22bbea;
+}
+
+.cook-portal .sidebar-title {
+    color: #28a745;
+}
+
+.student-portal .sidebar-title {
+    color: #6f42c1;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+}

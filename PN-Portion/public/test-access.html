@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PN-Portion System Access</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #666;
+            margin-top: 30px;
+        }
+        .card {
+            background: #f9f9f9;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #4CAF50;
+            border-radius: 5px;
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+        .url {
+            background: #e8f5e9;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .status {
+            background: #4CAF50;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        ul {
+            line-height: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 PN-Portion System - Access Guide</h1>
+        
+        <div class="status">✅ System is Running on Port 8001</div>
+        
+        <div class="warning">
+            <strong>⚠️ Important:</strong> Make sure you are logged in with the correct user role (Kitchen Team or Cook) before accessing these pages.
+        </div>
+
+        <h2>🔑 Kitchen Team Access</h2>
+        
+        <div class="card">
+            <h3>📦 Inventory Management (NEW)</h3>
+            <p><strong>What you can do:</strong></p>
+            <ul>
+                <li>Add new inventory items with Item Type field</li>
+                <li>Edit existing items (name, type, quantity, unit)</li>
+                <li>View inventory history and transactions</li>
+                <li>Delete unused items</li>
+            </ul>
+            <div class="url">http://127.0.0.1:8001/kitchen/inventory-management</div>
+            <a href="/kitchen/inventory-management" class="btn">Open Inventory Management</a>
+        </div>
+
+        <div class="card">
+            <h3>📋 Inventory Check (Reports)</h3>
+            <p>Submit inventory count reports to Cook/Admin</p>
+            <div class="url">http://127.0.0.1:8001/kitchen/inventory</div>
+            <a href="/kitchen/inventory" class="btn">Open Inventory Check</a>
+        </div>
+
+        <h2>👨‍🍳 Cook Access</h2>
+
+        <div class="card">
+            <h3>🛒 Purchase Orders</h3>
+            <p><strong>What you can do:</strong></p>
+            <ul>
+                <li>Create purchase orders with automatic cost calculation</li>
+                <li>Approve orders</li>
+                <li>Confirm delivery (automatically updates inventory)</li>
+            </ul>
+            <div class="url">http://127.0.0.1:8001/cook/purchase-orders</div>
+            <a href="/cook/purchase-orders" class="btn">Open Purchase Orders</a>
+        </div>
+
+        <div class="card">
+            <h3>🍽️ Weekly Menu Dishes (NEW)</h3>
+            <p><strong>What you can do:</strong></p>
+            <ul>
+                <li>Create weekly menu dishes with ingredient tracking</li>
+                <li>Check ingredient availability in real-time</li>
+                <li>System automatically deducts ingredients from inventory</li>
+                <li>Update or delete dishes (inventory adjusts automatically)</li>
+            </ul>
+            <div class="url">http://127.0.0.1:8001/cook/weekly-menu-dishes</div>
+            <a href="/cook/weekly-menu-dishes" class="btn">Open Weekly Menu Dishes</a>
+        </div>
+
+        <div class="card">
+            <h3>📊 Stock Management</h3>
+            <p>Review kitchen inventory reports and approve restocking</p>
+            <div class="url">http://127.0.0.1:8001/cook/stock-management</div>
+            <a href="/cook/stock-management" class="btn">Open Stock Management</a>
+        </div>
+
+        <h2>🧪 Quick Test Workflow</h2>
+        
+        <div class="card">
+            <h3>Test the Complete System (5 minutes)</h3>
+            <ol style="line-height: 2;">
+                <li><strong>Login as Kitchen Team</strong> → Go to Inventory Management</li>
+                <li><strong>Add Item:</strong> Tomatoes, Vegetable, 100 kg</li>
+                <li><strong>Login as Cook</strong> → Go to Purchase Orders</li>
+                <li><strong>Create PO:</strong> Tomatoes, 200 kg @ ₱10/kg = ₱2,000</li>
+                <li><strong>Approve & Deliver</strong> → Check inventory (should be 300 kg)</li>
+                <li><strong>Go to Weekly Menu Dishes</strong></li>
+                <li><strong>Create Dish:</strong> Tomato Soup, using 10 kg Tomatoes</li>
+                <li><strong>Check inventory</strong> → Should be 290 kg (automatic deduction!)</li>
+                <li><strong>View History</strong> → See all transactions logged</li>
+            </ol>
+        </div>
+
+        <h2>📚 Documentation</h2>
+        <ul>
+            <li><strong>Complete Guide:</strong> PN_PORTION_IMPLEMENTATION.md</li>
+            <li><strong>Setup Guide:</strong> SETUP_GUIDE.md</li>
+            <li><strong>Quick Reference:</strong> QUICK_REFERENCE.md</li>
+            <li><strong>System Status:</strong> SYSTEM_STATUS.md</li>
+        </ul>
+
+        <h2>✨ Key Features</h2>
+        <div class="card">
+            <h3>Automatic Inventory Updates</h3>
+            <ul>
+                <li>✅ Purchase Order Delivery → Inventory Increases ⬆️</li>
+                <li>✅ Weekly Menu Creation → Inventory Decreases ⬇️</li>
+                <li>✅ Weekly Menu Update → Inventory Adjusts ↔️</li>
+                <li>✅ Weekly Menu Deletion → Inventory Restores ⬆️</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>💡 Tip:</strong> If you don't see the new pages, make sure:
+            <ul>
+                <li>You are logged in with the correct role (kitchen or cook)</li>
+                <li>Clear your browser cache (Ctrl+Shift+R)</li>
+                <li>The server is running on port 8001</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

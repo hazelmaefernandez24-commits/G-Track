@@ -1,0 +1,1450 @@
+/* BASIC RESET */
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    header {
+  font-family: 'Poppins', sans-serif;
+  background-color: #22BBEA;
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100; /* ensure header is above sidebar/content */
+  box-sizing: border-box;
+  min-height: var(--header-height);
+}
+
+.logo {
+  font-family: 'Poppins', sans-serif;
+  margin-left: 0;
+}
+.logo img {
+  /* constrain logo height so header stays compact */
+  height: 56px;
+  width: auto;
+  margin-left: 0;
+  display: block;
+}
+
+.header-right {
+  font-family: 'Poppins', sans-serif;
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 500;
+}
+  .welcomeCard{
+    background:  #bfebf8;
+     color: black;
+     min-width: 600px;
+     max-width: 1600px;
+     width: 94%;
+     border-radius: 20px;
+     display: flex;
+     flex-direction: column;
+     /* replace relative top offset with margins to avoid overlap */
+     margin-top: 80px;
+     position: relative;
+     align-items: flex-start;
+     box-shadow: 0 4px 16px rgba(102,126,234,0.12);
+     margin-bottom: 16px;
+     padding: 48px 48px 32px 48px;
+    font-size: 1.2rem;
+ }
+
+       #welcomeCard h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+      #welcomeCard p {
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Align the top search/filter row with the center-panel and floor buttons
+   so the controls visually line up with the rooms area. On narrower
+   screens (left panel hidden) the margin is removed. */
+@media screen and (min-width: 993px) {
+  .toolbar-row { margin-left: 280px; max-width: calc(100% - 300px); }
+}
+@media screen and (max-width: 992px) {
+  .toolbar-row { margin-left: 0; max-width: 100%; }
+}
+
+    /* SIDEBAR */
+    .sidebar {
+      font-family: 'Poppins', sans-serif;
+      border-right: 3px solid #22BBEA;
+      background: #ffffff;
+      width: 240px;
+      padding-top: 10px;
+      padding-bottom: 30px;
+      /* fix sidebar to viewport and allow internal scroll */
+      position: fixed;
+      top: 0; /* will be adjusted at runtime to sit below header */
+      left: 0;
+      bottom: 0;
+      overflow-y: auto;
+        }
+        .sidebar ul {
+            font-family: 'Poppins', sans-serif;
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        .sidebar ul li {
+            font-family: 'Poppins', sans-serif;
+            margin: 15px 0;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .sidebar ul li a {
+            font-family: 'Poppins', sans-serif;
+            text-decoration: none;
+            color: black;
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+    
+          .sidebar-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 8px;
+            vertical-align: middle;
+      }
+
+    .row{
+      font-size: 20px;
+      font-weight: 450;
+    }
+     .sidebar {
+            border-right: 3px solid #22BBEA;
+            background: #ffffff;
+            min-width: 230px;
+            max-width: 260px;
+            padding-top: 30px;
+            padding-bottom: 30px;
+            height: 100vh;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        .sidebar ul li {
+            margin: 15px 0;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+       
+        .sidebar ul li:hover {
+            background: #fa5408;
+            color: white;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .sidebar ul li:hover a {
+            color: white;
+        }
+
+  .content {
+    flex: 1;
+    padding: 70px;
+    font-display: center;
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 250px;
+      padding: 20px;
+      min-width: auto; /* allow content to wrap responsively */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+      margin-bottom: 40px;
+      border-radius: 30px;
+      position: relative;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: calc(100% - 250px);
+    }
+
+    .main-cards {
+      display: flex;
+      justify-content: center;
+      gap: 75px;
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 50px;
+      margin-top: 100px;
+      flex-wrap: wrap;
+      padding: 0 20px;
+    }
+
+    .card {
+      flex: 1;
+      min-width: 300px;
+      max-width: 600px;
+      padding: 40px;
+      background-color: rgb(230, 230, 230);
+      border-radius: 30px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      border: 1px solid black;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .card h2 {
+      margin-bottom: 15px;
+      font-size: 24px;
+      color: black;
+      font-weight: 600;
+    }
+
+    .card p {
+      margin-bottom: 20px;
+      color: black;
+      font-size: 16px;
+    }
+
+    .card-button {
+      background-color: #22BBEA;
+      color: black;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .card-button:hover {
+      background-color: #199cc9;
+      transform: translateY(-2px);
+    }
+
+    /* Floor Buttons inside Room Tasking card */
+    .floor-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+      padding: 0;
+      max-width: 100%;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .floor-btn {
+      background-color: #22BBEA;
+      color: black;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-align: center;
+      min-height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .floor-btn:hover {
+      background-color: #1a9bd1;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Rooms Container */
+    .rooms-container {
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+      margin: 0 auto;
+      gap: 30px;
+    }
+
+    /* Ensure the Room & Task Assignments Overview stretches similar to the
+       General Tasking block for consistency on wide screens. */
+      #statsArea {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    #roomOverviewSection,
+    .task-template-section {
+      width: 100%;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #roomOverviewSection {
+        margin: 2px 0 0;
+        box-sizing: border-box;
+        padding-left: 28px;
+        padding-right: 28px;
+      }
+
+    #roomOverviewSection .section-header {
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .room-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 18px;
+      margin-top: 16px;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    .room-stats-grid .stat-card {
+      width: 100%;
+      margin: 0;
+    }
+
+    .rooms-wrapper {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+      padding: 24px 12px 32px;
+      justify-items: stretch;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 1024px) {
+      .rooms-wrapper {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .rooms-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Room Box Styles */
+    .room-box {
+      background-color: #ffffff;
+      border: 1px solid #e0e6ed;
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .room-box:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      border-color: #22bbea;
+    }
+
+
+
+    .room-box h3 {
+      margin: 0 0 20px 0;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #2c3e50;
+      padding: 12px 0;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 12px;
+      border: 1px solid #dee2e6;
+      position: relative;
+    }
+
+    .room-box h3::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #22bbea, #1e90ff);
+      border-radius: 12px 12px 0 0;
+    }
+
+    .student-occupants {
+      flex-grow: 1;
+      margin-bottom: 20px;
+    }
+
+    .student-occupants h4 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 0 16px 0;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 10px;
+      border: 1px solid #dee2e6;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #495057;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Action Buttons (Edit and Delete) */
+    .edit-btn, .delete-btn {
+      background: #ffc107;
+      border: none;
+      padding: 6px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .edit-btn:hover {
+      background: #e0a800;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .edit-btn img, .delete-btn img {
+      width: 16px;
+      height: 16px;
+    }
+
+    .delete-btn {
+      background: #dc3545;
+    }
+
+    .delete-btn:hover {
+      background: #c82333;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .occupants-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px 0;
+      font-family: 'Poppins', sans-serif;
+      background: #ffffff;
+      border-radius: 10px;
+      border: 1px solid #e9ecef;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .occupants-list li {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f3f4;
+      font-size: 0.9rem;
+      color: #495057;
+      display: flex;
+      align-items: center;
+      transition: background-color 0.2s ease;
+    }
+
+    .occupants-list li:hover {
+      background-color: #f8f9fa;
+    }
+
+    .occupants-list li:last-child {
+      border-bottom: none;
+    }
+
+    .occupants-list li i {
+      display: none;
+    }
+
+    /* Empty state styling */
+    .occupants-list li[style*="italic"] {
+      color: #6c757d;
+      font-style: italic;
+      justify-content: center;
+      background: #f8f9fa;
+    }
+
+    /* Student view badge styling */
+    .room-box div[style*="background: #e3f2fd"] {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+      color: #1565c0 !important;
+      padding: 6px 12px !important;
+      border-radius: 20px !important;
+      font-size: 0.75rem !important;
+      font-weight: 600 !important;
+      border: 1px solid #90caf9 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+    }
+
+    /* Student count badge in header */
+    .student-occupants h4 span {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    .gt-category-empty { text-align:center; padding:30px; border:2px dashed #cbd5f5; border-radius:14px; font-size:0.95rem; color:#4b5563; background:#f8fbff; }
+    .task-template-section { margin-top: 18px; }
+    .task-template-header { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .task-template-metrics { display:flex; gap:16px; flex-wrap:wrap; font-size:0.85rem; color:#6b7280; }
+    .task-template-metrics span { display:flex; align-items:center; gap:6px; }
+    .task-template-list { display:flex; gap:18px; margin-top:18px; overflow-x:auto; padding-bottom:6px; scroll-snap-type:x mandatory; }
+    .task-template-list::-webkit-scrollbar { height:6px; }
+    .task-template-list::-webkit-scrollbar-track { background:#e2e8f0; border-radius:999px; }
+    .task-template-list::-webkit-scrollbar-thumb { background:#94a3b8; border-radius:999px; }
+    .task-template-card { border:1px solid #e0e7ff; border-radius:22px; padding:18px 20px; background:#fff; box-shadow:0 10px 24px rgba(79,70,229,0.08); min-width:520px; scroll-snap-align:start; }
+    .task-template-card .template-row { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; flex-wrap:wrap; }
+    .template-info { display:flex; gap:14px; align-items:flex-start; min-width:250px; }
+    .task-template-index { width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#eef2ff,#dbeafe); color:#4f46e5; font-weight:700; display:flex; align-items:center; justify-content:center; font-size:1rem; }
+    .task-template-meta h4 { margin:0; font-size:1rem; color:#111827; font-weight:600; letter-spacing:0.5px; }
+    .task-template-meta p { margin:4px 0 0 0; font-size:0.85rem; color:#6b7280; }
+    .task-template-usage { text-align:right; min-width:160px; font-size:0.85rem; color:#6b7280; }
+    .task-template-usage strong { display:block; font-size:1.15rem; color:#0f172a; margin-top:4px; }
+    .usage-title { font-weight:600; color:#475467; }
+    .template-progress-grid { display:flex; gap:12px; margin-top:16px; flex-wrap:nowrap; overflow-x:auto; }
+    .template-progress-card { border:1px solid #edf2ff; border-radius:14px; padding:12px 14px; background:#f7f9ff; min-width:155px; text-align:left; }
+    .template-progress-label { font-size:0.75rem; color:#64748b; font-weight:600; display:flex; align-items:center; gap:6px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.4px; }
+    .task-progress-bar { height:6px; border-radius:999px; background:#e2e8f0; overflow:hidden; }
+    .task-progress-bar > div { height:100%; border-radius:999px; background:linear-gradient(135deg,#4f46e5,#22bbea); transition:width 0.3s ease; }
+    .task-progress-bar.warning { background:#fee2e2; }
+    .task-progress-bar.warning > div { background:linear-gradient(135deg,#f97316,#f43f5e); }
+    .template-progress-meta { margin-top:6px; font-size:0.8rem; color:#0f172a; font-weight:600; }
+    .task-template-empty { text-align:center; padding:26px; border:2px dashed #dbeafe; border-radius:14px; font-size:0.95rem; color:#64748b; background:#f8fbff; }
+.occupancy-summary-card { margin-top:20px; border:1px solid #e2e8f0; border-radius:20px; padding:20px 24px; background:#fff; box-shadow:0 10px 28px rgba(15,23,42,0.08); }
+.occupancy-summary-header { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap; }
+.occupancy-summary-header h3 { margin:0; font-size:1.05rem; color:#0f172a; }
+.occupancy-summary-header p { margin:4px 0 0 0; color:#6b7280; font-size:0.9rem; }
+.occupancy-summary-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:0.85rem; color:#475467; }
+.occupancy-summary-meta span { display:flex; align-items:center; gap:6px; font-weight:600; }
+.occupancy-ratings-row { margin-top:16px; display:flex; gap:16px; overflow-x:auto; }
+.occupancy-rating-card { min-width:220px; flex:1; border:1px solid #edf2ff; border-radius:16px; padding:14px 16px; background:#f9fbff; }
+.rating-title { display:flex; align-items:center; gap:10px; font-size:0.95rem; color:#0f172a; font-weight:600; margin-bottom:8px; }
+.rating-dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+.rating-count { font-size:0.85rem; color:#475467; font-weight:600; margin-bottom:4px; }
+.occupancy-rating-card p { margin:0 0 10px 0; font-size:0.82rem; color:#6b7280; }
+.occupancy-progress { display:flex; flex-direction:column; gap:6px; }
+.occupancy-progress-bar { height:6px; border-radius:999px; background:#e2e8f0; overflow:hidden; }
+.occupancy-progress-bar span { display:block; height:100%; border-radius:999px; }
+.occupancy-progress small { color:#0f172a; font-weight:600; font-size:0.8rem; }
+
+    /* Room number styling enhancement */
+    .room-box h3 {
+      position: relative;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border: 2px solid #e9ecef;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Professional card shadow and border */
+    .room-box {
+      border: 2px solid #f1f3f4;
+      background: #ffffff;
+      position: relative;
+    }
+
+    .room-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #22bbea 0%, #1e90ff 50%, #20c997 100%);
+      border-radius: 16px 16px 0 0;
+    }
+
+    /* Scrollbar styling for occupants list */
+    .occupants-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .occupants-list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    .occupants-list::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+    }
+
+    .occupants-list::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
+    /* Loading state for room cards */
+    .room-box.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .room-box.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #22bbea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Enhanced typography */
+    .room-box {
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.5;
+    }
+
+    .room-box h3 {
+      letter-spacing: -0.5px;
+    }
+
+    .occupants-list li {
+      font-weight: 500;
+      letter-spacing: 0.2px;
+    }
+
+    .room-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+      gap: 12px;
+    }
+
+    /* Add Student Button */
+    .add-student-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+      flex: 1;
+      justify-content: center;
+    }
+
+    .add-student-btn:hover {
+      background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+
+
+    .continue-btn {
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+      flex: 1;
+    }
+
+    .continue-btn:hover {
+      background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+      text-decoration: none;
+      color: white;
+    }
+
+    .addRoomCard {
+      display: none;
+    }
+
+    /* Hidden state */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Scrollbar Styling */
+    .rooms-container::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .rooms-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .rooms-container::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+
+    .rooms-container::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    /* Responsive Design */
+    @media screen and (max-width: 1400px) {
+      .main-cards {
+        gap: 40px;
+      }
+      
+      .card {
+        min-width: 280px;
+      }
+    }
+
+    @media screen and (max-width: 1200px) {
+      .main-content {
+        margin-left: 260px;
+        width: calc(100% - 280px);
+        padding: 15px;
+      }
+      
+      .main-cards {
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+      }
+      
+      .card {
+        width: 100%;
+        max-width: 450px;
+      }
+    }
+
+    @media screen and (max-width: 992px) {
+      .main-content {
+        margin-left: 255px;
+        width: calc(100% - 275px);
+        padding: 10px;
+      }
+      
+      .rooms-wrapper {
+        padding: 10px;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      .sidebar {
+        width: 200px;
+      }
+      
+      .main-content {
+        margin-left: 210px;
+        width: calc(100% - 220px);
+      }
+      
+      .main-cards {
+        margin-top: 100px;
+      }
+      
+      .card {
+        max-width: 400px;
+      }
+      
+      .room-box {
+        width: calc(50% - 1rem);
+        min-width: 280px;
+      }
+    }
+
+    @media screen and (max-width: 576px) {
+      .sidebar {
+        width: 180px;
+      }
+      
+      .main-content {
+        margin-left: 190px;
+        width: calc(100% - 200px);
+      }
+      
+      .main-cards {
+        padding: 0 10px;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+      
+      .room-box {
+        width: 100%;
+      }
+    }
+
+    .btn-general-tasking,
+     .toggle-btn {
+      background: #22BBEA;
+      color: black;
+      border: 1px black;
+      border-radius: 5px;
+      font-family: 'Poppins', sans-serif;
+      padding: 10px 20px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    #room-list-container {
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      width: 100%;
+    }
+
+    .expanded {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .room {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .room:last-child {
+      border-bottom: none;
+    }
+
+    
+    .content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      padding: 20px;
+      margin-left: 250px;
+      margin-top: 174px;
+      position: relative;
+  }
+  
+  .add-room-box {
+      height: 120px;
+      min-height: auto;
+      align-self: flex-start;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8f8f8;
+      border-style: dashed;
+      position: absolute;
+      top: 340px;
+      right: 30px;
+      width: 300px;
+  }
+  
+  .room-box h4 {
+      margin-top: 10px;
+      margin-bottom: 5px;
+      font-size: 1em;
+      font-weight: bold;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+      flex-grow: 1;
+  }
+  
+  .room-box ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 15px 0;
+      flex-grow: 1;
+  }
+  
+  .room-box ul li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 0;
+  }
+  
+  .room-actions {
+      display: flex;
+      gap: 5px;
+      margin-left: auto;
+  }
+  
+  .action-btn {
+      background-color: #777;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      padding: 4px;
+      line-height: 0;
+      font-size: 0;
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+  }
+  
+  .action-btn .icon {
+      width: 18px;
+      height: 18px;
+      vertical-align: middle;
+  }
+  
+  .action-btn:hover {
+      background-color: #555;
+  }
+  
+  .edit-student-btn {
+      background-color: #ff9800;
+  }
+  
+  .edit-student-btn:hover {
+      background-color: #f57c00;
+  }
+  
+  .delete-student-btn {
+      background-color: #e61515;
+  }
+  
+  .delete-student-btn:hover {
+      background-color: #cc0000;
+  }
+  
+  .continue-button {
+      background-color: #22BBEA;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+  }
+  
+  .continue-button:hover {
+      background-color: #1a9cb8;
+  }
+  
+  /* Adjustments for potential layout structure */
+  .page-container {
+      display: flex;
+  }
+  
+  .main-content {
+      flex-grow: 1;
+  }
+  
+  /* Styles for Room Action Buttons */
+  .room-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+  }
+  
+  .room-header h4 {
+      margin: 0;
+      padding: 0;
+      border: none;
+      font-size: 1em;
+      font-weight: bold;
+  }
+  
+  .room-actions {
+      text-align: right;
+      margin-bottom: 0;
+      flex-shrink: 0;
+  }
+
+/* New dashboard layout styles */
+.dashboard-tabs { margin: 12px 0; padding: 0 10px; }
+.dashboard-tabs .nav-tabs .nav-link { color: #4b5563; font-weight: 600; }
+.dashboard-tabs .nav-tabs .nav-link.active { color: #0d6efd; background: transparent; border: none; border-bottom: 3px solid #22bbea; }
+
+.dashboard-layout { display: block; width: 100%; box-sizing: border-box; }
+.dashboard-layout .left-panel { width: 260px; float: left; }
+.dashboard-layout .center-panel { margin-left: 280px; box-sizing: border-box; }
+.dashboard-stats { margin-bottom: 18px; display: flex; gap: 18px; flex-wrap: wrap; }
+
+/* Floor navigation styling inside left panel */
+.left-panel .floor-buttons { display: flex; flex-direction: column; gap: 8px; }
+.left-panel .floor-buttons .floor-btn { width: 100%; justify-content: flex-start; padding: 10px 12px; }
+
+/* Rooms area should use full-width cards grid */
+#roomsArea .rooms-container, #roomsArea .room-grid, .rooms-wrapper { width: 100%; }
+
+/* Quick action bar (floating) */
+.quick-action-bar {
+  position: fixed;
+  right: 20px;
+  bottom: 18px;
+  z-index: 13000;
+  display: flex;
+  gap: 10px;
+  background: transparent;
+}
+.quick-action-bar .btn { box-shadow: 0 6px 18px rgba(0,0,0,0.12); border-radius: 8px; padding: 10px 14px; }
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .dashboard-layout .left-panel { display: none; }
+  .dashboard-layout .center-panel { margin-left: 0; }
+  .quick-action-bar { right: 12px; left: 12px; bottom: 12px; justify-content: space-between; }
+}
+
+  
+  /* Modal Styles */
+  .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      overflow: auto;
+  }
+  
+  .modal-content {
+      background-color: #fefefe;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 50%;
+      max-width: 500px;
+      border-radius: 5px;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      font-family: 'Poppins', sans-serif;
+  }
+  
+  .modal-content h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+  }
+  
+  .close {
+      position: absolute;
+      right: 10px;
+      top: 5px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #aaa;
+  }
+  
+  .close:hover {
+      color: #000;
+  }
+  
+  /* Form Styles */
+  .form-group {
+      margin-bottom: 15px;
+  }
+  
+  .form-group label {
+      font-family: 'Poppins', sans-serif;
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 14px;
+  }
+  
+  .form-group input,
+  .form-group select {
+      font-family: 'Poppins', sans-serif;
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+  }
+  
+  .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+  }
+  
+  .submit-btn, .cancel-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+  }
+  
+  .submit-btn {
+      background-color: #08a821;
+      color: white;
+  }
+  
+  .cancel-btn {
+      background-color: #e61515;
+      color: white;
+  }
+  
+  .submit-btn:hover {
+      background-color: #08a821;
+  }
+  
+  .cancel-btn:hover {
+      background-color: #e61515;
+  }
+  
+  .form-control {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      margin-bottom: 10px;
+  }
+  
+  /* Ensure the dropdown has a white background */
+  select.form-control {
+      background-color: white;
+      cursor: pointer;
+  }
+  
+  /* Style the dropdown options */
+  select.form-control option {
+      padding: 8px;
+  }
+  
+  .delete-student-btn {
+      background-color: #e61515;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
+      padding: 2px 6px;
+      vertical-align: middle;
+  }
+  
+  .delete-student-btn:hover {
+      background-color: #cc0000;
+  }
+  
+  .delete-student-btn .icon {
+      width: 16px;
+      height: 16px;
+      vertical-align: middle;
+  }
+  
+  .add-room-btn {
+      width: 150px;
+      height: 35px;
+      background-color: rgb(48, 204, 231);
+      border: none;
+      color: black;
+      border-radius: 5px;
+      padding: 8px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      margin: 10px 0;
+  }
+  
+  /*.add-room-btn:hover {
+      background-color: #22BBEA;
+      color: black;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  */
+
+  .add-room-btn img,
+  .add-room-btn i {
+      width: 16px;
+      height: 16px;
+  }
+  
+  /* Add Room and Delete Room Buttons - Consistent Size */
+.add-room-btn,
+.delete-room-btn {
+    width: 150px;
+    height: 35px;
+    background-color: rgb(48, 204, 231);
+    border: none;
+    color: black;
+    border-radius: 5px;
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    margin: 10px 0;
+}
+
+.add-room-btn img,
+.add-room-btn i,
+.delete-room-btn img,
+.delete-room-btn i {
+    width: 16px;
+    height: 16px;
+}
+
+/* Optional: Add hover effect for both buttons */
+.add-room-btn:hover,
+.delete-room-btn:hover {
+    background-color: #22BBEA;
+    color: black;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== Override: Horizontal room-card layout (restore old look) ===== */
+/* Use a flex row that wraps so cards display side-by-side on wide screens
+   and wrap to multiple rows on smaller screens. Each card gets a fixed
+   width to match the provided screenshot. */
+.rooms-wrapper {
+  /* replace grid with flex row */
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 28px !important;
+  padding: 24px !important;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.rooms-wrapper .room-box,
+.rooms-container .room-box {
+  /* Desktop: 3 cards per row. Use calc to account for gap (28px) between cards.
+     This makes cards wider (landscape) and maintains consistent spacing. */
+  flex: 0 0 calc((100% - 56px) / 3);
+  width: calc((100% - 56px) / 3);
+  max-width: calc((100% - 56px) / 3);
+  box-sizing: border-box;
+}
+
+/* Responsive: 2 cards per row on medium screens, 1 per row on small screens */
+@media screen and (max-width: 1200px) {
+  .rooms-wrapper .room-box,
+  .rooms-container .room-box {
+    /* two cards per row (single gap of 28px) */
+    flex: 0 0 calc((100% - 28px) / 2);
+    width: calc((100% - 28px) / 2);
+    max-width: calc((100% - 28px) / 2);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .rooms-wrapper .room-box,
+  .rooms-container .room-box {
+    /* single column on small screens */
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Center content when there's extra space but keep cards left-aligned on narrow viewports */
+.rooms-container {
+  display: block;
+  width: 100%;
+  padding: 20px;
+}
+
+/* Make sure header/title remains full width inside the card and content stacks vertically inside each card */
+.room-box h3 {
+  text-align: center;
+}
+
+/* Ensure occupant list doesn't force card to grow too tall */
+.occupants-list {
+  max-height: 240px;
+}
+
+/* Responsive: stack cards full-width on small screens */
+@media screen and (max-width: 768px) {
+  .rooms-wrapper {
+    justify-content: center;
+    gap: 18px;
+    padding: 12px;
+  }
+  .rooms-wrapper .room-box,
+  .rooms-container .room-box {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Small tweak for very large displays to avoid overly wide gaps */
+@media screen and (min-width: 1600px) {
+  .rooms-wrapper {
+    gap: 36px;
+  }
+}
+
+/* End horizontal room-card overrides */
+
+/* Trim vertical spacing below page header/tabs to bring Overview card closer */
+.page-header {
+  margin-bottom: 6px !important;
+}
+
+/* Tighten vertical rhythm: reduce space from fixed header, welcome card, and overview */
+body {
+  /* reduce the large padding inserted in blade inline styles; keep enough for header */
+  padding-top: 72px !important;
+}
+
+.welcomeCard {
+  /* make the welcome card less tall so tabs and overview sit closer */
+  margin-top: 12px !important;
+  margin-bottom: 8px !important;
+  padding: 24px 32px 20px 32px !important;
+  max-width: 1200px;
+}
+
+#roomOverviewSection {
+  margin-top: 4px !important;
+}
+
+/* Toolbar row: search + filter inline layout */
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 10px 6px 10px;
+  flex-wrap: wrap; /* allow wrap on very small widths */
+}
+
+.toolbar-row .search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.toolbar-row .search input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #111827;
+  width: clamp(180px, 24vw, 320px);
+}
+
+.toolbar-row .search i {
+  font-size: 16px;
+}
+
+.filter-btn {
+  background-color: #ff711f;
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-btn:hover {
+  background-color: #0b5ed7;
+}
+
+@media (max-width: 576px) {
+  .toolbar-row {
+    gap: 8px;
+  }
+  .toolbar-row .search input { width: clamp(140px, 50vw, 240px); }
+}

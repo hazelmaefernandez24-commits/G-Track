@@ -1,0 +1,33 @@
+.admin-dash{
+    margin-top: 5%;
+}
+
+.admin-dash h1{
+    font-weight: 300;
+}
+
+.admin-dash .card{
+    margin: 20px;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: wheat;
+    width: 300px;
+}
+
+.row{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.admin-dash .chart{
+    width: 600px; 
+    height: 500px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    background-color: #f0f0f0;
+}
+

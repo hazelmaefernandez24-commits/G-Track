@@ -1,0 +1,29 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('schools', function (Blueprint $table) {
+            $table->id();
+            $table->string('school_id')->unique();
+            $table->string('name');
+            $table->string('department');
+            $table->string('course');
+            $table->integer('semester_count');
+            $table->json('terms');
+            $table->decimal('passing_grade_min', 3, 1);
+            $table->decimal('passing_grade_max', 3, 1);
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('schools');
+    }
+}; 

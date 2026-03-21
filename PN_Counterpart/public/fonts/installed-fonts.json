@@ -1,0 +1,9 @@
+{
+    "poppins": {
+        "normal": "\/opt\/lampp\/htdocs\/PN_Systems\/PN_Counterpart\/public\/fonts\/\/poppins_normal_41eae6f88194706e4cb26de3ac737d8a",
+        "500": "C:\\CAPSTONE\\PN_Systems\\PN_Counterpart\\public\\fonts\/\/poppins_500_a8989f7b44a711b1b2ef07347b37ec13",
+        "600": "C:\\CAPSTONE\\PN_Systems\\PN_Counterpart\\public\\fonts\/\/poppins_600_8766355d2de6e5a80a8dfebc31aeaedf",
+        "bold": "poppins_bold_c611dfa86762dbed0a7fd1e3d5f1a36c",
+        "300": "C:\\CAPSTONE\\PN_Systems\\PN_Counterpart\\public\\fonts\/\/poppins_300_6803ad4fe8fecdbaeff0adce8839c330"
+    }
+}

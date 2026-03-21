@@ -1,0 +1,61 @@
+/* General Container */
+.user-details-container {
+    margin: 20px auto;
+    max-width: 600px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 1, 0.3);
+    margin-top: 10%;
+}
+
+/* Page Title */
+.user-details-container h1 {
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* User Details Card */
+.user-details-card p {
+    font-size: 16px;
+    margin: 10px 0;
+    color: #555;
+}
+
+.user-details-card p strong {
+    color: #333;
+}
+
+/* Status Styling */
+.status-active {
+    color: green;
+    font-weight: bold;
+}
+
+.status-inactive {
+    color: red;
+    font-weight: bold;
+}
+
+/* Action Buttons */
+.action-buttons {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.action-buttons .btn {
+    background-color: #ff9933;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.action-buttons .btn:hover {
+    background-color: #2f2105;
+}
+
+

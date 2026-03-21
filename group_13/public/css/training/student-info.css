@@ -1,0 +1,236 @@
+body {
+    background: #f8f9fa;
+}
+
+.act1{
+    text-align:center;
+}
+
+/* Keep actions column centered */
+.cell:last-child {
+    text-align: center;
+}
+
+.page-container {
+    padding: 32px 0 32px 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #f8f9fa;
+}
+
+.header-section {
+    margin-bottom: 20px;
+}
+
+.header-section h2 {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+}
+
+.alert {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.filter-form {
+    background: #fff;
+    border-radius: 6px;
+    padding: 18px 24px 10px 24px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    border: 1px solid #e3eaf1;
+}
+
+.filter-form .form-group {
+    margin-bottom: 0;
+}
+
+.filter-form .btn {
+    background: #22bbea;
+    color: #fff;
+    padding: 8px 20px;
+    font-weight: 500;
+    border: none;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.filter-form .btn:hover {
+    background: #17a2b8;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.filter-form .form-control {
+    border: 1px solid #e3eaf1;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.filter-form .form-control:focus {
+    border-color: #22bbea;
+    box-shadow: 0 0 0 2px rgba(34, 187, 234, 0.1);
+    outline: none;
+}
+
+.table-wrapper {
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 24px;
+    border: 1px solid #e3eaf1;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 80px 120px 120px 120px 50px 80px 80px 1fr 150px;
+    background: #22bbea;
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #17a2b8;
+}
+
+.table-row {
+    text-align: left;
+    display: grid;
+    grid-template-columns: 80px 120px 120px 120px 50px 80px 80px 1fr 150px;
+    border-bottom: 1px solid #f0f4f8;
+    align-items: center;
+    background: #fff;
+    transition: background 0.15s;
+}
+
+.table-row:nth-child(even) {
+    background: #f6fafd;
+}
+
+.table-row:hover {
+    background-color: #f0f8ff;
+}
+
+.cell {
+    padding: 12px 8px;
+    font-size: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.header-cell {
+    text-align: left;
+    padding: 14px 8px;
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.btn {
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    text-align: center;
+    display: inline-block;
+    font-weight: 500;
+    background: #e9ecef;
+    color: #222;
+}
+
+.btn-view {
+    background: #22bbea;
+    color: #fff !important;
+}
+
+.btn-edit {
+    background: #ffc107;
+    color: #222 !important;
+}
+
+.btn-view:hover {
+    background: #17a2b8;
+    color: #fff !important;
+}
+
+.btn-edit:hover {
+    background: #e0a800;
+    color: #fff !important;
+}
+
+.pagination-container {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 4px;
+}
+
+.page-item {
+    display: inline-block;
+}
+
+.page-link {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    color: #22bbea;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.page-item.active .page-link {
+    background-color: #22bbea;
+    color: white;
+    border-color: #22bbea;
+}
+
+.page-link:hover {
+    background-color: #eaf6fb;
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+}

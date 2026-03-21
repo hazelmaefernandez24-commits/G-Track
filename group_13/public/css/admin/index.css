@@ -1,0 +1,154 @@
+/* General Container */
+.users-container {
+    margin: 20px auto;
+    width: 100%;
+}
+
+
+/* Page Title */
+h1 {
+    font-weight: 300;
+    color: #333;
+    margin-bottom: 20px;
+    margin-top: 3%;
+}
+
+/* Add User Button */
+.add-user-btn-container {
+    text-align: right;
+    margin-bottom: 20px;
+    margin-top: 2%;
+}
+
+.add-user-btn-container .btn {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.add-user-btn-container .btn:hover {
+    background-color: #0056b3;
+}
+
+/* Filter Dropdown */
+.filter-form {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filter-label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.filter-dropdown {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+/* Table Styling */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+ .table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    text-align: center;
+    font-weight: 300;
+}
+
+.table-striped tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+/* Status Styling */
+.status-active {
+    color: green;
+    font-weight: bold;
+}
+
+.status-inactive {
+    color: red;
+    font-weight: bold;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.action-buttons .btn {
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.action-buttons .btn-info {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.action-buttons .btn-info:hover {
+    background-color: #117a8b;
+}
+
+.action-buttons .btn-warning {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.action-buttons .btn-warning:hover {
+    background-color: #e0a800;
+}
+
+
+/*Pagination*/
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination-container nav {
+    display: flex;
+    gap: 8px;
+}
+
+.pagination-container nav .page-link,
+.pagination-container nav .page-item {
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.pagination-container nav .active .page-link {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+.pagination-container nav .disabled .page-link {
+    color: #999;
+    pointer-events: none;
+    background-color: #f8f9fa;
+}

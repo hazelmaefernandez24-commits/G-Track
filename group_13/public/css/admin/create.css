@@ -1,0 +1,72 @@
+
+/* Create User Form */
+.create-user-container {
+    max-width: 70%; /* Adjust the width to fit smaller screens */
+    margin: 0 auto; /* Center the form horizontally */
+
+ 
+
+}
+
+h1 {
+    font-size: 20px; /* Reduce font size for the heading */
+    font-weight: 500;
+    margin-bottom: 5px; /* Reduce spacing below the heading */
+    margin-left: 10px;
+}
+
+.create-user-container form {
+    background-color: #ffffff; /* White background for the form */
+    padding: 15px; /* Reduce padding for smaller screens */
+    border-radius: 8px; /* Slightly smaller border radius */
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for the form */
+    width:  50%;
+    margin: 0 auto; /* Center the form */
+}
+
+.create-user-container form .form-group {
+    margin-bottom: 10px; /* Reduce spacing between form fields */
+}
+
+.create-user-container form .form-label {
+    font-weight: 400; /* Use lighter font weight */
+    color: #333;
+    display: block; /* Ensure the label is above the input */
+    margin-bottom: 3px; /* Reduce spacing below the label */
+    text-align: left; /* Align labels to the left */
+    font-size: 14px; /* Reduce font size for labels */
+}
+
+.create-user-container form .form-control {
+    width: 100%; /* Make input fields take up the full width */
+    border: 1px solid #ccc;
+    border-radius: 4px; /* Slightly smaller border radius */
+    padding: 8px; /* Reduce padding for input fields */
+    font-size: 13px; /* Reduce font size for input text */
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.create-user-container form .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 3px rgba(0, 123, 255, 0.5); /* Subtle focus shadow */
+    outline: none; /* Remove default outline */
+}
+
+.create-user-container form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px; /* Reduce padding for the button */
+    border-radius: 4px; /* Slightly smaller border radius */
+    font-size: 14px; /* Reduce font size for the button */
+    cursor: pointer;
+    width: 100%; /* Make the button span the full width */
+}
+
+.create-user-container form button:hover {
+    background-color: #0056b3;
+}
+
+.icon-back{
+    margin-top: 5%;
+}

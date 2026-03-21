@@ -1,0 +1,319 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles that can't be handled by Tailwind */
+@layer components {
+    .status-badge {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    }
+    
+    .status-green {
+        @apply bg-green-100 text-green-800;
+    }
+    
+    .status-yellow {
+        @apply bg-yellow-100 text-yellow-800;
+    }
+    
+    .status-orange {
+        @apply bg-orange-100 text-orange-800;
+    }
+    
+    .status-red {
+        @apply bg-red-100 text-red-800;
+    }
+    
+    .status-gray {
+        @apply bg-gray-100 text-gray-800;
+    }
+}
+
+/* Styles for Intern Grades Index Page */
+
+/* Overall Page Container */
+.page-container {
+    max-width: 1200px; /* Limit width for better readability */
+    margin: 20px auto; /* Center the container */
+    padding: 20px; /* Add padding around content */
+    background-color: #fff; /* White background for the content area */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Header Section */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee; /* Separator line */
+}
+
+.page-header h1 {
+    font-size: 24px; /* Larger heading */
+    color: #333; /* Darker text color */
+    margin: 0;
+}
+
+.actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px; /* Slightly reduce gap */
+    padding: 5px 10px; /* Reduced padding */
+    border-radius: 5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    font-size: 14px; /* Reduced font size */
+}
+
+.btn-primary {
+    background-color: #22bbea; /* Primary button color */
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #1a9bc7; /* Darker hover color */
+}
+
+/* School Filter */
+.filter-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f9f9f9; /* Light background for filter */
+    border-radius: 5px;
+    border: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Spacing between elements */
+}
+
+.filter-section label {
+    font-weight: 500;
+    color: #555;
+}
+
+.form-select {
+    padding: 8px 12px; /* Adjust padding */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Alert Messages */
+.alert {
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: #d4edda; /* Light green background */
+    color: #155724; /* Dark green text */
+    border-color: #c3e6cb; /* Green border */
+}
+
+.alert-danger {
+    background-color: #f8d7da; /* Light red background */
+    color: #721c24; /* Dark red text */
+    border-color: #f5c6cb; /* Red border */
+}
+
+/* Grades Tables Section */
+.class-grades-section {
+    margin-bottom: 30px;
+}
+
+.class-grades-section h2 {
+    font-size: 20px; /* Slightly smaller heading for class name */
+    color: #444; /* Darker color */
+    margin-top: 20px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.table-responsive {
+    overflow-x: auto; /* Allow horizontal scrolling for tables */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for table container */
+    border-radius: 8px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse; /* Remove space between borders */
+}
+
+.table th,
+.table td {
+    padding: 12px 15px; /* More padding */
+    border: 1px solid #ddd; /* Lighter border */
+    text-align: left; /* Default text alignment */
+}
+
+.table th {
+    background-color: #22bbea; /* Header background color */
+    color: white; /* Header text color */
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px; /* Smaller font size for headers */
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f2f2f2; /* Zebra striping */
+}
+
+.table tbody tr:hover {
+    background-color: #e9e9e9; /* Hover effect for rows */
+}
+
+/* Center align specific columns */
+.table td.text-center,
+.table th.text-center {
+    text-align: center;
+}
+
+/* Badge Styles */
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px; /* Pill shape */
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.bg-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.bg-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.bg-orange {
+     background-color: #ffeeba; /* Using a lighter orange for badge */
+     color: #856404; /* Adjust text color for visibility */
+}
+
+.bg-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.bg-secondary {
+    background-color: #e2e3e5;
+    color: #495057;
+}
+
+/* Status Badge Styles (using similar colors) */
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px; /* Pill shape */
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.status-green {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-yellow {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-orange {
+     background-color: #ffeeba; /* Using a lighter orange for badge */
+     color: #856404; /* Adjust text color for visibility */
+}
+
+.status-red {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-gray {
+    background-color: #e2e3e5;
+    color: #495057;
+}
+
+/* Action Buttons in Table Cells */
+.action-buttons {
+    display: flex;
+    gap: 5px; /* Smaller gap */
+    justify-content: center; /* Center buttons in cell */
+    align-items: center;
+}
+
+.action-buttons .btn {
+    padding: 5px 8px; /* Smaller padding for table buttons */
+    font-size: 12px; /* Smaller font size */
+    border-radius: 4px;
+}
+
+.action-buttons .btn-primary {
+    background-color: #007bff; /* Bootstrap-like primary */
+}
+
+.action-buttons .btn-danger {
+    background-color: #dc3545; /* Bootstrap-like danger */
+    color: white;
+    border: none;
+}
+
+.action-buttons .btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.action-buttons .btn-danger:hover {
+    background-color: #c82333;
+}
+
+.action-buttons svg {
+    width: 16px; /* Adjust icon size */
+    height: 16px; /* Adjust icon size */
+}
+
+/* No Grades Message */
+.no-grades-message {
+    text-align: center;
+    padding: 50px 20px; /* More padding */
+    background-color: #f9f9f9; /* Light background */
+    border-radius: 8px;
+    border: 1px dashed #ccc; /* Dashed border */
+    margin-top: 30px;
+}
+
+.no-grades-message svg {
+    width: 50px; /* Larger icon */
+    height: 50px; /* Larger icon */
+    color: #aaa; /* Lighter color */
+    margin-bottom: 15px;
+}
+
+.no-grades-message .message-title {
+    font-size: 20px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.no-grades-message .text-muted {
+    color: #777;
+}
+
+/* Form Styles */
+.form-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}

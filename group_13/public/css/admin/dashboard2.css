@@ -1,0 +1,124 @@
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.top-bar {
+    height: 80px;
+    background: #22bbea;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+}
+
+.PN-logo {
+    height: 40px;
+    width: auto;
+}
+
+.container {
+    display: flex;
+    min-height: calc(100vh - 60px);
+    margin-top: 60px;
+}
+
+.sidebar {
+    margin-top: 20px;
+    width: 200px;
+    background: white;
+    border-right: 2px solid #22bbea;
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+    left: 0;
+    overflow-y: auto;
+}
+
+.menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu li {
+    display: flex;
+    align-items: center;
+    padding: 30px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s;
+    color: #333;
+}
+
+.menu li a{
+     text-decoration: none;
+}
+
+.menu li img {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+}
+
+.menu li:hover {
+    background: #e3f2fd;
+}
+
+.content {
+    width: 100%;
+    margin-left: 200px;
+    padding: 30px;
+    background: #f8f9fa;
+}
+
+
+
+
+.admin-dash{
+    margin-top: 3%;
+}
+
+.admin-dash h1{
+    font-weight: 300;
+}
+.row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.admin-dash .card {
+    flex: 1 1 280px;
+    width: 250px;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: wheat;
+    margin: 10px 10px 0 10px; 
+}
+
+
+.admin-dash .chart{
+    width: 100%; 
+    height: 500px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    background-color: #f0f0f0;
+}
+

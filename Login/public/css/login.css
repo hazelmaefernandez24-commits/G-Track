@@ -1,0 +1,229 @@
+* {
+    font-family: 'Poppins', sans-serif !important;
+}
+
+/* Preserve icon fonts */
+.fas, .far, .fal, .fab, .fa,
+[class*="fa-"],
+.material-icons,
+.glyphicon {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 5 Free", "Font Awesome 5 Pro", "Material Icons", "Glyphicons Halflings" !important;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f8f9fa;
+    font-family: 'Poppins', sans-serif !important;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Back Button Styles */
+.back-button-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background-color: #22bbea;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.back-button:hover {
+    background-color: #1a9bc7;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    color: white;
+    text-decoration: none;
+}
+
+.back-button i {
+    font-size: 16px;
+}
+.login-container {
+    width: 100%;
+    max-width: 500px;
+    min-height: 500px;
+    padding: 30px;
+    border: 2px solid #22bbea;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 60px;
+}
+.login-container img {
+    width: 250px;
+    margin-bottom: 50px;
+}
+.login-container label {
+    text-align: left;
+    margin-top: 10px;
+    font-size: 16px;
+}
+.login-container input[type="text"],
+.login-container input[type="password"] {
+    width: 90%;
+    padding: 15px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+.login-container button {
+    width: 100%;
+    padding: 15px;
+    background-color: #007bff;
+    border: none;
+    margin-top: 20px;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.login-container button:hover {
+    background-color: #ff9933;
+}
+.login-container a {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #007bff;
+    text-decoration: none;
+    text-decoration: none;
+    display: block; /* Ensures the <a> behaves like a block element */
+    text-align: center; /* Centers the text inside the <a> */
+    width: 100%;
+
+}
+.login-container a:hover {
+    text-decoration: underline;
+}
+
+.error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+    margin-left: 5px;
+    display: block;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+
+    .back-button-container {
+        top: 15px;
+        left: 15px;
+    }
+
+    .back-button {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .back-button i {
+        font-size: 14px;
+    }
+
+    .login-container {
+        max-width:250px;
+        min-height: auto;
+        padding: 25px;
+        margin-top: 50px;
+    }
+
+    .login-container img {
+        width: 200px;
+        margin-bottom: 30px;
+    }
+
+    .login-container label {
+        font-size: 15px;
+    }
+
+    .login-container input[type="text"],
+    .login-container input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        font-size: 15px;
+        box-sizing: border-box;
+    }
+
+    .login-container button {
+        padding: 12px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    .back-button-container {
+        top: 10px;
+        left: 10px;
+    }
+
+    .back-button {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .back-text {
+        display: none;
+    }
+
+    .back-button i {
+        font-size: 16px;
+    }
+
+    .login-container {
+        padding: 20px;
+        margin-top: 40px;
+        border-radius: 8px;
+    }
+
+    .login-container img {
+        width: 180px;
+        margin-bottom: 25px;
+    }
+
+    .login-container label {
+        font-size: 14px;
+    }
+
+    .login-container input[type="text"],
+    .login-container input[type="password"] {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .login-container button {
+        padding: 10px;
+        font-size: 14px;
+    }
+}

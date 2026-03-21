@@ -1,0 +1,78 @@
+/* Selection Controls */
+.controls {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+    align-items: center;
+}
+
+.floorSelect,
+.roomSelect {
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    padding: 8px 16px;
+    background-color: #22BBEA;
+    border: none;
+    border-radius: 8px;
+    color: black;
+    min-width: 180px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.floorSelect:hover,
+.roomSelect:hover {
+    background-color: #199cc9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.floorSelect:disabled,
+.roomSelect:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.floorSelect option,
+.roomSelect option {
+    background-color: white;
+    color: black;
+}
+
+/* Occupants Section */
+.occupants-section {
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 800px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.occupants-section h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.occupants-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.occupant-item {
+    background-color: #f8f9fa;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #333;
+}
+
+.hidden {
+    display: none;
+} 

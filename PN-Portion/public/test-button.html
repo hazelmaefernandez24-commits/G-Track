@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Button Click</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4>🧪 Button Click Test</h4>
+            </div>
+            <div class="card-body">
+                <h5>Test 1: Simple Button Click</h5>
+                <button type="button" class="btn btn-primary" onclick="testFunction()">
+                    <i class="bi bi-plus-circle"></i> Click Me
+                </button>
+                <div id="result1" class="mt-2"></div>
+
+                <hr class="my-4">
+
+                <h5>Test 2: Bootstrap Modal</h5>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#testModal">
+                    <i class="bi bi-box"></i> Open Modal
+                </button>
+
+                <hr class="my-4">
+
+                <h5>Test 3: Simulate Weekly Menu Button</h5>
+                <button type="button" class="btn btn-outline-primary btn-sm w-100" 
+                        onclick="openCreateDishModal(1, 'monday', 'breakfast')">
+                    <i class="bi bi-plus-circle"></i> Add Dish
+                </button>
+                <div id="result3" class="mt-2"></div>
+
+                <hr class="my-4">
+
+                <h5>Console Checks:</h5>
+                <div class="alert alert-info">
+                    <p>Open browser console (F12) and check:</p>
+                    <ul>
+                        <li>jQuery loaded: <code id="jqueryCheck"></code></li>
+                        <li>Bootstrap loaded: <code id="bootstrapCheck"></code></li>
+                        <li>Test function: <code id="functionCheck"></code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Modal -->
+    <div class="modal fade" id="testModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">✅ Modal Works!</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>If you can see this, Bootstrap modals are working correctly!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dish Modal (Simulated) -->
+    <div class="modal fade" id="dishModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="dishModalTitle">Create Weekly Menu Dish</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>✅ The "Add Dish" button is working!</p>
+                    <p>Week Cycle: <strong id="weekCycleDisplay"></strong></p>
+                    <p>Day: <strong id="dayDisplay"></strong></p>
+                    <p>Meal Type: <strong id="mealTypeDisplay"></strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Test function
+        function testFunction() {
+            document.getElementById('result1').innerHTML = '<div class="alert alert-success">✅ Button click works!</div>';
+            console.log('Test function called successfully');
+        }
+
+        // Simulated openCreateDishModal function
+        function openCreateDishModal(weekCycle, day, mealType) {
+            console.log('openCreateDishModal called:', weekCycle, day, mealType);
+            
+            document.getElementById('weekCycleDisplay').textContent = weekCycle;
+            document.getElementById('dayDisplay').textContent = day;
+            document.getElementById('mealTypeDisplay').textContent = mealType;
+            
+            document.getElementById('result3').innerHTML = '<div class="alert alert-success">✅ Function called! Opening modal...</div>';
+            
+            // Open the modal
+            var myModal = new bootstrap.Modal(document.getElementById('dishModal'));
+            myModal.show();
+        }
+
+        // Check what's loaded
+        window.addEventListener('DOMContentLoaded', function() {
+            // Check jQuery
+            if (typeof jQuery !== 'undefined') {
+                document.getElementById('jqueryCheck').innerHTML = '<span class="text-success">✅ jQuery ' + jQuery.fn.jquery + '</span>';
+            } else {
+                document.getElementById('jqueryCheck').innerHTML = '<span class="text-danger">❌ Not loaded</span>';
+            }
+
+            // Check Bootstrap
+            if (typeof bootstrap !== 'undefined') {
+                document.getElementById('bootstrapCheck').innerHTML = '<span class="text-success">✅ Bootstrap loaded</span>';
+            } else {
+                document.getElementById('bootstrapCheck').innerHTML = '<span class="text-danger">❌ Not loaded</span>';
+            }
+
+            // Check function
+            if (typeof openCreateDishModal === 'function') {
+                document.getElementById('functionCheck').innerHTML = '<span class="text-success">✅ Function defined</span>';
+            } else {
+                document.getElementById('functionCheck').innerHTML = '<span class="text-danger">❌ Not defined</span>';
+            }
+        });
+    </script>
+</body>
+</html>

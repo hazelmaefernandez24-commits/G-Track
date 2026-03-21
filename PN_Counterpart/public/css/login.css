@@ -1,0 +1,80 @@
+/* @extends('layouts') */
+/* @section('title', 'Login') */
+/* @section('css') */
+/* <link rel="stylesheet" href="{{ asset('css/login.css') }}"> */
+/* @endsection */
+/* @section('content') */
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f4f4f4;
+    font-family: Poppins, sans-serif;
+    font-weight: 200;
+    
+}
+.login-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.image-container {
+    margin-bottom: 20px;
+    text-align: center;
+}
+.image-container img {
+    width: 60%;
+    height: auto;
+}
+.login-form {
+    width: 100%;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: px;
+}
+button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    font-weight: bold;
+}
+button:hover {
+    background-color: #0056b3;
+}
+.forgot-password {
+    margin-top: 15px;
+    text-align: center;
+}
+.forgot-password a {
+    color: #007BFF;
+    text-decoration: none;
+    font-size: 14px;
+}
+.forgot-password a:hover {
+    text-decoration: underline;
+}
