@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ config('app.name', 'GTrack') }} - Dashboard</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
         <style>
             :root{
                 --bg:#f6f7fb;
@@ -187,6 +188,56 @@
             }
             .card-icon-online{color: var(--online);}
             .card-icon-offline{color: var(--offline);}
+
+
+            /* New Student Activity Table Styles */
+.activity-section {
+    margin-top: 24px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 16px;
+}
+.activity-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+.activity-table th {
+    background: #f8fafc;
+    padding: 12px;
+    border-bottom: 2px solid #e5e7eb;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 11px;
+}
+.activity-table td {
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+.activity-table tr:hover {
+    background: #fdfdfd;
+}
+.status-pill {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 11px;
+}
+.status-online { background: #dcfce7; color: #166534; }
+.status-offline { background: #fee2e2; color: #991b1b; }
+.battery-text { font-weight: 600; color: #374151; }
+
         </style>
     </head>
     <body>
@@ -202,25 +253,31 @@
             </div>
 
             <div class="actions">
-                <div class="icon-btn" aria-label="Notifications">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2Z" fill="#0f172a"/>
-                        <path d="M18 16v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2h16l-2-2Z" fill="#0f172a" opacity=".9"/>
-                    </svg>
-                    <span class="badge">3</span>
-                </div>
-                <div class="icon-btn" aria-label="Settings">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.06 7.06 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.5 1h-3a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.11 7.46a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.23 14.52a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.3.6.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54c.04.24.25.42.49.42h3c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96c.21.08.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Z" fill="#0f172a" opacity=".85"/>
-                    </svg>
-                </div>
-                <a class="logout" href="{{ url('/') }}">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M10 17v-2H3v-6h7V7l5 5-5 5Z" fill="#0f172a"/>
-                        <path d="M14 3h7v18h-7v-2h5V5h-5V3Z" fill="#0f172a" opacity=".6"/>
-                    </svg>
-                    Logout
-                </a>
+                <a href="/notifications?tab=broadcast&class=all" class="icon-btn" aria-label="Broadcast Notifications">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2Z" fill="#0f172a"/>
+        <path d="M18 16v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2h16l-2-2Z" fill="#0f172a"/>
+    </svg>
+   <span class="badge">{{ $broadcastCount }}</span>
+</a>
+                <a href="/notifications?tab=sos&class=all" class="icon-btn" aria-label="SOS Alerts">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L2 20h20L12 2Z" fill="#dc2626"/>
+        <text x="12" y="17" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">!</text>
+    </svg>
+    <span class="badge">{{ $sosCount }}</span>
+</a>
+               <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+    @csrf
+    <button type="submit" class="logout" style="background:none;border:none;cursor:pointer;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M10 17v-2H3v-6h7V7l5 5-5 5Z" fill="#0f172a"/>
+            <path d="M14 3h7v18h-7v-2h5V5h-5V3Z" fill="#0f172a" opacity=".6"/>
+        </svg>
+        Logout
+    </button>
+</form>
+
             </div>
         </header>
 
@@ -231,7 +288,7 @@
             </div>
 
             <section class="cards">
-                <!-- Online Students -->
+               
                 <article class="card">
                     <div class="card-head">
                         <div>
@@ -252,7 +309,7 @@
                     </div>
                 </article>
 
-                <!-- Offline Students -->
+               
                 <article class="card">
                     <div class="card-head">
                         <div>
@@ -273,7 +330,7 @@
                     </div>
                 </article>
 
-                <!-- Latest Update -->
+               
                 <article class="card">
                     <div class="card-head">
                         <div>
@@ -292,7 +349,314 @@
                     </div>
                 </article>
             </section>
+
+            
+            <div style="display: flex; gap: 16px; margin-top: 24px;">
+                <!-- Map Section (65%) -->
+                <div style="flex: 0 0 65%; display: flex; flex-direction: column;">
+                    <!-- Map Header with Class Filter -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h2 style="font-size: 18px; margin: 0;">Real-Time Location Tracking</h2>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <label for="class-filter" style="font-weight:600; font-size:14px;">Class:</label>
+                            <select id="class-filter" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:8px; font-size:13px;">
+                                <option>All Classes</option>
+                                <option>2026</option>
+                                <option>2027</option>
+                                <option>2028</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="map" style="height: 500px; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.06);"></div>
+                    <!-- Legend -->
+                    <div style="margin-top: 12px; font-size: 13px; display: flex; gap: 16px; align-items: center;">
+                        <span style="display: inline-flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; border: 2px solid #1e40af;"></span> Male</span>
+                        <span style="display: inline-flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444; border: 2px solid #b91c1e;"></span> Female</span>
+                    </div>
+                </div>
+
+                <!-- Notifications Section (35%) -->
+                <div style="flex: 0 0 35%;">
+                    <div style="background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 16px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,.04);">
+                        <!-- Notifications Header -->
+                        <div style="margin-bottom: 16px;">
+                            <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800;">Notifications Center</h3>
+                            <p style="margin: 0; font-size: 13px; color: #667085;">View all messages, SOS alerts & system status</p>
+                        </div>
+
+                        <!-- Notification Badges -->
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                            <div style="background: #FEE2E2; border: 1px solid #FECACA; border-radius: 8px; padding: 8px 12px; text-align: center; flex: 1;">
+                                <div style="font-size: 20px; font-weight: 900; color: #DC2626;">
+    {{ $broadcastCount }}
+</div>
+                                <div style="font-size: 11px; color: #991B1B; font-weight: 600;">New</div>
+                            </div>
+                            <div style="background: #DBEAFE; border: 1px solid #BFDBFE; border-radius: 8px; padding: 8px 12px; text-align: center; flex: 1;">
+                                <div style="font-size: 20px; font-weight: 900; color: #2563EB;">
+    {{ $sosCount }}
+</div>
+                                <div style="font-size: 11px; color: #1E40AF; font-weight: 600;">SOS</div>
+                            </div>
+                        </div>
+
+                        <!-- Open Notifications Button -->
+                        <button onclick="window.location.href='/notifications'" style="width: 100%; background: #2563EB; color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563EB'">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2Z" fill="currentColor"/>
+                                <path d="M18 16v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2h16l-2-2Z" fill="currentColor" opacity=".9"/>
+                            </svg>
+                            Open Notifications Dashboard
+                        </button>
+                    </div>
+
+                    <!-- Send Notification Container -->
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #E5E7EB;">
+                        <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800;">Send Notification</h3>
+                        <p style="margin: 0 0 16px 0; font-size: 13px; color: #667085;">Send emergency announcements</p>
+
+                        @if(session('success'))
+    <div style="color: green; margin-bottom: 10px;">
+        {{ session('success') }}
+    </div>
+@endif
+
+<form method="POST" action="/notifications/send" style="display: flex; flex-direction: column; gap: 12px;">
+    @csrf
+
+    <!-- Target Audience -->
+    <div>
+        <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">
+            Target Audience
+        </label>
+        <select name="target" required style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;">
+            <option value="all">All Students</option>
+            <option value="2026">Class 2026</option>
+            <option value="2027">Class 2027</option>
+            <option value="2028">Class 2028</option>
+            <option value="sos">SOS Alerts Only</option>
+        </select>
+    </div>
+
+    <!-- Message -->
+    <div>
+        <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">
+            Message
+        </label>
+        <textarea name="message" required placeholder="Type your emergency announcement here..."
+            style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; min-height: 80px;"></textarea>
+    </div>
+
+    <!-- Send Button -->
+    <button type="submit"
+        style="width: 100%; background: #2563EB; color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: 600; cursor: pointer;">
+        Send Notification
+    </button>
+</form>
+                    </div>
+                </div>
+            </div>
+
         </main>
+<section class="activity-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div>
+            <h3 style="margin: 0; font-size: 18px; font-weight: 800;">Student Activity Log</h3>
+            <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--muted);">
+                Detailed status of all registered student devices
+            </p>
+        </div>
+        
+    </div>
+
+    <div class="table-container">
+        <table class="activity-table">
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Gender</th>
+                    <th>Status</th>
+                    <th>Battery</th>
+                    <th>Signal</th>
+                    <th>Last Update</th>
+                    <th>Contact</th>
+                </tr>
+            </thead>
+          <tbody>
+    @foreach($students ?? [] as $student)
+    <tr>
+        <td style="font-weight: 700;">{{ $student->student_id }}</td> <!-- STU20206009 -->
+        <td>{{ $student->name }}</td>
+        <td>
+            <span style="background: #eff6ff; color: #1e40af; padding: 2px 6px; border-radius: 4px;">
+                {{ $student->class }}
+            </span>
+        </td>
+        <td>{{ $student->gender }}</td>
+        <td>
+            @if($student->sos_status === 'SOS')
+                <span class="status-pill status-offline">● SOS ALERT</span>
+            @else
+                @if($student->status)
+                    <span class="status-pill status-online">● ONLINE</span>
+                @else
+                    <span class="status-pill status-offline">● OFFLINE</span>
+                @endif
+            @endif
+        </td>
+        <td class="battery-text">
+            <div style="display:flex; align-items:center; gap:4px;">
+                <div style="width: 20px; height: 10px; border: 1px solid #9ca3af; border-radius: 2px; position: relative;">
+                    <div style="width: {{ $student->battery_level }}%; height: 100%; background: {{ $student->battery_level < 20 ? '#ef4444' : '#22c55e' }};"></div>
+                </div>
+                {{ $student->battery_level }}%
+            </div>
+        </td>
+        <td>
+            <span title="{{ $student->signal_status }}">
+                @if($student->signal_status == 'Strong') 📶 @else ⚠️ @endif
+                {{ $student->signal_status }}
+            </span>
+        </td>
+        <td style="color: var(--muted);">{{ $student->last_update }}</td>
+        <td>
+            <a href="tel:{{ $student->contact }}" style="color: var(--blue); text-decoration: none; font-weight: 600;">
+                {{ $student->contact }}
+            </a>
+        </td>
+    </tr>
+    @endforeach
+
+    @if(count($students ?? []) == 0)
+    <tr>
+        <td colspan="9" style="text-align:center; padding: 20px; color: var(--muted);">
+            No student data available.
+        </td>
+    </tr>
+    @endif
+</tbody>
+
+
+        </table>
+    </div>
+</section>
+
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+        <script>
+            let map;
+            let markers = [];
+            let selectedClass = 'All Classes';
+
+            function getColorByGender(gender) {
+                if (!gender) return '#6b7280';
+                return gender.toString().toLowerCase() === 'female' ? '#ef4444' : '#3b82f6';
+            }
+
+            function showPopup(location) {
+                const student = location.student || {};
+                const recorded = location.recorded_at ? new Date(location.recorded_at).toLocaleString() : 'Unknown';
+                const sos = location.sos_status || student.sos_status || 'safe';
+
+                const sosLabel = sos === 'help' ? '<span style="color:#ef4444;font-weight:700;">I Need Help</span>' : '<span style="color:#22c55e;font-weight:700;">I Am Safe</span>';
+
+                return `
+                    <div style="font-size:13px;line-height:1.3;min-width:220px;">
+                        <strong>${student.name || 'Unknown'}</strong><br>
+                        Gender: ${student.gender || 'Unknown'}<br>
+                        Class: ${student.class || 'Unknown'}<br>
+                        Email: ${student.email || 'N/A'}<br>
+                        Latitude: ${location.latitude}<br>
+                        Longitude: ${location.longitude}<br>
+                        Latest: ${recorded}<br>
+                        Status: ${sosLabel}<br>
+                        
+                    </div>
+                `;
+            }
+
+            function updateSOS(studentId, sosStatus) {
+                fetch('/api/location/sos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ student_id: studentId, sos_status: sosStatus })
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('SOS update failed ' + res.status);
+                    return res.json();
+                })
+                .then(() => {
+                    loadLocations();
+                })
+                .catch(err => console.error('Error setting SOS status:', err));
+            }
+
+            function clearMarkers() {
+                markers.forEach(marker => marker.remove());
+                markers = [];
+            }
+
+            function loadLocations() {
+                const url = selectedClass === 'All Classes' ? '/api/location/all' : `/api/location/all?class=${selectedClass}`;
+                fetch(url)
+                    .then(res => {
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        return res.json();
+                    })
+                    .then(data => {
+                        clearMarkers();
+                        if (!Array.isArray(data) || data.length === 0) return;
+
+                        const bounds = [];
+                        data.forEach(loc => {
+                            const lat = parseFloat(loc.latitude);
+                            const lng = parseFloat(loc.longitude);
+                            if (Number.isNaN(lat) || Number.isNaN(lng)) return;
+
+                            const marker = L.circleMarker([lat, lng], {
+                                radius: 8,
+                                fillColor: getColorByGender(loc.student?.gender),
+                                color: '#1f2937',
+                                weight: 1,
+                                fillOpacity: 0.9,
+                            }).addTo(map);
+
+                            marker.bindPopup(showPopup(loc));
+                            markers.push(marker);
+                            bounds.push([lat, lng]);
+                        });
+
+                        if (bounds.length) {
+                            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+                        }
+                    })
+                    .catch(err => console.error('Error loading location data:', err));
+            }
+
+            function initMap() {
+                map = L.map('map').setView([10.3157, 123.8854], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
+                    maxZoom: 19,
+                }).addTo(map);
+
+                document.getElementById('class-filter').addEventListener('change', function () {
+                    selectedClass = this.value;
+                    loadLocations();
+                });
+
+                loadLocations();
+                setInterval(loadLocations, 900000); 
+
+                setTimeout(() => map.invalidateSize(), 350);
+            }
+
+            window.updateSOS = updateSOS;
+            window.addEventListener('DOMContentLoaded', initMap);
+        </script>
     </body>
 </html>
-

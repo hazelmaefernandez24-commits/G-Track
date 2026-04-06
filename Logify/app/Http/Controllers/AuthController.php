@@ -12,7 +12,8 @@ class AuthController extends Controller
     {
         $token = $request->query('token');
         if (empty($token)) {
-            return redirect(env('MAIN_SYSTEM_URL') . '/')->with('error', 'Token missing');
+           
+            return response()->view('errors.no-token', [], 403);
         }
         session(['api_token' => $token]);
         $response = Http::withToken($token)

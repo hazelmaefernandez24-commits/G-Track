@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Admin;
 
 return [
 
@@ -42,6 +43,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+         'admin' => [ // 👈 add this
+            'driver' => 'session',
+            'provider' => 'admins',
+        ],
+
     ],
 
     /*
@@ -67,10 +74,11 @@ return [
             'model' => env('AUTH_MODEL', User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'admins' => [ 
+            'driver' => 'eloquent',
+            'model' => Admin::class,
+        ],
+
     ],
 
     /*
@@ -99,6 +107,13 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+         'admins' => [ // 👈 optional, if you want password reset for admins
+            'provider' => 'admins',
+            'table' => 'admin_password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+
     ],
 
     /*
