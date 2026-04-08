@@ -25,9 +25,13 @@ class LocationController extends Controller
             'sos_status' => $validated['sos_status'] ?? 'safe',
         ]);
 
-        if (!empty($validated['sos_status'])) {
-            $student = Student::find($validated['student_id']);
-            $student->sos_status = $validated['sos_status'];
+        $student = Student::find($validated['student_id']);
+        if ($student) {
+            $student->status = true; // Mark as online when sending GPS
+            $student->last_update = now()->format('M d, Y h:i A');
+            if (!empty($validated['sos_status'])) {
+                $student->sos_status = $validated['sos_status'];
+            }
             $student->save();
         }
 

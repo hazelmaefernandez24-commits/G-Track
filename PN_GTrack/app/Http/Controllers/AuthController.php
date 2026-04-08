@@ -42,23 +42,26 @@ class AuthController extends Controller
 
     // --- MOBILE API METHODS ---
     public function apiLogin(Request $request)
-    {
-        $request->validate([
-            'student_id' => 'required'
-        ]);
+{
+    // 1. If the mobile app says the user is an 'admin'
+    if ($request->role === 'admin') {
+        $credentials = $request->only('email', 'password');
 
-        // Assuming mobile app users are students logging in with their student_id (e.g. PN-123)
-        $student = \App\Models\Student::where('student_id', $request->student_id)->first();
-
-        if (!$student) {
-            return response()->json(['message' => 'Student not found in the system'], 404);
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            return response()->json([
+                'message' => 'Login successful',
+                'user' => $user,
+                'role' => 'admin'
+            ]);
         }
-
-        return response()->json([
-            'message' => 'Login successful',
-            'student' => $student
-        ]);
+        return response()->json(['message' => 'Invalid admin email or password'], 401);
     }
+
+    // Student authentication is now handled by StudentController@apiLogin
+    // Mobile apps should use the `/api/student/login` endpoint
+    return response()->json(['message' => 'Please use the correct endpoint for student login'], 400);
+}
 
     public function apiLogout(Request $request)
     {

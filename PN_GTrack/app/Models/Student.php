@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Student extends Model
 {
+    protected $casts = [
+        'status' => 'boolean',
+    ];
+
     protected $fillable = [
     'student_id', 
     'name', 

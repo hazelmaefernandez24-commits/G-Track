@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Student;
+use App\Models\StudentAuth;
+use Illuminate\Support\Facades\Hash;
 
 class StudentSeeder extends Seeder
 {
@@ -12,25 +14,26 @@ class StudentSeeder extends Seeder
      */
     public function run(): void
     {
-       \App\Models\Student::firstOrCreate(
-    ['email' => 'john@example.com'],
-    ['name' => 'John Doe',
-     'gender' => 'male', 
-     'class' => '2026']
-);
+        // Sample Student 1
+        $student1 = Student::firstOrCreate(
+            ['email' => 'hazelmae.fernandez@example.com'],
+            [
+                'student_id' => 'STU2026009',
+                'name' => 'Hazel Fernandez',
+                'gender' => 'Female', 
+                'class' => '2026'
+            ]
 
-\App\Models\Student::firstOrCreate(
-    ['email' => 'jane@example.com'],
-    ['name' => 'Jane Smith', 
-    'gender' => 'female',
-     'class' => '2027']
-);
+        );
 
-\App\Models\Student::firstOrCreate(
-    ['email' => 'bob@example.com'],
-    ['name' => 'Bob Johnson', 
-    'gender' => 'male', 
-    'class' => '2026']
-);
+        StudentAuth::firstOrCreate(
+            ['email' => 'hazelmae.fernandez@example.com'],
+            [
+                'student_id' => 'STU2026009',
+                'password' => Hash::make('#hazel2006')
+            ]
+        );
+
+    
     }
 }

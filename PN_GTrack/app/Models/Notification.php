@@ -16,7 +16,7 @@ class Notification extends Model
         'read',
     ];
 
-    // optional relation to student
+   
     public function student()
     {
         return $this->belongsTo(Student::class);

@@ -10,9 +10,18 @@ use App\Http\Controllers\StatusController;
 
 Route::middleware('api')->group(function () {
 
-    // 🔵 AUTH: Using the newly created API methods
-    Route::post('/login', [AuthController::class, 'apiLogin']); 
+    // 🔵 AUTH: Using the API methods
+    Route::post('/login', [AuthController::class, 'apiLogin']); // Admin login
+    Route::post('/student/login', [\App\Http\Controllers\StudentController::class, 'apiLogin']); // Student login
     Route::post('/logout', [AuthController::class, 'apiLogout']);
+
+    // 📡 STUDENT REAL-TIME STATUS
+    Route::post('/student/heartbeat', [\App\Http\Controllers\StudentController::class, 'heartbeat']); // Keep-alive ping
+    Route::post('/student/sos',       [\App\Http\Controllers\StudentController::class, 'sendSOS']);   // SOS alert
+    Route::post('/student/offline',   [\App\Http\Controllers\StudentController::class, 'goOffline']); // Mark offline on logout
+
+    // 📊 DASHBOARD STATS (polled every 10s by admin dashboard)
+    Route::get('/dashboard/stats', [\App\Http\Controllers\DeviceController::class, 'apiStats']);
 
     // 🟢 LOCATION (These are correct and return JSON)
     Route::get('/location/all', [LocationController::class, 'getAll']);

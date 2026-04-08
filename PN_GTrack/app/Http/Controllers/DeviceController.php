@@ -26,42 +26,36 @@ class DeviceController extends Controller
 
 public function index()
 {
-    $students = \DB::table('students')
-        ->join('locations', 'students.id', '=', 'locations.student_id')
-        ->select(
-            'students.id',
-            'students.student_id',
-            'students.name',
-            'students.class',
-            'students.gender',
-            'students.contact',
-            'students.battery_level',
-            'students.signal_status',
-            'students.status',
-            'locations.latitude',
-            'locations.longitude',
-            'locations.sos_status',
-            'locations.recorded_at as last_update'
-        )
-        ->orderBy('locations.recorded_at', 'desc')
-        ->get();
-
-    // Mark offline if last_update older than 10 minutes
-    foreach ($students as $student) {
-        if ($student->last_update && Carbon::parse($student->last_update)->lt(Carbon::now()->subMinutes(10))) {
+    // 1. Auto-mark students offline if no heartbeat in last 5 minutes
+    $onlineStudents = \App\Models\Student::where('status', true)->get();
+    foreach ($onlineStudents as $student) {
+        if ($student->updated_at->addMinutes(5)->isPast()) {
             $student->status = false;
+            $student->save();
         }
     }
+
+    // 2. Fetch students with their latest location for the table/map
+    // Using Eloquent for better consistency
+    $students = \App\Models\Student::all()->map(function($student) {
+        $lastLocation = $student->locations()->latest('recorded_at')->first();
+        
+        // Add location details to the student object for the view
+        $student->latitude = $lastLocation->latitude ?? null;
+        $student->longitude = $lastLocation->longitude ?? null;
+        $student->last_update_loc = $lastLocation->recorded_at ?? $student->last_update;
+        return $student;
+    });
 
     // Counts
     $onlineCount   = $students->where('status', true)->count();
     $offlineCount  = $students->where('status', false)->count();
 
-
     $broadcastCount = \DB::table('notifications')->where('type', 'broadcast')->count();
     $sosCount       = \DB::table('notifications')->where('type', 'sos')->count();
 
-    $latestUpdate = $students->max('last_update');
+    // Latest overall system update
+    $latestUpdate = \App\Models\Student::max('updated_at');
     $latestTime   = $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('h:i A') : null;
     $latestDate   = $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('M d, Y') : null;
 
@@ -74,6 +68,61 @@ public function index()
         'latestTime',
         'latestDate'
     ));
+}
+
+/**
+ * JSON stats endpoint polled by the dashboard every 10 seconds.
+ */
+public function apiStats()
+{
+    $students = \App\Models\Student::all();
+
+    // Auto-mark students offline if no heartbeat in last 5 minutes
+    // Use updated_at (real timestamp) for accurate time comparison
+    foreach ($students->where('status', true) as $student) {
+        if ($student->updated_at->addMinutes(5)->isPast()) {
+            $student->status = false;
+            $student->save();
+        }
+    }
+
+    // Reload after possible updates
+    $students = \App\Models\Student::all();
+
+    $onlineCount   = $students->where('status', true)->count();
+    $offlineCount  = $students->where('status', false)->count();
+    $broadcastCount = \DB::table('notifications')->where('type', 'broadcast')->count();
+    $sosCount       = \DB::table('notifications')->where('type', 'sos')->count();
+    $sosStudents    = $students->where('sos_status', 'help')->pluck('student_id');
+
+    // Use updated_at (real timestamp) for accurate latest update calculation
+    $latestUpdate   = \App\Models\Student::max('updated_at');
+    $latestTime     = $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('h:i A') : null;
+    $latestDate     = $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('M d, Y') : null;
+
+    return response()->json([
+        'onlineCount'    => $onlineCount,
+        'offlineCount'   => $offlineCount,
+        'broadcastCount' => $broadcastCount,
+        'sosCount'       => $sosCount,
+        'sosStudents'    => $sosStudents,
+        'latestTime'     => $latestTime,
+        'latestDate'     => $latestDate,
+        'students'       => $students->map(function ($s) {
+            return [
+                'student_id'     => $s->student_id,
+                'name'           => $s->name,
+                'class'          => $s->class,
+                'gender'         => $s->gender,
+                'status'         => $s->status,
+                'battery_level'  => $s->battery_level,
+                'signal_status'  => $s->signal_status,
+                'sos_status'     => $s->sos_status,
+                'last_update'    => $s->last_update,
+                'contact'        => $s->contact,
+            ];
+        }),
+    ]);
 }
 
 

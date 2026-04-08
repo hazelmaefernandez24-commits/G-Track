@@ -293,7 +293,7 @@
                     <div class="card-head">
                         <div>
                             <div class="card-title">Online Students</div>
-                            <div class="stat-number" style="color: var(--online);">{{ $onlineCount }}</div>
+                            <div class="stat-number" id="online-count" style="color: var(--online);">{{ $onlineCount }}</div>
                             <div class="stat-sub" style="color: var(--online-sub);">
                                 Currently online
                             </div>
@@ -314,7 +314,7 @@
                     <div class="card-head">
                         <div>
                             <div class="card-title">Offline Students</div>
-                            <div class="stat-number" style="color: var(--offline);">{{ $offlineCount }}</div>
+                            <div class="stat-number" id="offline-count" style="color: var(--offline);">{{ $offlineCount }}</div>
                             <div class="stat-sub" style="color: var(--offline-sub);">
                                 Currently offline
                             </div>
@@ -336,8 +336,8 @@
                         <div>
                             <div class="card-title">Latest Update</div>
                             <div class="latest">
-                                <div class="latest-time">{{ $latestTime }}</div>
-                                <div class="latest-date">{{ $latestDate }}</div>
+                                <div class="latest-time" id="latest-time">{{ $latestTime }}</div>
+                                <div class="latest-date" id="latest-date">{{ $latestDate }}</div>
                             </div>
                         </div>
                         <div class="latest-icon" aria-hidden="true">
@@ -434,7 +434,7 @@
             <option value="2026">Class 2026</option>
             <option value="2027">Class 2027</option>
             <option value="2028">Class 2028</option>
-            <option value="sos">SOS Alerts Only</option>
+           
         </select>
     </div>
 
@@ -458,6 +458,14 @@
             </div>
 
         </main>
+<!-- 🚨 SOS ALERT BANNER (shown dynamically) -->
+<div id="sos-banner" style="display:none; background:#dc2626; color:#fff; padding:14px 24px; font-size:15px; font-weight:700; text-align:center; position:sticky; top:64px; z-index:999; animation: sosPulse 1s infinite;">
+    🚨 SOS ALERT — A student is in danger! Check the dashboard immediately.
+</div>
+<style>
+@keyframes sosPulse { 0%,100%{background:#dc2626;} 50%{background:#b91c1c;} }
+</style>
+
 <section class="activity-section">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
         <div>
@@ -484,10 +492,10 @@
                     <th>Contact</th>
                 </tr>
             </thead>
-          <tbody>
+          <tbody id="student-table-body">
     @foreach($students ?? [] as $student)
     <tr>
-        <td style="font-weight: 700;">{{ $student->student_id }}</td> <!-- STU20206009 -->
+        <td style="font-weight: 700;">{{ $student->student_id }}</td>
         <td>{{ $student->name }}</td>
         <td>
             <span style="background: #eff6ff; color: #1e40af; padding: 2px 6px; border-radius: 4px;">
@@ -496,14 +504,12 @@
         </td>
         <td>{{ $student->gender }}</td>
         <td>
-            @if($student->sos_status === 'SOS')
-                <span class="status-pill status-offline">● SOS ALERT</span>
+            @if($student->sos_status === 'help')
+                <span class="status-pill status-offline">🚨 SOS ALERT</span>
+            @elseif($student->status)
+                <span class="status-pill status-online">● ONLINE</span>
             @else
-                @if($student->status)
-                    <span class="status-pill status-online">● ONLINE</span>
-                @else
-                    <span class="status-pill status-offline">● OFFLINE</span>
-                @endif
+                <span class="status-pill status-offline">● OFFLINE</span>
             @endif
         </td>
         <td class="battery-text">
@@ -530,7 +536,7 @@
     @endforeach
 
     @if(count($students ?? []) == 0)
-    <tr>
+    <tr id="no-data-row">
         <td colspan="9" style="text-align:center; padding: 20px; color: var(--muted);">
             No student data available.
         </td>
@@ -650,13 +656,91 @@
                 });
 
                 loadLocations();
-                setInterval(loadLocations, 900000); 
+                setInterval(loadLocations, 15000); // Refresh map every 15s
 
                 setTimeout(() => map.invalidateSize(), 350);
             }
 
             window.updateSOS = updateSOS;
             window.addEventListener('DOMContentLoaded', initMap);
+        </script>
+
+        <!-- 🔄 REAL-TIME DASHBOARD POLLING -->
+        <script>
+        function buildStatusPill(student) {
+            if (student.sos_status === 'help') {
+                return '<span class="status-pill status-offline">🚨 SOS ALERT</span>';
+            } else if (student.status) {
+                return '<span class="status-pill status-online">● ONLINE</span>';
+            } else {
+                return '<span class="status-pill status-offline">● OFFLINE</span>';
+            }
+        }
+
+        function buildSignalIcon(signal) {
+            return signal === 'Strong' ? '📶' : '⚠️';
+        }
+
+        function buildBatteryCell(level) {
+            const color = level < 20 ? '#ef4444' : '#22c55e';
+            return `<div style="display:flex;align-items:center;gap:4px;">
+                <div style="width:20px;height:10px;border:1px solid #9ca3af;border-radius:2px;position:relative;">
+                    <div style="width:${level}%;height:100%;background:${color};"></div>
+                </div>
+                ${level}%
+            </div>`;
+        }
+
+        function pollDashboardStats() {
+            fetch('/api/dashboard/stats')
+                .then(res => res.json())
+                .then(data => {
+                    // Update stat cards
+                    const onlineEl  = document.getElementById('online-count');
+                    const offlineEl = document.getElementById('offline-count');
+                    const timeEl    = document.getElementById('latest-time');
+                    const dateEl    = document.getElementById('latest-date');
+                    if (onlineEl)  onlineEl.textContent  = data.onlineCount;
+                    if (offlineEl) offlineEl.textContent = data.offlineCount;
+                    if (timeEl)    timeEl.textContent    = data.latestTime ?? '—';
+                    if (dateEl)    dateEl.textContent    = data.latestDate ?? '—';
+
+                    // Show or hide SOS banner
+                    const sosBanner = document.getElementById('sos-banner');
+                    if (sosBanner) {
+                        sosBanner.style.display = (data.sosStudents && data.sosStudents.length > 0) ? 'block' : 'none';
+                    }
+
+                    // Rebuild student table rows
+                    const tbody = document.getElementById('student-table-body');
+                    if (tbody && data.students) {
+                        if (data.students.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:#6b7280;">No student data available.</td></tr>';
+                        } else {
+                            tbody.innerHTML = data.students.map(s => `
+                                <tr>
+                                    <td style="font-weight:700;">${s.student_id}</td>
+                                    <td>${s.name}</td>
+                                    <td><span style="background:#eff6ff;color:#1e40af;padding:2px 6px;border-radius:4px;">${s.class}</span></td>
+                                    <td>${s.gender}</td>
+                                    <td>${buildStatusPill(s)}</td>
+                                    <td>${buildBatteryCell(s.battery_level)}</td>
+                                    <td>${buildSignalIcon(s.signal_status)} ${s.signal_status ?? '—'}</td>
+                                    <td style="color:#6b7280;">${s.last_update ?? '—'}</td>
+                                    <td><a href="tel:${s.contact}" style="color:#4f46e5;text-decoration:none;font-weight:600;">${s.contact ?? '—'}</a></td>
+                                </tr>
+                            `).join('');
+                        }
+                    }
+                })
+                .catch(err => console.error('Dashboard poll error:', err));
+        }
+
+        // Start polling every 10 seconds
+        document.addEventListener('DOMContentLoaded', function () {
+            pollDashboardStats();
+            setInterval(pollDashboardStats, 10000);
+        });
         </script>
     </body>
 </html>
