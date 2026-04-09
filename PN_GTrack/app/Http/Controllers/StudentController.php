@@ -85,16 +85,33 @@ class StudentController extends Controller
 
         $student->sos_status  = $request->sos_status;
         $student->last_update = now()->format('M d, Y h:i A');
+        if ($request->latitude)  $student->latitude  = $request->latitude;
+        if ($request->longitude) $student->longitude = $request->longitude;
+        if ($request->battery)   $student->battery_level = $request->battery;
+        if ($request->signal)    $student->signal_status = $request->signal;
         $student->save();
 
-        // Also log in notifications table if SOS is triggered
+        // Also log in notifications table
         if ($request->sos_status === 'help') {
             \App\Models\Notification::create([
                 'type'    => 'sos',
                 'message' => $student->name . ' (' . $student->student_id . ') sent an SOS alert!',
                 'student_id' => $student->student_id,
                 'class'   => $student->class,
+                'latitude'  => $request->latitude,
+                'longitude' => $request->longitude,
+                'battery_level' => $request->battery,
+                'signal_status' => $request->signal,
                 'status'  => 'unread',
+            ]);
+        } else {
+            // "I am Safe" transition
+            \App\Models\Notification::create([
+                'type'    => 'student_message',
+                'message' => $student->name . ' is now SAFE.',
+                'student_id' => $student->student_id,
+                'class'   => $student->class,
+                'status'  => 'read', // Mark as resolved/safe
             ]);
         }
 

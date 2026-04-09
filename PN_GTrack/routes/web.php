@@ -87,7 +87,8 @@ Route::get('/notifications', [NotificationController::class, 'index']);
 
 Route::post('/notifications/send', [NotificationController::class, 'send']);
 
+Route::post('/notifications/{id}/acknowledge', [NotificationController::class, 'acknowledge']);
+Route::post('/notifications/{id}/read', [NotificationController::class, 'read']);
+Route::post('/notifications/{id}/reply', [NotificationController::class, 'reply']);
+
 Route::get('/dashboard', [App\Http\Controllers\DeviceController::class, 'index']);
-
-
-

@@ -14,6 +14,14 @@ class Notification extends Model
         'type',
         'message',
         'read',
+        'battery_level',
+        'signal_status',
+        'location',
+        'latitude',
+        'longitude',
+        'media_url',
+        'class',
+        'status',
     ];
 
    
