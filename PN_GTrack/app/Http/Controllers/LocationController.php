@@ -66,34 +66,44 @@ class LocationController extends Controller
     {
         $classFilter = $request->query('class', 'All Classes');
         
-        $query = Location::with('student')
-            ->orderBy('recorded_at', 'desc')
-            ->latest();
-
-        if ($classFilter !== 'All Classes') {
-            $query->whereHas('student', function ($q) use ($classFilter) {
-                $q->where('class', $classFilter);
-            });
+        // Normalize class filter if it starts with 'Class '
+        if ($classFilter !== 'All Classes' && str_starts_with($classFilter, 'Class ')) {
+            $classFilter = str_replace('Class ', '', $classFilter);
         }
 
-        $locations = $query->get()->map(function ($location) {
+        $query = Student::with(['locations' => function ($q) {
+            $q->orderBy('recorded_at', 'desc');
+        }]);
+
+        if ($classFilter !== 'All Classes') {
+            $query->where('class', $classFilter);
+        }
+
+        $students = $query->get();
+
+        $locations = $students->map(function ($student) {
+            $latest = $student->locations->first();
+            if (!$latest) return null;
+
             return [
-                'id' => $location->id,
-                'student_id' => $location->student_id,
-                'latitude' => $location->latitude,
-                'longitude' => $location->longitude,
-                'recorded_at' => $location->recorded_at,
-                'sos_status' => $location->sos_status ?? ($location->student->sos_status ?? 'safe'),
+                'id' => $latest->id,
+                'student_id' => $student->id,
+                'latitude' => $latest->latitude,
+                'longitude' => $latest->longitude,
+                'recorded_at' => $latest->recorded_at,
+                // CRITICAL: Always use the Student's CURRENT SOS status, not historical log data
+                'sos_status' => $student->sos_status ?? 'safe', 
                 'student' => [
-                    'name' => $location->student->name ?? 'Unknown',
-                    'gender' => $location->student->gender ?? 'male',
-                    'class' => $location->student->class ?? '2026',
-                    'email' => $location->student->email ?? 'N/A',
-                    'phone' => $location->student->phone ?? null,
-                    'sos_status' => $location->student->sos_status ?? 'safe',
+                    'student_id' => $student->student_id,
+                    'name' => $student->name ?? 'Unknown',
+                    'gender' => $student->gender ?? 'male',
+                    'class' => $student->class ?? '2026',
+                    'email' => $student->email ?? 'N/A',
+                    'phone' => $student->phone ?? null,
+                    'sos_status' => $student->sos_status ?? 'safe',
                 ]
             ];
-        });
+        })->filter()->values();
 
         return response()->json($locations);
     }

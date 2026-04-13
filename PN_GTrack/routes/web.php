@@ -66,10 +66,10 @@ if (Schema::hasTable('notifications')) {
         ->where('read', false)
         ->count();
 
-    // ONLY unread SOS alerts
+    // ONLY unread and non-resolved SOS alerts
     $sosCount = DB::table('notifications')
         ->where('type', 'sos')
-        ->where('read', false)
+        ->where('status', '!=', 'resolved')
         ->count();
 }
 
@@ -88,6 +88,7 @@ Route::get('/notifications', [NotificationController::class, 'index']);
 Route::post('/notifications/send', [NotificationController::class, 'send']);
 
 Route::post('/notifications/{id}/acknowledge', [NotificationController::class, 'acknowledge']);
+Route::post('/notifications/{id}/resolve', [NotificationController::class, 'resolve']);
 Route::post('/notifications/{id}/read', [NotificationController::class, 'read']);
 Route::post('/notifications/{id}/reply', [NotificationController::class, 'reply']);
 

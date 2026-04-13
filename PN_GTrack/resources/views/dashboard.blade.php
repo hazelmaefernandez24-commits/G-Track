@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ config('app.name', 'GTrack') }} - Dashboard</title>
+        <title>PN_G!track</title> 
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
         <style>
             :root{
@@ -58,9 +58,9 @@
                 margin-top:2px;
             }
             .brand-text{
-                display:flex;
-                flex-direction:column;
-                line-height:1.1;
+               font-size: 19px;
+            font-weight: 800;
+            line-height:1;
             }
             .actions{
                 display:flex;
@@ -607,6 +607,9 @@
             }
 
             function loadLocations() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const focusStudentId = urlParams.get('student_id');
+
                 const url = selectedClass === 'All Classes' ? '/api/location/all' : `/api/location/all?class=${selectedClass}`;
                 fetch(url)
                     .then(res => {
@@ -618,6 +621,8 @@
                         if (!Array.isArray(data) || data.length === 0) return;
 
                         const bounds = [];
+                        let focusMarker = null;
+
                         data.forEach(loc => {
                             const lat = parseFloat(loc.latitude);
                             const lng = parseFloat(loc.longitude);
@@ -634,9 +639,17 @@
                             marker.bindPopup(showPopup(loc));
                             markers.push(marker);
                             bounds.push([lat, lng]);
+
+                            // Match student_id or STU... code
+                            if (focusStudentId && (loc.student_id == focusStudentId || (loc.student && loc.student.student_id == focusStudentId))) {
+                                focusMarker = marker;
+                            }
                         });
 
-                        if (bounds.length) {
+                        if (focusMarker) {
+                            map.setView(focusMarker.getLatLng(), 18);
+                            focusMarker.openPopup();
+                        } else if (bounds.length) {
                             map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
                         }
                     })

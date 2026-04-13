@@ -20,9 +20,23 @@ class Notification extends Model
         'latitude',
         'longitude',
         'media_url',
+        'video_url',
+        'audio_url',
+        'sender_type',
+        'parent_id',
         'class',
         'status',
     ];
+
+    public function parent()
+    {
+        return $this->belongsTo(Notification::class, 'parent_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Notification::class, 'parent_id');
+    }
 
    
     public function student()

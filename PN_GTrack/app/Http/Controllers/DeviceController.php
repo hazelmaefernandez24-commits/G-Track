@@ -51,8 +51,8 @@ public function index()
     $onlineCount   = $students->where('status', true)->count();
     $offlineCount  = $students->where('status', false)->count();
 
-    $broadcastCount = \DB::table('notifications')->where('type', 'broadcast')->count();
-    $sosCount       = \DB::table('notifications')->where('type', 'sos')->count();
+    $broadcastCount = \DB::table('notifications')->where('type', 'broadcast')->where('read', false)->count();
+    $sosCount       = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->count();
 
     // Latest overall system update
     $latestUpdate = \App\Models\Student::max('updated_at');
@@ -91,8 +91,8 @@ public function apiStats()
 
     $onlineCount   = $students->where('status', true)->count();
     $offlineCount  = $students->where('status', false)->count();
-    $broadcastCount = \DB::table('notifications')->where('type', 'broadcast')->count();
-    $sosCount       = \DB::table('notifications')->where('type', 'sos')->count();
+    $broadcastCount = \DB::table('notifications')->where('type', 'broadcast')->where('read', false)->count();
+    $sosCount       = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->count();
     $sosStudents    = $students->where('sos_status', 'help')->pluck('student_id');
 
     // Use updated_at (real timestamp) for accurate latest update calculation

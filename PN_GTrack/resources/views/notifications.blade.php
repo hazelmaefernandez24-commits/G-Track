@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset='UTF-8'/>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
-    <title>Notifications Dashboard</title>
+    <title>G!Track - Notifications Dashboard</title>
     <style>
         /* ---- your existing styles remain unchanged ---- */
         :root { 
@@ -22,145 +22,179 @@
             font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,Noto Sans,Liberation Sans,sans-serif; 
             background:var(--bg); color:var(--text);
         }
-        .topbar{background:#2563eb;
-            height:72px;
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            padding:0 22px;
-            box-shadow:0 1px 2px rgba(15,23,42,.1);
-            border-bottom:1px solid var(--line);
-        }
-        .top-left{
-            display:flex;
-            align-items:center;
-            gap:10px;
-        }
-        .top-left a{
-            color:#fff;
-            text-decoration:none;
-            font-weight:600;
-            display:flex;
-            align-items:center;
-            gap:8px;
-            font-size:14px;
-        }
+        .topbar{
+                height:64px;
+                background:#2563eb;
+                border-bottom:1px solid rgba(0,0,0,.06);
+                box-shadow: var(--shadow);
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                padding:0 20px;
+            }
+
         .brand{
             display:flex;
             align-items:center;
-            gap:10px;
+            gap:12px;
+            color: #fff;
+            text-decoration: none;
         }
 
-        .brand-icon{
-            width:34px;
-            height:34px;
-            border-radius:10px;
-            background:transparent;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            overflow:hidden;
-        }
+       .brand-badge{
+                width:34px;height:34px;border-radius:10px;
+                background:transparent;
+                display:flex;align-items:center;justify-content:center;
+            }
 
-        .brand-icon img{
-            width:100%;
-            height:100%;
-            object-fit:contain;
-            display:block;
-        }
+        
 
         .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
             font-size: 19px;
             font-weight: 800;
-            margin: 0;
+            line-height:1;
+        }
+
+        .brand-sub {
+            font-size: 11px;
+            font-weight: 400;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            position: relative;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #fff;
+            text-decoration: none;
+            transition: all 0.2s;
         }
 
-        .subtitle {
+        .icon-btn:hover { background: rgba(255,255,255,0.2); }
+
+        .logout {
+            background: none;
+            border: none;
             color: #fff;
-            font-size: 13px;
-            margin: 2px 0 0;
-        }
-
-        .container {
-            max-width: 100vw;
-            width: 100%;
-            margin: 0;
-            padding: 10px 18px 20px;
-        }
-
-        .body-wrap {
-            min-width: 100vw;
-        }
-
-        .section {
-            background: #fff;
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            margin-bottom: 14px;
-        }
-
-        .section-padding {
-            padding: 16px 18px;
-        }
-
-        .section-title {
-            margin: 0;
-            font-size: 21px;
             font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .logout:hover { background: rgba(255,255,255,0.1); }
+
+        .page-title h1{
+            margin:0;
+            font-size:26px;
+            font-weight:800;
+            letter-spacing:.1px;
+        }
+        .page-title p{
+            margin:6px 0 18px 0;
+            color: #6d28d9;
+            font-weight:500;
+        }
+        .cards{
+            display:grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap:18px;
+            margin-top:14px;
+            margin-bottom: 24px;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px 24px 40px 24px;
         }
 
-        .logout{
+        .card{
+            background:#fff;
+            border:1px solid rgba(0,0,0,.08);
+            border-radius:16px;
+            padding:18px 18px 16px 18px;
+            position:relative;
+            overflow:hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,.04);
+            min-height:150px;
+        }
+        .card-head{
             display:flex;
-            align-items:center;
-            gap:8px;
-            padding:10px 14px;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:122x;
+            margin-bottom:12px;
+        }
+        .card-title{
+            font-size:14px;
+            font-weight:800;
+        }
+        .status-dot{
+            width:34px;height:34px;
             border-radius:12px;
-            border:1px solid rgba(255,255,255,.3);
-            background:rgba(255,255,255,.1);
-            color:#fff;
-            text-decoration:none;
-            font-weight:600;
+            display:flex;align-items:center;justify-content:center;
+            border:1px solid rgba(0,0,0,.06);
+            background:#fff;
+        }
+        .stat-number{
+            font-size:28px;
+            font-weight:900;
+            margin-top:6px;
+        }
+        .stat-sub{
+            margin-top:6px;
             font-size:13px;
+            color: #667085;
+            font-weight: 500;
+        }
+        .latest{
+            margin-top:6px;
+        }
+        .latest-time{
+            font-size:16px;
+            font-weight:800;
+            margin-top:6px;
+        }
+        .latest-date{
+            font-size:13px;
+            color: #64748b;
+            margin-top:3px;
+        }
+        .latest-icon{
+            width:34px;height:34px;
+            border-radius:12px;
+            display:flex;align-items:center;justify-content:center;
+            border:1px solid rgba(0,0,0,.06);
+            background:#fff;
         }
 
         .overview-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 12px;
             margin-top: 12px;
-        }
-
-        @media (max-width: 940px) {
-            .overview-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .stat-card {
-            background: #fff;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 15px;
-        }
-
-        .stat-subtitle {
-            font-size: 13px;
-            color: var(--muted);
-            margin: 0 0 6px;
-            font-weight: 650;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 900;
-            margin: 0;
-            color: #0f172a;
-        }
-
-        .stat-detail {
-            font-size: 13px;
-            color: #94a3b8;
         }
 
         .feature-row {
@@ -393,64 +427,184 @@
     </style>
 </head>
 <body>
-    <header class='topbar'>
-        <div class='top-left'>
-            <a href='/dashboard'>← Back</a>
-            <div class='brand'>
-                <div class='brand-icon' aria-hidden='true'>
-                    <img src="{{ asset('images/gtrack.png') }}" alt="G!Track logo" />
-                </div>
-                <div>
-                    <div class='brand-text'>Notifications Dashboard</div>
-                    <div class='subtitle'>Messages, SOS Alerts & System Status</div>
-                </div>
+    <header class="topbar">
+        <a href="/dashboard" class="brand">
+            <div class="brand-badge">
+                <img src="{{ asset('images/gtrack.png') }}" alt="logo" style="width:1500%;height:150%;object-fit:contain;" />
             </div>
+            <div class="brand-text">
+                <div class="brand-name">Admin Dashboard</div>
+                <div class="brand-sub">Communications Center</div>
+            </div>
+        </a>
+
+        <div class="actions">
+            <a href="/dashboard" class="logout">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                Main Dashboard
+            </a>
+
+            <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                @csrf
+                <button type="submit" class="logout">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Logout
+                </button>
+            </form>
         </div>
-        <a class='logout' href='/logout'>Logout</a>
     </header>
 
-    <main class='container'>
+    <main class="container">
         @if(session('success'))
             <div style='margin-bottom:12px;padding:10px 14px;border:1px solid #34d399;background:#d1fae5;color:#065f46;border-radius:10px; font-weight:600;'>
                 {{ session('success') }}
             </div>
         @endif
 
-        <div class='section'>
-            <div class='section-padding'>
-                <h2 class='section-title'>Notifications Overview</h2>
-                <div class='overview-grid'>
-                    <div class='stat-card'>
-                        <p class='stat-subtitle'>Total Messages</p>
-                        <p class='stat-value'>{{ $stats['total'] }}</p>
-                        <p class='stat-detail'>All student notifications</p>
+        <div class="page-title">
+            <h1>System Status Monitoring</h1>
+            <p>Real-time overview of student tracking system</p>
+        </div>
+
+        <section class="cards">
+            <article class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">Online Students</div>
+                        <div class="stat-number" id="online-count" style="color: #22c55e;">{{ $stats['onlineCount'] }}</div>
+                        <div class="stat-sub" style="color: #3b82f6;">
+                            Currently online
+                        </div>
                     </div>
-                    <div class='stat-card'>
-                        <p class='stat-subtitle'>Unread Messages</p>
-                        <p class='stat-value' style='color:var(--blue);'>{{ $stats['unread'] }}</p>
-                        <p class='stat-detail'>Requires attention</p>
-                    </div>
-                    <div class='stat-card'>
-                        <p class='stat-subtitle'>Emergency Alerts</p>
-                        <p class='stat-value' style='color:var(--red);'>{{ $stats['sos'] }}</p>
-                        <p class='stat-detail'>Pending alerts</p>
-                    </div>
-                    <div class='stat-card'>
-                        <p class='stat-subtitle'>Broadcast Messages</p>
-                        <p class='stat-value' style='color:var(--yellow);'>{{ $stats['total'] - $stats['sos'] }}</p>
-                        <p class='stat-detail'>Urgent messages</p>
+                    <div class="status-dot" style="color: #22c55e;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Z" fill="currentColor"/>
+                            <path d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Z" fill="currentColor" opacity=".9"/>
+                            <path d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Z" fill="currentColor" opacity=".35"/>
+                            <path d="M16 13c-1.14 0-3.2.36-4.64 1.06.94.74 1.64 1.7 1.64 2.44V19h9v-2.5c0-2.33-4.67-3.5-6-3.5Z" fill="currentColor" opacity=".25"/>
+                        </svg>
                     </div>
                 </div>
-            </div>
-            <div class='filter-block'>
+            </article>
+
+            <article class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">Offline Students</div>
+                        <div class="stat-number" id="offline-count" style="color: #ef4444;">{{ $stats['offlineCount'] }}</div>
+                        <div class="stat-sub" style="color: #f43f5e;">
+                            Currently offline
+                        </div>
+                    </div>
+                    <div class="status-dot" style="color: #ef4444;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Z" fill="currentColor"/>
+                            <path d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Z" fill="currentColor" opacity=".9"/>
+                            <path d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Z" fill="currentColor" opacity=".35"/>
+                            <path d="M16 13c-1.14 0-3.2.36-4.64 1.06.94.74 1.64 1.7 1.64 2.44V19h9v-2.5c0-2.33-4.67-3.5-6-3.5Z" fill="currentColor" opacity=".25"/>
+                        </svg>
+                    </div>
+                </div>
+            </article>
+
+            <article class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">Latest Update</div>
+                        <div class="latest">
+                            <div class="latest-time" id="latest-time">{{ $stats['latestTime'] }}</div>
+                            <div class="latest-date" id="latest-date">{{ $stats['latestDate'] }}</div>
+                        </div>
+                    </div>
+                    <div class="latest-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z" stroke="#6b7280" stroke-width="2" opacity=".9"/>
+                            <path d="M12 6v6l4 2" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <div class="page-title" style="margin-top: 32px;">
+            <h1>Notifications Overview</h1>
+            <p>Summary of system communications and alerts</p>
+        </div>
+
+        <section class="cards">
+            <!-- Unread Messages -->
+            <article class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">Unread Messages</div>
+                        <div class="stat-number" style="color: var(--blue);">{{ $stats['unread'] }}</div>
+                        <div class="stat-sub">
+                            Requires attention
+                        </div>
+                    </div>
+                    <div class="status-dot" style="color: var(--blue);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Emergency Alerts -->
+            <article class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">Emergency Alerts</div>
+                        <div class="stat-number" style="color: var(--red);">{{ $stats['sos'] }}</div>
+                        <div class="stat-sub">
+                            Pending SOS alerts
+                        </div>
+                    </div>
+                    <div class="status-dot" style="color: var(--red);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 21h22L12 2 1 21Zm12-3h-2v-2h2v2Zm0-4h-2v-4h2v4Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Broadcast History -->
+            <article class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">Broadcast History</div>
+                        <div class="stat-number" style="color: #f59e0b;">{{ $stats['broadcast'] }}</div>
+                        <div class="stat-sub">
+                            Announcements sent
+                        </div>
+                    </div>
+                    <div class="status-dot" style="color: #f59e0b;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2Zm0 14H5.17L4 17.17V4h16v12Z" fill="currentColor"/>
+                            <path d="M7 9h10v2H7z" fill="currentColor" opacity=".3"/>
+                        </svg>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <div class='section' style="margin-top: 24px;">
+            <div class='filter-block' style="border-radius: 12px; border: 1px solid var(--line);">
                 <span class='filter-label'>Filter by Class</span>
                 <div class='select-wrap'>
                     <span style='color:#475569;font-size:15px;'>:</span>
                     <select id='class-filter' onchange="location.href='?class=' + encodeURIComponent(this.value) + '&tab={{ $tab }}'">
                         <option value='all' {{ $class === 'all' ? 'selected' : '' }}>All Classes</option>
-                        <option value='Class 2026' {{ $class === 'Class 2026' ? 'selected' : '' }}>Class 2026</option>
-                        <option value='Class 2027' {{ $class === 'Class 2027' ? 'selected' : '' }}>Class 2027</option>
-                        <option value='Class 2028' {{ $class === 'Class 2028' ? 'selected' : '' }}>Class 2028</option>
+                        <option value='2026' {{ $dbClass === '2026' ? 'selected' : '' }}>Class 2026</option>
+                        <option value='2027' {{ $dbClass === '2027' ? 'selected' : '' }}>Class 2027</option>
+                        <option value='2028' {{ $dbClass === '2028' ? 'selected' : '' }}>Class 2028</option>
                     </select>
                 </div>
             </div>
@@ -495,7 +649,7 @@
                                 <div class='message-item' style="{{ $notification->status === 'resolved' ? 'opacity: 0.7; border-left: 4px solid var(--muted);' : 'border-left: 4px solid var(--red);' }}">
                                     <div class='message-head'>
                                         <p class='message-title'>
-                                            SOS Alert 
+                                            SOS Alert: {{ $notification->student->name ?? 'Unknown Student' }} ({{ $notification->student->student_id ?? 'N/A' }})
                                             @if($notification->status === 'resolved')
                                                 <span class='badge-pill' style='background:#f1f5f9;color:#64748b;border-color:#e2e8f0;'>I am Safe (Resolved)</span>
                                             @else
@@ -504,47 +658,85 @@
                                         </p>
                                         <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                                     </div>
-                                    <p class='message-body' style="font-weight: 600; color: {{ $notification->status === 'resolved' ? 'var(--muted)' : '#b91c1c' }};">{{ $notification->message }}</p>
+                                    {{-- Message Body removed as per request --}}
                                     
-                                    @if($notification->media_url)
-                                        <div style="margin-top: 12px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line);">
-                                            @if(Str::endsWith($notification->media_url, ['.mp3', '.wav']))
-                                                <audio controls style="width: 100%;"><source src="{{ $notification->media_url }}" type="audio/mpeg"></audio>
-                                            @else
-                                                <video controls style="width: 100%; display: block;"><source src="{{ $notification->media_url }}" type="video/mp4"></video>
+                                    @if($notification->media_url || $notification->video_url || $notification->audio_url)
+                                        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+                                            {{-- Legacy media_url support --}}
+                                            @if($notification->media_url)
+                                                <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--line);">
+                                                    @if(Str::endsWith($notification->media_url, ['.mp3', '.wav']))
+                                                        <audio controls style="width: 100%;"><source src="{{ $notification->media_url }}" type="audio/mpeg"></audio>
+                                                    @else
+                                                        <video controls style="width: 100%; display: block;"><source src="{{ $notification->media_url }}" type="video/mp4"></video>
+                                                    @endif
+                                                </div>
+                                            @endif
+
+                                            {{-- New video_url support --}}
+                                            @if($notification->video_url)
+                                                <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--line);">
+                                                    <video controls style="width: 100%; display: block;"><source src="{{ $notification->video_url }}" type="video/mp4"></video>
+                                                </div>
+                                            @endif
+
+                                            {{-- New audio_url support --}}
+                                            @if($notification->audio_url)
+                                                <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--line);">
+                                                    <audio controls style="width: 100%;"><source src="{{ $notification->audio_url }}" type="audio/mpeg"></audio>
+                                                </div>
                                             @endif
                                         </div>
                                     @endif
 
-                                    <div class='message-meta' style='margin-top:12px; padding: 10px; background: #f8fafc; border-radius: 8px;'>
-                                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
-                                            <div style="flex: 1;">
-                                                <div style="font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase;">Telemetry</div>
-                                                <div style="font-size: 12px; margin-top: 4px;">
-                                                    🔋 {{ $notification->battery_level ?? 'N/A' }}% | 📶 {{ $notification->signal_status ?? 'N/A' }}
-                                                </div>
+                                    <div class='message-meta' style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; border: 1px solid rgba(0,0,0,0.05);'>
+                                        <div>
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Battery Status</div>
+                                            <div style="font-weight: 700; color: {{ $notification->battery_level < 20 ? '#b91c1c' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
+                                                🔋 {{ $notification->battery_level ?? 'N/A' }}{{ $notification->battery_level ? '%' : '' }}
                                             </div>
-                                            <div style="flex: 1 text-align: right;">
-                                                <div style="font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase;">Location</div>
-                                                <div style="font-size: 12px; margin-top: 4px; color: var(--blue);">
-                                                    @if($notification->latitude)
-                                                        <a href="https://www.google.com/maps?q={{ $notification->latitude }},{{ $notification->longitude }}" target="_blank" style="text-decoration: none; color: inherit;">
-                                                            📍 {{ number_format($notification->latitude, 5) }}, {{ number_format($notification->longitude, 5) }} ↗
-                                                        </a>
-                                                    @else
-                                                        {{ $notification->location ?? 'N/A' }}
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            @if($notification->status !== 'resolved')
-                                                <div class='message-actions' style="margin:0;">
-                                                    <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge' style='display:inline;' >
-                                                        @csrf
-                                                        <button class='action-btn ack-btn' style="font-size:11px; padding:6px 12px;" type='submit'>Resolved</button>
-                                                    </form>
-                                                </div>
-                                            @endif
                                         </div>
+                                        <div>
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Signal Strength</div>
+                                            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶 {{ $notification->signal_status ?? 'N/A' }}</div>
+                                        </div>
+                                        <div style="grid-column: span 2;">
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Current Coordinates</div>
+                                            <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
+                                                @if($notification->latitude)
+                                                    <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                                                        📍 {{ number_format($notification->latitude, 5) }}, {{ number_format($notification->longitude, 5) }} 
+                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                                                    </a>
+                                                @else
+                                                    {{ $notification->location ?? 'Location Unavailable' }}
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        @if($notification->status !== 'resolved')
+                                            <div style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
+                                                {{-- Acknowledged (Mark as Seen) --}}
+                                                @if(!$notification->read)
+                                                    <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge' style='display:inline;'>
+                                                        @csrf
+                                                        <button class='action-btn' style="font-size:11px; padding:8px 16px; border-radius: 8px; background: #3b82f6; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" type='submit'>
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                                            Acknowledged
+                                                        </button>
+                                                    </form>
+                                                @endif
+
+                                                {{-- Mark as Resolved (Safe) --}}
+                                                <form method='POST' action='/notifications/{{ $notification->id }}/resolve' style='display:inline;'>
+                                                    @csrf
+                                                    <button class='action-btn ack-btn' style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;" type='submit'>
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                                        Mark as Resolved
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             @empty
@@ -555,35 +747,61 @@
                                 <div class='message-item' style="border-left: 4px solid var(--blue);">
                                     <div class='message-head'>
                                         <p class='message-title'>
-                                            Blackout Alert
+                                            Blackout Alert: {{ $notification->student->name ?? 'Unknown Student' }}
                                             <span class='badge-pill' style='background:#dbeafe;color:#1e40af;border-color:#bfdbfe;'>System Offline</span>
                                         </p>
                                         <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                                     </div>
-                                    <p class='message-body'>{{ $notification->message }}</p>
-                                    <div class='message-meta' style='margin-top:12px; background: #f1f5f9; padding: 10px; border-radius: 8px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;'>
+                                    {{-- Message Body removed as per request --}}
+                                    <div class='message-meta' style='margin-top:12px; background: #f1f5f9; padding: 12px; border-radius: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; border: 1px solid rgba(0,0,0,0.05);'>
                                         <div>
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 700; color: #64748b;">Battery</div>
-                                            <div style="font-weight: 700; color: {{ $notification->battery_level < 20 ? 'var(--red)' : '#0f172a' }};">
-                                                {{ $notification->battery_level ?? 'N/A' }}{{ $notification->battery_level ? '%' : '' }}
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Battery Status</div>
+                                            <div style="font-weight: 700; color: {{ $notification->battery_level < 20 ? 'var(--red)' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
+                                                🔋 {{ $notification->battery_level ?? 'N/A' }}{{ $notification->battery_level ? '%' : '' }}
                                             </div>
                                         </div>
                                         <div>
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 700; color: #64748b;">Signal</div>
-                                            <div style="font-weight: 700; color: #0f172a;">{{ $notification->signal_status ?? 'N/A' }}</div>
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Signal Strength</div>
+                                            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶 {{ $notification->signal_status ?? 'N/A' }}</div>
                                         </div>
                                         <div style="grid-column: span 2;">
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 700; color: #64748b;">Current Location</div>
-                                            <div style="font-weight: 700; color: #0f172a; font-size: 11px;">
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Current Coordinates</div>
+                                            <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
                                                 @if($notification->latitude)
-                                                    <a href="https://www.google.com/maps?q={{ $notification->latitude }},{{ $notification->longitude }}" target="_blank" style="text-decoration: none; color: inherit;">
-                                                        📍 {{ $notification->latitude }}, {{ $notification->longitude }}
+                                                    <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                                                        📍 {{ number_format($notification->latitude, 5) }}, {{ number_format($notification->longitude, 5) }} 
+                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                                                     </a>
                                                 @else
-                                                    {{ $notification->location ?? 'N/A' }}
+                                                    {{ $notification->location ?? 'Location Unavailable' }}
                                                 @endif
                                             </div>
                                         </div>
+
+                                        @if($notification->status !== 'resolved')
+                                            <div style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
+                                                {{-- Acknowledged (Mark as Seen) --}}
+                                                @if(!$notification->read)
+                                                    <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge' style='display:inline;'>
+                                                        @csrf
+                                                        <button class='action-btn' style="font-size:11px; padding:8px 16px; border-radius: 8px; background: #3b82f6; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" type='submit'>
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                                            Acknowledged
+                                                        </button>
+                                                    </form>
+                                                @endif
+
+                                                {{-- Mark as Resolved (Safe) --}}
+                                                <form method='POST' action='/notifications/{{ $notification->id }}/resolve' style='display:inline;'>
+                                                    @csrf
+                                                    <button class='action-btn ack-btn' style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;" type='submit'>
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                                        Mark as Resolved
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    </div>
                                     </div>
                                 </div>
                             @empty
@@ -611,15 +829,12 @@
                         @endforelse
                     @else
                         @forelse($notifications as $notification)
-                            <div class='message-item' style="{{ $notification->type === 'admin_reply' ? 'margin-left: 30px; border-left: 4px solid var(--blue); background: #f0f7ff;' : 'border-left: 4px solid #cbd5e1;' }}">
+                            {{-- Parent Message (from Student) --}}
+                            <div class='message-item' style="border-left: 4px solid #cbd5e1;">
                                 <div class='message-head'>
                                     <p class='message-title'>
-                                        {{ $notification->type === 'admin_reply' ? 'Administrator Response' : 'Student Message' }}
-                                        @if($notification->type === 'admin_reply')
-                                            <span class='badge-pill' style='background:#dbeafe;color:#1e40af;'>Outbound Reply</span>
-                                        @else
-                                            <span class='badge-pill' style='background:#f1f5f9;color:#475569;'>Inbound Message</span>
-                                        @endif
+                                        {{ $notification->student->name ?? 'Unknown Student' }} ({{ $notification->student->student_id ?? 'N/A' }})
+                                        <span class='badge-pill' style='background:#f1f5f9;color:#475569;'>Inbound Message</span>
                                     </p>
                                     <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                                 </div>
@@ -634,7 +849,7 @@
                                         </strong>
                                     </span>
                                     
-                                    @if($notification->type === 'student_message' && $notification->status !== 'replied')
+                                    @if($notification->status !== 'replied')
                                         <div class="reply-wrap">
                                             <button onclick="document.getElementById('reply-form-{{ $notification->id }}').style.display='block'; this.style.display='none';" class="action-btn read-btn" style="font-size: 11px; padding: 4px 10px;">Reply to Student</button>
                                             <form id="reply-form-{{ $notification->id }}" method="POST" action="/notifications/{{ $notification->id }}/reply" style="display:none; width: 100%; margin-top: 10px;">
@@ -649,6 +864,23 @@
                                     @endif
                                 </div>
                             </div>
+
+                            {{-- Threaded Replies (from Admin) --}}
+                            @foreach($notification->replies as $reply)
+                                <div class='message-item' style="margin-left: 30px; border-left: 4px solid var(--blue); background: #f0f7ff;">
+                                    <div class='message-head'>
+                                        <p class='message-title'>
+                                            Administrator Response
+                                            <span class='badge-pill' style='background:#dbeafe;color:#1e40af;'>Outbound Reply</span>
+                                        </p>
+                                        <span class='message-meta'>{{ \Carbon\Carbon::parse($reply->created_at)->format('n/j/Y, h:i A') }}</span>
+                                    </div>
+                                    <p class='message-body'>{{ $reply->message }}</p>
+                                    <div class='message-meta' style='margin-top:8px;'>
+                                        <span class='badge-pill' style="font-size: 10px; background: #e0f2fe;">Sent from Panel</span>
+                                    </div>
+                                </div>
+                            @endforeach
                         @empty
                             <div class='message-item' style='background:#fff;border-color:#cbd5e1;text-align:center;padding:30px;color:var(--muted);'>No messages or replies found.</div>
                         @endforelse
@@ -658,5 +890,28 @@
         </div>
     </main>
 
+
+    <script>
+    function pollDashboardStats() {
+        fetch('/api/dashboard/stats')
+            .then(res => res.json())
+            .then(data => {
+                const onlineEl  = document.getElementById('online-count');
+                const offlineEl = document.getElementById('offline-count');
+                const timeEl    = document.getElementById('latest-time');
+                const dateEl    = document.getElementById('latest-date');
+                if (onlineEl)  onlineEl.textContent  = data.onlineCount;
+                if (offlineEl) offlineEl.textContent = data.offlineCount;
+                if (timeEl)    timeEl.textContent    = data.latestTime ?? '—';
+                if (dateEl)    dateEl.textContent    = data.latestDate ?? '—';
+            })
+            .catch(err => console.error('Dashboard poll error:', err));
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        pollDashboardStats();
+        setInterval(pollDashboardStats, 10000); // Sync every 10s
+    });
+    </script>
 </body>
 </html>

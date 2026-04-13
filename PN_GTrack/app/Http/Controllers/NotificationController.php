@@ -14,7 +14,13 @@ class NotificationController extends Controller
         $subtab = $request->query('subtab', 'sos');
         $class = $request->query('class', 'all');
 
-        $query = DB::table('notifications');
+        // Normalize class name (e.g., 'Class 2026' -> '2026')
+        $dbClass = $class;
+        if (str_starts_with($class, 'Class ')) {
+            $dbClass = str_replace('Class ', '', $class);
+        }
+
+        $query = \App\Models\Notification::with(['replies', 'student']);
 
         // --- FILTER BY TYPE (TAB) ---
         if ($tab === 'sos') {
@@ -22,26 +28,43 @@ class NotificationController extends Controller
         } elseif ($tab === 'broadcast') {
             $query->where('type', 'broadcast');
         } else {
-            // STUDENT MESSAGES: Show messages from students and admin replies
-            $query->whereIn('type', ['student_message', 'admin_reply']);
+            // STUDENT MESSAGES: Fetch general conversations only
+            // Exclude SOS/Blackout as they belong in the 'Emergency Alerts' tab
+            $query->whereNotIn('type', ['sos', 'blackout'])
+                  ->where(function($q) {
+                      $q->where('type', 'student_message')
+                        ->orWhere('sender_type', 'student');
+                  })->whereNull('parent_id');
         }
 
         // --- FILTER BY CLASS ---
         if ($class !== 'all') {
-            $query->where(function ($q) use ($class) {
-                $q->where('class', $class)
-                  ->orWhere('class', 'all'); 
+            $query->where(function ($q) use ($dbClass) {
+                $q->where('class', $dbClass)
+                  ->orWhere('class', 'all') // Include global broadcasts
+                  ->orWhereHas('student', function ($sq) use ($dbClass) {
+                      $sq->where('class', $dbClass);
+                  });
             });
         }
 
         $notifications = $query->orderBy('created_at', 'desc')->get();
 
         // --- STATS LOGIC ---
+        $students = \App\Models\Student::all();
+        $latestUpdate   = \App\Models\Student::max('updated_at');
+        $latestTime     = $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('h:i A') : null;
+        $latestDate     = $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('M d, Y') : null;
+
         $stats = [
-            'total' => DB::table('notifications')->count(),
-            'unread' => DB::table('notifications')->where('read', false)->count(),
-            'sos' => DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->count(),
-            'blackout' => DB::table('notifications')->where('type', 'blackout')->count(),
+            'unread' => \App\Models\Notification::where('read', false)->count(),
+            'sos' => \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->count(),
+            'broadcast' => \App\Models\Notification::where('type', 'broadcast')->count(),
+            'onlineCount' => $students->where('status', true)->count(),
+            'offlineCount' => $students->where('status', false)->count(),
+            'blackout' => \App\Models\Notification::where('type', 'blackout')->count(),
+            'latestTime' => $latestTime,
+            'latestDate' => $latestDate
         ];
 
         return view('notifications', [
@@ -49,7 +72,8 @@ class NotificationController extends Controller
             'stats' => $stats,
             'tab' => $tab,
             'subtab' => $subtab,
-            'class' => $class
+            'class' => $class,
+            'dbClass' => $dbClass
         ]);
     }
 
@@ -66,10 +90,22 @@ class NotificationController extends Controller
             $type = 'broadcast';
         }
 
+        // Determine class automatically if student_id is provided
+        $studentClass = $request->class ?? 'all';
+        if ($request->student_id && $studentClass === 'all') {
+            $targetStudent = \App\Models\Student::where('id', $request->student_id)
+                ->orWhere('student_id', $request->student_id)
+                ->first();
+            if ($targetStudent) {
+                $studentClass = $targetStudent->class;
+            }
+        }
+
         DB::table('notifications')->insert([
             'student_id' => $request->student_id ?? null,
-            'class' => $request->class ?? 'all', 
+            'class' => $studentClass, 
             'type' => $type,
+            'sender_type' => 'admin',
             'message' => $request->message,
             'latitude' => $request->latitude ?? null,
             'longitude' => $request->longitude ?? null,
@@ -100,6 +136,8 @@ class NotificationController extends Controller
             'student_id' => $parent->student_id,
             'class' => $parent->class,
             'type' => 'admin_reply',
+            'sender_type' => 'admin',
+            'parent_id' => $id,
             'message' => $request->message,
             'read' => false,
             'status' => 'replied',
@@ -113,10 +151,49 @@ class NotificationController extends Controller
         return redirect()->back()->with('success', 'Reply sent to student!');
     }
 
+    public function acknowledge($id)
+    {
+        $notification = \App\Models\Notification::findOrFail($id);
+        $notification->update(['read' => true]);
+
+        return redirect()->back()->with('success', 'Alert acknowledged.');
+    }
+
+    public function resolve($id)
+    {
+        $notification = \App\Models\Notification::find($id);
+        if ($notification) {
+            $notification->update([
+                'status' => 'resolved',
+                'read' => true
+            ]);
+
+            // If it's a student SOS, mark the student as safe
+            if ($notification->student_id) {
+                $student = \App\Models\Student::where('student_id', $notification->student_id)
+                    ->orWhere('id', $notification->student_id)
+                    ->first();
+                if ($student) {
+                    $student->sos_status = 'safe';
+                    $student->save();
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Alert marked as Resolved (Safe).');
+    }
+
+    public function read($id)
+    {
+        $notification = \App\Models\Notification::findOrFail($id);
+        $notification->update(['read' => true]);
+
+        return redirect()->back()->with('success', 'Notification marked as read.');
+    }
+
     // --- MOBILE API METHODS ---
     public function apiGet($student_id)
     {
-        // The mobile app will pass the student's ID, fetch their specific notifications
         $student = \App\Models\Student::where('id', $student_id)->orWhere('student_id', $student_id)->first();
         
         $query = DB::table('notifications')->orderBy('created_at', 'desc');
@@ -128,6 +205,9 @@ class NotificationController extends Controller
                   ->orWhere('student_id', $student->id);
             });
         }
+
+        // Admin-only: Hide blackout alerts from students
+        $query->where('type', '!=', 'blackout');
 
         $notifications = $query->get();
 
@@ -143,6 +223,8 @@ class NotificationController extends Controller
             'target' => 'required',
             'message' => 'required',
             'media' => 'nullable|file|mimes:mp4,mov,avi,mp3,wav|max:20480', // 20MB max
+            'video' => 'nullable|file|mimes:mp4,mov,avi|max:20480',
+            'audio' => 'nullable|file|mimes:mp3,wav|max:20480',
         ]);
 
         $type = $request->target;
@@ -156,10 +238,44 @@ class NotificationController extends Controller
             $mediaUrl = asset('storage/' . $path);
         }
 
+        $videoUrl = null;
+        if ($request->hasFile('video')) {
+            $path = $request->file('video')->store('alerts', 'public');
+            $videoUrl = asset('storage/' . $path);
+        }
+
+        $audioUrl = null;
+        if ($request->hasFile('audio')) {
+            $path = $request->file('audio')->store('alerts', 'public');
+            $audioUrl = asset('storage/' . $path);
+        }
+
+        // Auto-categorization: If message mentions low battery or gate emergency, set type to blackout
+        $lowBatteryKeywords = ['low on battery', 'battery is low', 'running low on battery', 'main gate'];
+        $messageLower = strtolower($request->message);
+        foreach ($lowBatteryKeywords as $keyword) {
+            if (str_contains($messageLower, $keyword)) {
+                $type = 'blackout';
+                break;
+            }
+        }
+
+        // Determine class automatically if student_id is provided
+        $studentClass = $request->class ?? 'all';
+        if ($request->student_id && $studentClass === 'all') {
+            $targetStudent = \App\Models\Student::where('id', $request->student_id)
+                ->orWhere('student_id', $request->student_id)
+                ->first();
+            if ($targetStudent) {
+                $studentClass = $targetStudent->class;
+            }
+        }
+
         $id = DB::table('notifications')->insertGetId([
             'student_id' => $request->student_id ?? null,
-            'class' => $request->class ?? 'all', 
+            'class' => $studentClass, 
             'type' => $type,
+            'sender_type' => ($type === 'student_message' || $type === 'sos' || $type === 'blackout') ? 'student' : 'system',
             'message' => $request->message,
             'latitude' => $request->latitude ?? null,
             'longitude' => $request->longitude ?? null,
@@ -167,6 +283,8 @@ class NotificationController extends Controller
             'signal_status' => $request->signal ?? null,
             'location' => $request->location ?? null,
             'media_url' => $mediaUrl,
+            'video_url' => $videoUrl,
+            'audio_url' => $audioUrl,
             'read' => false,
             'status' => 'pending', 
             'created_at' => now(),

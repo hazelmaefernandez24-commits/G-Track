@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'PN_GTrack') }} - Login</title>
+    <title>{{ config('app.name', 'PN_GTrack') }} - G!Track</title> 
     <style>
         :root{
             --bg:#f6f7fb;
