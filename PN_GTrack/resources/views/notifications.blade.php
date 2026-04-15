@@ -627,9 +627,34 @@
                 </div>
 
                 @if($tab === 'broadcast')
+                    <div style="background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                        <h3 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 800;">Send New Broadcast</h3>
+                        <p style="margin: 0 0 16px 0; font-size: 13px; color: var(--muted);">Direct one-way announcement to students</p>
+
+                        <form method="POST" action="/notifications/send" style="display: grid; grid-template-columns: 1fr 2fr auto; gap: 16px; align-items: flex-end;">
+                            @csrf
+                            <div>
+                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Target Audience</label>
+                                <select name="target" required style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
+                                    <option value="all">All Students</option>
+                                    <option value="2026">Class 2026</option>
+                                    <option value="2027">Class 2027</option>
+                                    <option value="2028">Class 2028</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Message Content</label>
+                                <input type="text" name="message" required placeholder="Type your announcement here..." style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
+                            </div>
+                            <button type="submit" style="background: var(--blue); color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;">
+                                Send Announcement
+                            </button>
+                        </form>
+                    </div>
+
                     <div class='broadcast-info'>
-                        <strong>Broadcast Notifications History<br></strong>
-                        <p>All notifications sent to students.</p>
+                        <strong>Broadcast Notifications History</strong>
+                        <p>Detailed log of all outbound school-wide announcements.</p>
                     </div>
                 @endif
 
@@ -689,23 +714,31 @@
                                         </div>
                                     @endif
 
+                                    @php
+                                        // Prefer current student telemetry over static notification data
+                                        $currentBattery = $notification->student->battery_level ?? $notification->battery_level;
+                                        $currentSignal = $notification->student->signal_status ?? $notification->signal_status;
+                                        $currentLat = $notification->student->latitude ?? $notification->latitude;
+                                        $currentLng = $notification->student->longitude ?? $notification->longitude;
+                                    @endphp
+
                                     <div class='message-meta' style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; border: 1px solid rgba(0,0,0,0.05);'>
                                         <div>
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Battery Status</div>
-                                            <div style="font-weight: 700; color: {{ $notification->battery_level < 20 ? '#b91c1c' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
-                                                🔋 {{ $notification->battery_level ?? 'N/A' }}{{ $notification->battery_level ? '%' : '' }}
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Live Battery</div>
+                                            <div style="font-weight: 700; color: {{ $currentBattery < 20 ? '#b91c1c' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
+                                                🔋 {{ $currentBattery ?? 'N/A' }}{{ $currentBattery ? '%' : '' }}
                                             </div>
                                         </div>
                                         <div>
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Signal Strength</div>
-                                            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶 {{ $notification->signal_status ?? 'N/A' }}</div>
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Live Signal</div>
+                                            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶 {{ $currentSignal ?? 'N/A' }}</div>
                                         </div>
                                         <div style="grid-column: span 2;">
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Current Coordinates</div>
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Last Known Location</div>
                                             <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
-                                                @if($notification->latitude)
+                                                @if($currentLat)
                                                     <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
-                                                        📍 {{ number_format($notification->latitude, 5) }}, {{ number_format($notification->longitude, 5) }} 
+                                                        📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }} 
                                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                                                     </a>
                                                 @else
@@ -753,23 +786,31 @@
                                         <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                                     </div>
                                     {{-- Message Body removed as per request --}}
+                                    @php
+                                        // Prefer current student telemetry over static notification data
+                                        $currentBattery = $notification->student->battery_level ?? $notification->battery_level;
+                                        $currentSignal = $notification->student->signal_status ?? $notification->signal_status;
+                                        $currentLat = $notification->student->latitude ?? $notification->latitude;
+                                        $currentLng = $notification->student->longitude ?? $notification->longitude;
+                                    @endphp
+
                                     <div class='message-meta' style='margin-top:12px; background: #f1f5f9; padding: 12px; border-radius: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; border: 1px solid rgba(0,0,0,0.05);'>
                                         <div>
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Battery Status</div>
-                                            <div style="font-weight: 700; color: {{ $notification->battery_level < 20 ? 'var(--red)' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
-                                                🔋 {{ $notification->battery_level ?? 'N/A' }}{{ $notification->battery_level ? '%' : '' }}
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Live Battery</div>
+                                            <div style="font-weight: 700; color: {{ $currentBattery < 20 ? 'var(--red)' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
+                                                🔋 {{ $currentBattery ?? 'N/A' }}{{ $currentBattery ? '%' : '' }}
                                             </div>
                                         </div>
                                         <div>
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Signal Strength</div>
-                                            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶 {{ $notification->signal_status ?? 'N/A' }}</div>
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Live Signal</div>
+                                            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶 {{ $currentSignal ?? 'N/A' }}</div>
                                         </div>
                                         <div style="grid-column: span 2;">
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Current Coordinates</div>
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Last Known Location</div>
                                             <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
-                                                @if($notification->latitude)
+                                                @if($currentLat)
                                                     <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
-                                                        📍 {{ number_format($notification->latitude, 5) }}, {{ number_format($notification->longitude, 5) }} 
+                                                        📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }} 
                                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                                                     </a>
                                                 @else

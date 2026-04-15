@@ -13,17 +13,15 @@ class StudentController extends Controller
     {
         $request->validate([
             'student_id' => 'required',
-            'email' => 'required|email',
             'password' => 'required'
         ]);
 
         $studentAuth = StudentAuth::where('student_id', $request->student_id)
-            ->where('email', $request->email)
             ->first();
 
         // Verify StudentAuth exists and password is correct
         if (!$studentAuth || !Hash::check($request->password, $studentAuth->password)) {
-            return response()->json(['message' => 'Invalid student ID, email, or password'], 401);
+            return response()->json(['message' => 'Invalid student ID or password'], 401);
         }
 
         // Mark student as online upon login
