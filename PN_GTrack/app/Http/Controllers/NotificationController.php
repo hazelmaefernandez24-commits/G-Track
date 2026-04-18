@@ -270,7 +270,7 @@ class NotificationController extends Controller
         $audioUrl = $request->hasFile('audio') ? asset('storage/' . $request->file('audio')->store('alerts', 'public')) : null;
 
         $id = DB::table('notifications')->insertGetId([
-            'student_id' => $student->student_id,
+            'student_id' => $student->id, // Use numeric ID for the relationship
             'class' => $student->class, 
             'type' => $type,
             'sender_type' => 'student',

@@ -92,25 +92,24 @@ class StudentController extends Controller
         // Also log in notifications table
         if ($request->sos_status === 'help') {
             \App\Models\Notification::create([
-                'type'    => 'sos',
-                'message' => $student->name . ' (' . $student->student_id . ') sent an SOS alert!',
-                'student_id' => $student->student_id,
-                'class'   => $student->class,
-                'latitude'  => $request->latitude,
-                'longitude' => $request->longitude,
+                'type'          => 'sos',
+                'sender_type'   => 'student',
+                'message'       => $student->name . ' (' . $student->student_id . ') sent an SOS alert!',
+                'student_id'    => $student->id, // Use numeric ID for the relationship
+                'class'         => $student->class,
+                'latitude'      => $request->latitude,
+                'longitude'     => $request->longitude,
                 'battery_level' => $request->battery,
                 'signal_status' => $request->signal,
-                'status'  => 'unread',
+                'read'          => false,
+                'status'        => 'pending',
             ]);
         } else {
-            // "I am Safe" transition
-            \App\Models\Notification::create([
-                'type'    => 'student_message',
-                'message' => $student->name . ' is now SAFE.',
-                'student_id' => $student->student_id,
-                'class'   => $student->class,
-                'status'  => 'read', // Mark as resolved/safe
-            ]);
+            // "I am Safe" transition - Resolve existing SOS alerts
+            \App\Models\Notification::where('student_id', $student->id)
+                ->where('type', 'sos')
+                ->where('status', '!=', 'resolved')
+                ->update(['status' => 'resolved', 'read' => true]);
         }
 
         return response()->json([
