@@ -314,11 +314,6 @@
             font-size: 12px;
         }
 
-        /* Messages */
-        .messages {
-            margin-top: 10px;
-        }
-
         .message-item {
             background: #f8fafc;
             border: 1px solid var(--line);
@@ -439,6 +434,7 @@
         </a>
 
         <div class="actions">
+
             <a href="/dashboard" class="logout">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
@@ -596,17 +592,23 @@
         </section>
 
         <div class='section' style="margin-top: 24px;">
-            <div class='filter-block' style="border-radius: 12px; border: 1px solid var(--line);">
-                <span class='filter-label'>Filter by Class</span>
-                <div class='select-wrap'>
-                    <span style='color:#475569;font-size:15px;'>:</span>
-                    <select id='class-filter' onchange="location.href='?class=' + encodeURIComponent(this.value) + '&tab={{ $tab }}'">
-                        <option value='all' {{ $class === 'all' ? 'selected' : '' }}>All Classes</option>
-                        <option value='2026' {{ $dbClass === '2026' ? 'selected' : '' }}>Class 2026</option>
-                        <option value='2027' {{ $dbClass === '2027' ? 'selected' : '' }}>Class 2027</option>
-                        <option value='2028' {{ $dbClass === '2028' ? 'selected' : '' }}>Class 2028</option>
-                    </select>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class='filter-block' style="border-radius: 12px; border: 1px solid var(--line); flex: 1; margin-bottom: 0;">
+                    <span class='filter-label'>Filter by Class</span>
+                    <div class='select-wrap'>
+                        <span style='color:#475569;font-size:15px;'>:</span>
+                        <select id='class-filter' onchange="location.href='?class=' + encodeURIComponent(this.value) + '&tab={{ $tab }}'">
+                            <option value='all' {{ $class === 'all' ? 'selected' : '' }}>All Classes</option>
+                            <option value='2026' {{ $dbClass === '2026' ? 'selected' : '' }}>Class 2026</option>
+                            <option value='2027' {{ $dbClass === '2027' ? 'selected' : '' }}>Class 2027</option>
+                            <option value='2028' {{ $dbClass === '2028' ? 'selected' : '' }}>Class 2028</option>
+                        </select>
+                    </div>
                 </div>
+                <a href="/students" style="display: inline-flex; align-items: center; gap: 8px; background: #2563eb; color: #fff; font-weight: 700; font-size: 13px; padding: 10px 18px; border-radius: 10px; text-decoration: none; white-space: nowrap; transition: background 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    View Student List
+                </a>
             </div>
         </div>
 
@@ -874,7 +876,10 @@
                             <div class='message-item' style="border-left: 4px solid #cbd5e1;">
                                 <div class='message-head'>
                                     <p class='message-title'>
-                                        {{ $notification->student->name ?? 'Unknown Student' }} ({{ $notification->student->student_id ?? 'N/A' }})
+                                        <a href="/students?id={{ $notification->student->id ?? '' }}" style="color: var(--blue); text-decoration: none; font-weight: 800; border-bottom: 2px solid transparent; transition: all 0.2s;" onmouseover="this.style.borderBottomColor='var(--blue)'" onmouseout="this.style.borderBottomColor='transparent'">
+                                            {{ $notification->student->name ?? 'Unknown Student' }}
+                                        </a>
+                                        ({{ $notification->student->student_id ?? 'N/A' }})
                                         <span class='badge-pill' style='background:#f1f5f9;color:#475569;'>Inbound Message</span>
                                     </p>
                                     <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
@@ -890,19 +895,29 @@
                                         </strong>
                                     </span>
                                     
-                                    @if($notification->status !== 'replied')
-                                        <div class="reply-wrap">
-                                            <button onclick="document.getElementById('reply-form-{{ $notification->id }}').style.display='block'; this.style.display='none';" class="action-btn read-btn" style="font-size: 11px; padding: 4px 10px;">Reply to Student</button>
-                                            <form id="reply-form-{{ $notification->id }}" method="POST" action="/notifications/{{ $notification->id }}/reply" style="display:none; width: 100%; margin-top: 10px;">
+                                    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start;">
+                                        {{-- Acknowledge (Mark as Seen) --}}
+                                        @if(!$notification->read)
+                                            <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge' style='display:inline;'>
                                                 @csrf
-                                                <textarea name="message" required style="width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px; font-size: 13px;" placeholder="Type your response..."></textarea>
-                                                <div style="display: flex; gap: 8px; margin-top: 6px;">
-                                                    <button type="submit" class="action-btn read-btn" style="font-size: 11px;">Send Reply</button>
-                                                    <button type="button" onclick="this.parentElement.parentElement.style.display='none'; this.parentElement.parentElement.previousElementSibling.style.display='block';" class="action-btn" style="background:var(--muted); font-size: 11px;">Cancel</button>
-                                                </div>
+                                                <button class='action-btn' style="font-size:11px; padding:6px 12px; border-radius: 8px; background: #3b82f6; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" type='submit'>
+                                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                                    Acknowledge
+                                                </button>
                                             </form>
-                                        </div>
-                                    @endif
+                                        @endif
+
+                                        {{-- Mark as Resolved --}}
+                                        @if($notification->status !== 'resolved')
+                                            <form method='POST' action='/notifications/{{ $notification->id }}/resolve' style='display:inline;'>
+                                                @csrf
+                                                <button class='action-btn ack-btn' style="font-size:11px; padding:6px 12px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;" type='submit'>
+                                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                                    Mark as Resolved
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
 
