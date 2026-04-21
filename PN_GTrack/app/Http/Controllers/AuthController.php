@@ -15,16 +15,16 @@ class AuthController extends Controller
     }
 
     
-  public function login(Request $request)
+    public function login(Request $request)
 {
-    $credentials = $request->only('email', 'password');
+    $credentials = $request->only('staff_id', 'password');
 
-    if (Auth::attempt($credentials)) {
+    if (Auth::guard('admin')->attempt($credentials)) {
         return redirect('/dashboard');
     }
 
     return back()->withErrors([
-        'email' => 'Invalid email or password',
+        'staff_id' => 'Invalid Staff ID or password',
     ]);
 }
     
@@ -45,17 +45,17 @@ class AuthController extends Controller
 {
     // 1. If the mobile app says the user is an 'admin'
     if ($request->role === 'admin') {
-        $credentials = $request->only('email', 'password');
+        $credentials = $request->only('staff_id', 'password');
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
+        if (Auth::guard('admin')->attempt($credentials)) {
+            $user = Auth::guard('admin')->user();
             return response()->json([
                 'message' => 'Login successful',
                 'user' => $user,
                 'role' => 'admin'
             ]);
         }
-        return response()->json(['message' => 'Invalid admin email or password'], 401);
+        return response()->json(['message' => 'Invalid admin Staff ID or password'], 401);
     }
 
     // Student authentication is now handled by StudentController@apiLogin

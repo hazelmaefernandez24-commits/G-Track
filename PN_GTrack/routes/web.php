@@ -89,7 +89,11 @@ Route::post('/notifications/send', [NotificationController::class, 'send']);
 
 Route::post('/notifications/{id}/acknowledge', [NotificationController::class, 'acknowledge']);
 Route::post('/notifications/{id}/resolve', [NotificationController::class, 'resolve']);
-Route::post('/notifications/{id}/read', [NotificationController::class, 'read']);
+Route::get('/notifications/{id}/read', [NotificationController::class, 'read']);
 Route::post('/notifications/{id}/reply', [NotificationController::class, 'reply']);
+
+// --- NEW MESSENGER ROUTES ---
+Route::get('/messages/{student_id}/json', [NotificationController::class, 'getMessagesJson']);
+Route::post('/messages/new/{student_id}', [NotificationController::class, 'sendMessageAjax']);
 
 Route::get('/dashboard', [App\Http\Controllers\DeviceController::class, 'index']);

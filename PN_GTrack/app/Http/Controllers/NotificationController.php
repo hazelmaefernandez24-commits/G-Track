@@ -28,13 +28,12 @@ class NotificationController extends Controller
         } elseif ($tab === 'broadcast') {
             $query->where('type', 'broadcast');
         } else {
-            // STUDENT MESSAGES: Fetch general conversations only
-            // Exclude SOS/Blackout as they belong in the 'Emergency Alerts' tab
+            // STUDENT MESSAGES: Modern Messenger-style grouping
             $query->whereNotIn('type', ['sos', 'blackout'])
                   ->where(function($q) {
-                      $q->where('type', 'student_message')
-                        ->orWhere('sender_type', 'student');
-                  })->whereNull('parent_id');
+                      $q->whereIn('type', ['student_message', 'admin_reply'])
+                        ->orWhereIn('sender_type', ['student', 'admin']);
+                  });
         }
 
         // --- FILTER BY CLASS ---
@@ -48,7 +47,17 @@ class NotificationController extends Controller
             });
         }
 
-        $notifications = $query->orderBy('created_at', 'desc')->get();
+        // Get all relevant notifications
+        $allNotifications = $query->orderBy('created_at', 'asc')->get();
+
+        if ($tab === 'student') {
+            // Group the messages by student for Messenger layout
+            // Only group items that have a valid student_id
+            $notifications = $allNotifications->whereNotNull('student_id')->groupBy('student_id');
+        } else {
+            // For SOS and Broadcast, keep the list sorted by newest first
+            $notifications = $allNotifications->reverse();
+        }
 
         // --- STATS LOGIC ---
         $students = \App\Models\Student::all();
@@ -67,8 +76,11 @@ class NotificationController extends Controller
             'latestDate' => $latestDate
         ];
 
+        $sidebarStudents = \App\Models\Student::orderBy('name', 'asc')->get();
+
         return view('notifications', [
             'notifications' => $notifications,
+            'sidebarStudents' => $sidebarStudents,
             'stats' => $stats,
             'tab' => $tab,
             'subtab' => $subtab,
@@ -306,5 +318,55 @@ class NotificationController extends Controller
             'message' => 'Emergency alert received by Admin!',
             'notification_id' => $id
         ]);
+    }
+
+    // --- MESSENGER UI AJAX METHODS ---
+    public function getMessagesJson($student_id)
+    {
+        $student = \App\Models\Student::where('id', $student_id)
+            ->orWhere('student_id', $student_id)
+            ->first();
+
+        if (!$student) {
+            return response()->json(['messages' => []]);
+        }
+
+        // Fetch all messages related to this student
+        $messages = DB::table('notifications')
+            ->where(function($q) use ($student) {
+                $q->where('student_id', $student->id)
+                  ->orWhere('student_id', $student->student_id);
+            })
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return response()->json(['messages' => $messages]);
+    }
+
+    public function sendMessageAjax(Request $request, $student_id)
+    {
+        $request->validate(['message' => 'required']);
+
+        $student = \App\Models\Student::where('id', $student_id)
+            ->orWhere('student_id', $student_id)
+            ->first();
+
+        if (!$student) {
+            return response()->json(['success' => false], 404);
+        }
+
+        $id = DB::table('notifications')->insertGetId([
+            'student_id'  => $student->id,
+            'class'       => $student->class,
+            'type'        => 'admin_reply',
+            'sender_type' => 'admin',
+            'message'     => $request->message,
+            'read'        => false,
+            'status'      => 'replied',
+            'created_at'  => now(),
+            'updated_at'  => now()
+        ]);
+
+        return response()->json(['success' => true, 'id' => $id]);
     }
 }

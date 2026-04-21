@@ -162,20 +162,20 @@
 
                
                 <div class="form-group">
-    <label class="form-label" for="email">Email</label>
-    <input 
-        type="email" 
-        class="form-input @error('email') is-invalid @enderror" 
-        id="email" 
-        name="email" 
-        placeholder="Enter your Email"
-        value="{{ old('email') }}"
-        required 
-        autofocus>
-    @error('email')
-        <span class="error-message">{{ $message }}</span>
-    @enderror
-</div>
+                    <label class="form-label" for="staff_id">Staff ID</label>
+                    <input 
+                        type="text" 
+                        class="form-input @error('staff_id') is-invalid @enderror" 
+                        id="staff_id" 
+                        name="staff_id" 
+                        placeholder="Enter your Staff ID"
+                        value="{{ old('staff_id') }}"
+                        required 
+                        autofocus>
+                    @error('staff_id')
+                        <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
                 
                 <div class="form-group">
                     <label class="form-label" for="password">Password</label>
