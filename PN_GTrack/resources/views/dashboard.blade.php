@@ -239,7 +239,10 @@
 .battery-text { font-weight: 600; color: #374151; }
 
         </style>
-    </head>
+        <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+</head>
     <body>
         <header class="topbar">
             <div class="brand">
@@ -381,24 +384,9 @@
                         <!-- Notifications Header -->
                         <div style="margin-bottom: 16px;">
                             <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800;">Notifications Center</h3>
-                            <p style="margin: 0; font-size: 13px; color: #667085;">View all messages, SOS alerts & system status</p>
+                            <p style="margin: 0; font-size: 13px; color: #667085;">View all messages & system status</p>
                         </div>
 
-                        <!-- Notification Badges -->
-                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                            <div style="background: #FEE2E2; border: 1px solid #FECACA; border-radius: 8px; padding: 8px 12px; text-align: center; flex: 1;">
-                                <div style="font-size: 20px; font-weight: 900; color: #DC2626;">
-    {{ $broadcastCount }}
-</div>
-                                <div style="font-size: 11px; color: #991B1B; font-weight: 600;">New</div>
-                            </div>
-                            <div style="background: #DBEAFE; border: 1px solid #BFDBFE; border-radius: 8px; padding: 8px 12px; text-align: center; flex: 1;">
-                                <div style="font-size: 20px; font-weight: 900; color: #2563EB;">
-    {{ $sosCount }}
-</div>
-                                <div style="font-size: 11px; color: #1E40AF; font-weight: 600;">SOS</div>
-                            </div>
-                        </div>
 
                         <!-- Open Notifications Button -->
                         <button onclick="window.location.href='/notifications'" style="width: 100%; background: #2563EB; color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563EB'">
@@ -421,36 +409,33 @@
     </div>
 @endif
 
-<form method="POST" action="/notifications/send" style="display: flex; flex-direction: column; gap: 12px;">
+<form method="POST" action="/notifications/send" id="dashboard-broadcast-form" style="display: flex; flex-direction: column; gap: 12px;">
     @csrf
 
-    <!-- Target Audience -->
-    <div>
-        <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">
-            Target Audience
-        </label>
-        <select name="target" required style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;">
-            <option value="all">All Students</option>
-            <option value="2026">Class 2026</option>
-            <option value="2027">Class 2027</option>
-            <option value="2028">Class 2028</option>
-           
-        </select>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Target Audience</label>
+            <select name="target" required style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;">
+                <option value="all">All Students</option>
+                <option value="2026">Class 2026</option>
+                <option value="2027">Class 2027</option>
+                <option value="2028">Class 2028</option>
+            </select>
+        </div>
+        <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Subject Line</label>
+            <input type="text" name="subject" required placeholder="Subject Title..." style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;">
+        </div>
     </div>
 
-    <!-- Message -->
     <div>
-        <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">
-            Message
-        </label>
-        <textarea name="message" required placeholder="Type your emergency announcement here..."
-            style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; min-height: 80px;"></textarea>
+        <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Message Content (Rich Text)</label>
+        <div id="dashboard-quill-editor" style="height: 120px; background: #fff; border-radius: 6px; border: 1px solid #d1d5db;"></div>
+        <input type="hidden" name="message" id="dashboard-broadcast-message-input">
     </div>
 
-    <!-- Send Button -->
-    <button type="submit"
-        style="width: 100%; background: #2563EB; color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: 600; cursor: pointer;">
-        Send Notification
+    <button type="submit" style="width: 100%; background: #22c55e; color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s;">
+        Send Broadcast Notification
     </button>
 </form>
                     </div>
@@ -749,8 +734,32 @@
                 .catch(err => console.error('Dashboard poll error:', err));
         }
 
-        // Start polling every 10 seconds
-        document.addEventListener('DOMContentLoaded', function () {
+        // Dashboard Broadcast Quill Initialization
+        var dashboardQuill;
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('dashboard-quill-editor')) {
+                dashboardQuill = new Quill('#dashboard-quill-editor', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'align': [] }],
+                            ['clean']
+                        ]
+                    },
+                    placeholder: 'Type your announcement here...'
+                });
+
+                const form = document.getElementById('dashboard-broadcast-form');
+                if (form) {
+                    form.onsubmit = function() {
+                        const messageInput = document.getElementById('dashboard-broadcast-message-input');
+                        messageInput.value = dashboardQuill.root.innerHTML;
+                    };
+                }
+            }
+
             pollDashboardStats();
             setInterval(pollDashboardStats, 10000);
         });

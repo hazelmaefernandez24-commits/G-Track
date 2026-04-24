@@ -93,6 +93,7 @@ class NotificationController extends Controller
     {
         $request->validate([
             'target' => 'required',
+            'subject' => 'required|max:255',
             'message' => 'required',
         ]);
 
@@ -120,8 +121,9 @@ class NotificationController extends Controller
             'class' => $studentClass, 
             'type' => $type,
             'sender_type' => 'admin',
+            'subject' => $request->subject,
             'message' => $request->message,
-            'read' => false,
+            'read' => true, // Admin-sent broadcasts are "read" by default for the admin
             'status' => 'pending', 
             'created_at' => now(),
             'updated_at' => now()

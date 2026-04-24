@@ -629,7 +629,55 @@
             flex-shrink: 0;
         }
         .send-btn:disabled { background: #cbd5e1; }
+
+        /* --- MODAL STYLES --- */
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center;
+            z-index: 1000; backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: #fff; border-radius: 20px; width: 95%; max-width: 650px;
+            padding: 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            position: relative; animation: modal-in 0.3s ease-out;
+            max-height: 85vh; display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        @keyframes modal-in {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-close {
+            position: absolute; top: 20px; right: 20px; cursor: pointer; color: var(--muted);
+            z-index: 10; padding: 4px; border-radius: 50%; transition: background 0.2s;
+        }
+        .modal-close:hover { background: #f1f5f9; color: var(--text); }
+
+        .modal-subject { font-size: 20px; font-weight: 800; margin-bottom: 4px; color: var(--text); line-height: 1.3; }
+        
+        .modal-body-container {
+            background: #f8fafc; border: 1px solid var(--line); border-radius: 14px; 
+            margin-top: 20px; overflow: hidden; display: flex; flex-direction: column;
+        }
+        .modal-scroll-area {
+            padding: 24px; overflow-y: auto; flex: 1;
+        }
+        /* Custom Scrollbar for Modal */
+        .modal-scroll-area::-webkit-scrollbar { width: 6px; }
+        .modal-scroll-area::-webkit-scrollbar-track { background: #f1f5f9; }
+        .modal-scroll-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .broadcast-item-clickable { cursor: pointer; transition: all 0.2s; }
+        .broadcast-item-clickable:hover { background: #fefce8; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+
+        @keyframes slide-down {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
     </style>
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 </head>
 <body>
     <header class="topbar">
@@ -811,38 +859,64 @@
                         <h3 class='card-title'>{{ $class === 'all' ? 'All Classes' : $class }}</h3>
                         <p class='card-sub'>{{ $notifications->count() }} {{ $notifications->count() === 1 ? 'message' : 'messages' }}</p>
                     </div>
-                    <span class='badge-right'>{{ $stats['unread'] }} Unread</span>
                 </div>
 
                 @if($tab === 'broadcast')
-                    <div style="background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                        <h3 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 800;">Send New Broadcast</h3>
-                        <p style="margin: 0 0 16px 0; font-size: 13px; color: var(--muted);">Direct one-way announcement to students</p>
-
-                        <form method="POST" action="/notifications/send" style="display: grid; grid-template-columns: 1fr 2fr auto; gap: 16px; align-items: flex-end;">
-                            @csrf
+                    <div id="broadcast-form-container" style="display: none; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); animation: slide-down 0.3s ease-out;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
                             <div>
-                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Target Audience</label>
-                                <select name="target" required style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
-                                    <option value="all">All Students</option>
-                                    <option value="2026">Class 2026</option>
-                                    <option value="2027">Class 2027</option>
-                                    <option value="2028">Class 2028</option>
-                                </select>
+                                <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800;">Compose New Broadcast</h3>
+                                <p style="margin: 0; font-size: 13px; color: var(--muted);">Prepare and send an announcement to students</p>
                             </div>
-                            <div>
-                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Message Content</label>
-                                <input type="text" name="message" required placeholder="Type your announcement here..." style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
-                            </div>
-                            <button type="submit" style="background: var(--blue); color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;">
-                                Send Announcement
+                            <button onclick="toggleBroadcastForm()" style="background: #f1f5f9; color: #64748b; border: none; padding: 8px; border-radius: 8px; cursor: pointer;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
+                        </div>
+
+                        <form method="POST" action="/notifications/send" id="broadcast-form" style="display: flex; flex-direction: column; gap: 16px;">
+                            @csrf
+                            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px;">
+                                <div>
+                                    <label style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Target Audience</label>
+                                    <select name="target" required style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
+                                        <option value="all">All Students</option>
+                                        <option value="2026">Class 2026</option>
+                                        <option value="2027">Class 2027</option>
+                                        <option value="2028">Class 2028</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Subject Line</label>
+                                    <input type="text" name="subject" required placeholder="Enter subject Title..." style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Message Content (Rich Text)</label>
+                                <div id="quill-editor" style="height: 150px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--line);"></div>
+                                <input type="hidden" name="message" id="broadcast-message-input">
+                            </div>
+
+                            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                                <button type="button" onclick="toggleBroadcastForm()" style="background: #f1f5f9; color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">
+                                    Cancel
+                                </button>
+                                <button type="submit" style="background: var(--blue); color: #fff; border: none; padding: 12px 32px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s;">
+                                    Send Announcement Now
+                                </button>
+                            </div>
                         </form>
                     </div>
 
-                    <div class='broadcast-info'>
-                        <strong>Broadcast Notifications History</strong>
-                        <p>Detailed log of all outbound school-wide announcements.</p>
+                    <div class='broadcast-info' style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>Broadcast Notifications History</strong>
+                            <p style="margin: 4px 0 0 0;">Detailed log of all outbound school-wide announcements.</p>
+                        </div>
+                        <button onclick="toggleBroadcastForm()" id="toggle-broadcast-btn" style="background: var(--blue); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); transition: all 0.2s;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Send New Broadcast
+                        </button>
                     </div>
                 @endif
 
@@ -1039,15 +1113,16 @@
                         @endif
                     @elseif($tab === 'broadcast')
                         @forelse($notifications as $notification)
-                            <div class='message-item' style="border-left: 4px solid var(--yellow);">
+                            <div class='message-item broadcast-item-clickable' 
+                                 onclick="showBroadcastDetails('{{ addslashes($notification->subject ?? 'Broadcast Notification') }}', '{{ addslashes($notification->message) }}', '{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}')"
+                                 style="border-left: 4px solid var(--yellow);">
                                 <div class='message-head'>
                                     <p class='message-title'>
-                                        Broadcast Notification
+                                        {{ $notification->subject ?? 'No Subject' }}
                                         <span class='badge-pill' style='background:#fef3c7;color:#92400e;border-color:#fde68a;'>Outbound</span>
                                     </p>
                                     <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                                 </div>
-                                <p class='message-body'>{{ $notification->message }}</p>
                                 <div class='message-meta' style='margin-top:8px;'>
                                     @if($notification->class && $notification->class !== 'all') Class: {{ $notification->class }} | @endif
                                     <span class='badge-pill' style="font-size: 10px;">Sent to All</span>
@@ -1186,6 +1261,61 @@
     });
 
     // --- MESSENGER LOGIC ---
+    // --- Broadcast Details Modal Handling ---
+    function showBroadcastDetails(subject, message, time) {
+        const backdrop = document.getElementById('broadcast-modal');
+        document.getElementById('modal-subject').textContent = subject;
+        document.getElementById('modal-message').innerHTML = message;
+        document.getElementById('modal-time').textContent = time;
+        backdrop.style.display = 'flex';
+    }
+
+    function closeBroadcastModal(e) {
+        if (e.target.classList.contains('modal-backdrop')) {
+            e.target.style.display = 'none';
+        }
+    }
+
+    // --- Quill Rich Text Editor Initialization ---
+    var quill;
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('quill-editor')) {
+            quill = new Quill('#quill-editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'align': [] }],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Type your announcement here...'
+            });
+
+            const form = document.getElementById('broadcast-form');
+            if (form) {
+                form.onsubmit = function() {
+                    const messageInput = document.getElementById('broadcast-message-input');
+                    messageInput.value = quill.root.innerHTML;
+                };
+            }
+        }
+    });
+
+    function toggleBroadcastForm() {
+        const container = document.getElementById('broadcast-form-container');
+        const triggerBtn = document.getElementById('toggle-broadcast-btn');
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            triggerBtn.style.display = 'none';
+        } else {
+            container.style.display = 'none';
+            triggerBtn.style.display = 'flex';
+        }
+    }
+
     let activeStudentId = null;
     let activeStudentName = '';
     let activeIsFemale = false;
@@ -1380,5 +1510,28 @@
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     });
     </script>
+
+    <!-- Broadcast Details Modal -->
+    <div id="broadcast-modal" class="modal-backdrop" onclick="closeBroadcastModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="document.getElementById('broadcast-modal').style.display='none'">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <div id="modal-time" style="font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;"></div>
+            <h2 id="modal-subject" class="modal-subject"></h2>
+            
+            <div class="modal-body-container">
+                <div class="modal-scroll-area">
+                    <div id="modal-message" style="line-height: 1.6; font-size: 15px; color: #334155;"></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button onclick="document.getElementById('broadcast-modal').style.display='none'" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer;">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
