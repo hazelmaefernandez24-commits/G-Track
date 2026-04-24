@@ -947,35 +947,6 @@
                                     </div>
                                     {{-- Message Body removed as per request --}}
                                     
-                                    @if($notification->media_url || $notification->video_url || $notification->audio_url)
-                                        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
-                                            {{-- Legacy media_url support --}}
-                                            @if($notification->media_url)
-                                                <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--line);">
-                                                    @if(Str::endsWith($notification->media_url, ['.mp3', '.wav']))
-                                                        <audio controls style="width: 100%;"><source src="{{ $notification->media_url }}" type="audio/mpeg"></audio>
-                                                    @else
-                                                        <video controls style="width: 100%; display: block;"><source src="{{ $notification->media_url }}" type="video/mp4"></video>
-                                                    @endif
-                                                </div>
-                                            @endif
-
-                                            {{-- New video_url support --}}
-                                            @if($notification->video_url)
-                                                <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--line);">
-                                                    <video controls style="width: 100%; display: block;"><source src="{{ $notification->video_url }}" type="video/mp4"></video>
-                                                </div>
-                                            @endif
-
-                                            {{-- New audio_url support --}}
-                                            @if($notification->audio_url)
-                                                <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--line);">
-                                                    <audio controls style="width: 100%;"><source src="{{ $notification->audio_url }}" type="audio/mpeg"></audio>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    @endif
-
                                     @php
                                         // Prefer current student telemetry over static notification data
                                         $currentBattery = $notification->student->battery_level ?? $notification->battery_level;
@@ -984,54 +955,103 @@
                                         $currentLng = $notification->student->longitude ?? $notification->longitude;
                                     @endphp
 
-                                    <div class='message-meta' style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; border: 1px solid rgba(0,0,0,0.05);'>
-                                        <div>
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Live Battery</div>
-                                            <div style="font-weight: 700; color: {{ $currentBattery < 20 ? '#b91c1c' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
-                                                🔋 {{ $currentBattery ?? 'N/A' }}{{ $currentBattery ? '%' : '' }}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Live Signal</div>
-                                            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶 {{ $currentSignal ?? 'N/A' }}</div>
-                                        </div>
-                                        <div style="grid-column: span 2;">
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Last Known Location</div>
-                                            <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
-                                                @if($currentLat)
-                                                    <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
-                                                        📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }} 
-                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-                                                    </a>
+                                    <div class='message-meta' style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);'>
+                                        <!-- MEDIA FEEDS SECTION -->
+                                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px;">
+                                            <!-- Video Feed Container -->
+                                            <div style="background: #0f172a; border-radius: 8px; padding: 10px; min-height: 120px; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;">
+                                                <div style="position: absolute; top: 8px; left: 8px; background: rgba(220, 38, 38, 0.9); color: #fff; font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; z-index: 10; display: flex; align-items: center; gap: 4px;">
+                                                    <span style="width: 6px; height: 6px; background: #fff; border-radius: 50%; animate: pulse 1s infinite;"></span>
+                                                    Live Video Feed
+                                                </div>
+                                                
+                                                @if($notification->video_url || (isset($notification->media_url) && !Str::endsWith($notification->media_url, ['.mp3', '.wav'])))
+                                                    <video controls style="width: 100%; border-radius: 6px; max-height: 15100px;">
+                                                        <source src="{{ $notification->video_url ?? $notification->media_url }}" type="video/mp4">
+                                                    </video>
                                                 @else
-                                                    {{ $notification->location ?? 'Location Unavailable' }}
+                                                    <div style="text-align: center; color: rgba(255,255,255,0.4);">
+                                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 8px; opacity: 0.5;">
+                                                            <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                                                        </svg>
+                                                        <div style="font-size: 11px; font-weight: 700;">No Video Feed Available</div>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <!-- Audio Feed Container -->
+                                            <div style="background: #1e293b; border-radius: 8px; padding: 10px; min-height: 120px; display: flex; flex-direction: column; justify-content: center; position: relative;">
+                                                <div style="position: absolute; top: 8px; left: 8px; background: rgba(37, 99, 235, 0.9); color: #fff; font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; z-index: 10;">
+                                                    Live Audio
+                                                </div>
+
+                                                @if($notification->audio_url || (isset($notification->media_url) && Str::endsWith($notification->media_url, ['.mp3', '.wav'])))
+                                                    <div style="padding-top: 10px;">
+                                                        <audio controls style="width: 100%;">
+                                                            <source src="{{ $notification->audio_url ?? $notification->media_url }}" type="audio/mpeg">
+                                                        </audio>
+                                                    </div>
+                                                @else
+                                                    <div style="text-align: center; color: rgba(255,255,255,0.4);">
+                                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 8px; opacity: 0.5;">
+                                                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+                                                        </svg>
+                                                        <div style="font-size: 11px; font-weight: 700;">No Audio Source</div>
+                                                    </div>
                                                 @endif
                                             </div>
                                         </div>
 
-                                        @if($notification->status !== 'resolved')
-                                            <div style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
-                                                {{-- Acknowledged (Mark as Seen) --}}
-                                                @if(!$notification->read)
-                                                    <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge' style='display:inline;'>
+                                        <!-- TELEMETRY SECTION (Restored Original Style) -->
+                                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05);">
+                                            <div>
+                                                <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Live Battery</div>
+                                                <div style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? '#b91c1c' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
+                                                    🔋 {{ $currentBattery ?? 'N/A' }}{{ $currentBattery ? '%' : '' }}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Live Signal</div>
+                                                <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶 {{ $currentSignal ?? 'N/A' }}</div>
+                                            </div>
+                                            <div style="grid-column: span 2;">
+                                                <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Last Known Location</div>
+                                                <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
+                                                    @if($currentLat)
+                                                        <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                                                            📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }} 
+                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                                                        </a>
+                                                    @else
+                                                        {{ $notification->location ?? 'Location Unavailable' }}
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            @if($notification->status !== 'resolved')
+                                                <div style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
+                                                    {{-- Acknowledged (Mark as Seen) --}}
+                                                    @if(!$notification->read)
+                                                        <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge' style='display:inline;'>
+                                                            @csrf
+                                                            <button class='action-btn' style="font-size:11px; padding:8px 16px; border-radius: 8px; background: #3b82f6; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" type='submit'>
+                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                                                Acknowledged
+                                                            </button>
+                                                        </form>
+                                                    @endif
+
+                                                    {{-- Mark as Resolved (Safe) --}}
+                                                    <form method='POST' action='/notifications/{{ $notification->id }}/resolve' style='display:inline;'>
                                                         @csrf
-                                                        <button class='action-btn' style="font-size:11px; padding:8px 16px; border-radius: 8px; background: #3b82f6; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" type='submit'>
-                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                                            Acknowledged
+                                                        <button class='action-btn ack-btn' style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;" type='submit'>
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                                            Mark as Resolved
                                                         </button>
                                                     </form>
-                                                @endif
-
-                                                {{-- Mark as Resolved (Safe) --}}
-                                                <form method='POST' action='/notifications/{{ $notification->id }}/resolve' style='display:inline;'>
-                                                    @csrf
-                                                    <button class='action-btn ack-btn' style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;" type='submit'>
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                                                        Mark as Resolved
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        @endif
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             @empty
@@ -1047,7 +1067,15 @@
                                         </p>
                                         <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                                     </div>
-                                    {{-- Message Body removed as per request --}}
+                                    <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px; border-radius: 6px; margin: 12px 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                        <div style="font-size: 10px; font-weight: 800; color: #1e40af; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #3b82f6;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                            Important Message from Student
+                                        </div>
+                                        <p style="margin: 0; color: #1e3a8a; font-size: 14px; font-weight: 500; line-height: 1.5;">
+                                            {{ $notification->message }}
+                                        </p>
+                                    </div>
                                     @php
                                         // Prefer current student telemetry over static notification data
                                         $currentBattery = $notification->student->battery_level ?? $notification->battery_level;

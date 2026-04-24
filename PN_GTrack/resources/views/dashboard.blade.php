@@ -88,19 +88,21 @@
                 display:flex;align-items:center;justify-content:center;
                 border:2px solid #fff;
             }
-            .logout{
-                display:flex;
-                align-items:center;
-                gap:8px;
-                padding:10px 14px;
-                border-radius:12px;
-                border:1px solid rgba(255,255,255,.3);
-                background:rgba(255,255,255,.1);
-                color:#fff;
-                text-decoration:none;
-                font-weight:600;
-                font-size:13px;
+            .logout {
+                background: none;
+                border: none;
+                color: #fff;
+                font-weight: 700;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+                padding: 8px 12px;
+                border-radius: 10px;
+                transition: all 0.2s;
             }
+            .logout:hover { background: rgba(255,255,255,0.1); }
             .container{
                 max-width:1180px;
                 margin:0 auto;
@@ -271,15 +273,16 @@
     <span class="badge">{{ $sosCount }}</span>
 </a>
                <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-    @csrf
-    <button type="submit" class="logout" style="background:none;border:none;cursor:pointer;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M10 17v-2H3v-6h7V7l5 5-5 5Z" fill="#0f172a"/>
-            <path d="M14 3h7v18h-7v-2h5V5h-5V3Z" fill="#0f172a" opacity=".6"/>
-        </svg>
-        Logout
-    </button>
-</form>
+                    @csrf
+                    <button type="submit" class="logout">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        Logout
+                    </button>
+                </form>
 
             </div>
         </header>
