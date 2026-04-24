@@ -434,7 +434,7 @@
         <input type="hidden" name="message" id="dashboard-broadcast-message-input">
     </div>
 
-    <button type="submit" style="width: 100%; background: #22c55e; color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s;">
+    <button type="submit" style="width: 100%; background: #4f46e5; color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#4338ca'" onmouseout="this.style.background='#4f46e5'">
         Send Broadcast Notification
     </button>
 </form>
