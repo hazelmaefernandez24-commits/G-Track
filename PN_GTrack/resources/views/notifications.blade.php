@@ -948,11 +948,18 @@
                                     {{-- Message Body removed as per request --}}
                                     
                                     @php
-                                        // Prefer current student telemetry over static notification data
+                                        // Get the student's latest GPS record from the locations table
+                                        $latestLocation = $notification->student
+                                            ? \App\Models\Location::where('student_id', $notification->student->id)
+                                                ->orderBy('recorded_at', 'desc')
+                                                ->first()
+                                            : null;
+
+                                        // Prefer live locations table → student model → notification snapshot
                                         $currentBattery = $notification->student->battery_level ?? $notification->battery_level;
-                                        $currentSignal = $notification->student->signal_status ?? $notification->signal_status;
-                                        $currentLat = $notification->student->latitude ?? $notification->latitude;
-                                        $currentLng = $notification->student->longitude ?? $notification->longitude;
+                                        $currentSignal  = $notification->student->signal_status ?? $notification->signal_status;
+                                        $currentLat     = $latestLocation->latitude  ?? $notification->student->latitude  ?? $notification->latitude;
+                                        $currentLng     = $latestLocation->longitude ?? $notification->student->longitude ?? $notification->longitude;
                                     @endphp
 
                                     <div class='message-meta' style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);'>
@@ -1067,21 +1074,20 @@
                                         </p>
                                         <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                                     </div>
-                                    <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px; border-radius: 6px; margin: 12px 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                                        <div style="font-size: 10px; font-weight: 800; color: #1e40af; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #3b82f6;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                            Important Message from Student
-                                        </div>
-                                        <p style="margin: 0; color: #1e3a8a; font-size: 14px; font-weight: 500; line-height: 1.5;">
-                                            {{ $notification->message }}
-                                        </p>
-                                    </div>
+                                    {{-- Message from student removed: only battery, signal, and location are displayed --}}
                                     @php
-                                        // Prefer current student telemetry over static notification data
+                                        // Get the student's latest GPS record from the locations table
+                                        $latestLocation = $notification->student
+                                            ? \App\Models\Location::where('student_id', $notification->student->id)
+                                                ->orderBy('recorded_at', 'desc')
+                                                ->first()
+                                            : null;
+
+                                        // Prefer live locations table → student model → notification snapshot
                                         $currentBattery = $notification->student->battery_level ?? $notification->battery_level;
-                                        $currentSignal = $notification->student->signal_status ?? $notification->signal_status;
-                                        $currentLat = $notification->student->latitude ?? $notification->latitude;
-                                        $currentLng = $notification->student->longitude ?? $notification->longitude;
+                                        $currentSignal  = $notification->student->signal_status ?? $notification->signal_status;
+                                        $currentLat     = $latestLocation->latitude  ?? $notification->student->latitude  ?? $notification->latitude;
+                                        $currentLng     = $latestLocation->longitude ?? $notification->student->longitude ?? $notification->longitude;
                                     @endphp
 
                                     <div class='message-meta' style='margin-top:12px; background: #f1f5f9; padding: 12px; border-radius: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; border: 1px solid rgba(0,0,0,0.05);'>
@@ -1096,7 +1102,7 @@
                                             <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶 {{ $currentSignal ?? 'N/A' }}</div>
                                         </div>
                                         <div style="grid-column: span 2;">
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Last Known Location</div>
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Location</div>
                                             <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
                                                 @if($currentLat)
                                                     <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
