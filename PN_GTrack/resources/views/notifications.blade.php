@@ -114,7 +114,7 @@
         }
         .page-title p{
             margin:6px 0 18px 0;
-            color: #6d28d9;
+            color: #ff9900;
             font-weight:500;
         }
         .cards{
