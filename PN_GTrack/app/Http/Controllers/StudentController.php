@@ -60,6 +60,7 @@ class StudentController extends Controller
         $student->last_update  = now()->format('M d, Y h:i A');
         $student->signal_status = $request->signal ?? $student->signal_status;
         $student->battery_level = $request->battery_level ?? $student->battery_level;
+        $student->touch(); // Force updated_at timestamp to refresh even if data is same
         $student->save();
 
         return response()->json(['message' => 'Heartbeat received', 'student_id' => $student->student_id]);

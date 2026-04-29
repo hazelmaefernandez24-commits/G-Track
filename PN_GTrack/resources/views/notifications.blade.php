@@ -382,7 +382,7 @@
         /* --- MESSENGER-STYLE CHAT UI --- */
         .chat-container {
             margin-bottom: 30px;
-            background: #fff;
+            background: #ffffffff;
             border: 1px solid var(--line);
             border-radius: 16px;
             overflow: hidden;
@@ -483,7 +483,7 @@
         .messenger-wrapper {
             display: flex;
             height: 650px;
-            background: #fff;
+            background: #a82626ff;
             border: 1px solid var(--line);
             border-radius: 12px;
             overflow: hidden;
@@ -493,7 +493,7 @@
         /* LEFT PANEL — Student List */
         .student-panel {
             width: 320px;
-            background: #fff;
+            background: #ffffffff;
             border-right: 1px solid var(--line);
             display: flex;
             flex-direction: column;
@@ -604,7 +604,7 @@
             padding: 8px 14px; border-radius: 18px;
             font-size: 14px; line-height: 1.4;
         }
-        .bubble.student { background: #fff; color: var(--text); border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; }
+        .bubble.student { background: #ffffffff; color: var(--text); border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; }
         .bubble.admin { background: var(--blue); color: #fff; border-bottom-right-radius: 4px; }
         .bubble.sos-alert { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
         .bubble-time { font-size: 10px; margin-top: 4px; color: var(--muted); }

@@ -29,7 +29,7 @@ public function index()
     // 1. Auto-mark students offline if no heartbeat in last 5 minutes
     $onlineStudents = \App\Models\Student::where('status', true)->get();
     foreach ($onlineStudents as $student) {
-        if ($student->updated_at->addMinutes(5)->isPast()) {
+        if ($student->updated_at->addMinutes(15)->isPast()) {
             $student->status = false;
             $student->save();
         }
@@ -80,7 +80,7 @@ public function apiStats()
     // Auto-mark students offline if no heartbeat in last 5 minutes
     // Use updated_at (real timestamp) for accurate time comparison
     foreach ($students->where('status', true) as $student) {
-        if ($student->updated_at->addMinutes(5)->isPast()) {
+        if ($student->updated_at->addMinutes(15)->isPast()) {
             $student->status = false;
             $student->save();
         }
