@@ -12,23 +12,17 @@ class LocationSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\Location::create([
-            'student_id' => 1,
-            'latitude' => 10.3157,
-            'longitude' => 123.8854,
-            'recorded_at' => now(),
-        ]);
-        \App\Models\Location::create([
-            'student_id' => 2,
-            'latitude' => 10.3160,
-            'longitude' => 123.8860,
-            'recorded_at' => now(),
-        ]);
-        \App\Models\Location::create([
-            'student_id' => 3,
-            'latitude' => 10.3140,
-            'longitude' => 123.8840,
-            'recorded_at' => now(),
-        ]);
+        $students = \App\Models\Student::all();
+        
+        foreach ($students as $index => $student) {
+            // Create a location near Cebu City (10.3157, 123.8854)
+            \App\Models\Location::create([
+                'student_id' => $student->id,
+                'latitude' => 10.3157 + (rand(-100, 100) / 10000),
+                'longitude' => 123.8854 + (rand(-100, 100) / 10000),
+                'recorded_at' => now()->subMinutes(rand(1, 60)),
+                'sos_status' => $student->sos_status ?? 'safe'
+            ]);
+        }
     }
 }

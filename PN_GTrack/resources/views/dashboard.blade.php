@@ -505,7 +505,7 @@
                 <div style="width: 20px; height: 10px; border: 1px solid #9ca3af; border-radius: 2px; position: relative;">
                     <div style="width: {{ $student->battery_level }}%; height: 100%; background: {{ $student->battery_level < 20 ? '#ef4444' : '#22c55e' }};"></div>
                 </div>
-                {{ $student->battery_level }}%
+                {{ isset($student->battery_level) ? $student->battery_level . '%' : 'N/A' }}
             </div>
         </td>
         <td>
@@ -688,7 +688,7 @@
                 <div style="width:20px;height:10px;border:1px solid #9ca3af;border-radius:2px;position:relative;">
                     <div style="width:${level}%;height:100%;background:${color};"></div>
                 </div>
-                ${level}%
+                ${level !== null && level !== undefined ? level + '%' : 'N/A'}
             </div>`;
         }
 

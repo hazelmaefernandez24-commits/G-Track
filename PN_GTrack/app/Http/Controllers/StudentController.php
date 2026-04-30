@@ -59,7 +59,8 @@ class StudentController extends Controller
         $student->status       = true;
         $student->last_update  = now()->format('M d, Y h:i A');
         $student->signal_status = $request->signal ?? $student->signal_status;
-        $student->battery_level = $request->battery_level ?? $student->battery_level;
+        $battery = $request->input('battery_level', $request->input('battery'));
+        $student->battery_level = isset($battery) ? $battery : $student->battery_level;
         $student->touch(); // Force updated_at timestamp to refresh even if data is same
         $student->save();
 
@@ -86,7 +87,8 @@ class StudentController extends Controller
         $student->last_update = now()->format('M d, Y h:i A');
         if ($request->latitude)  $student->latitude  = $request->latitude;
         if ($request->longitude) $student->longitude = $request->longitude;
-        if ($request->battery)   $student->battery_level = $request->battery;
+        $battery = $request->input('battery_level', $request->input('battery'));
+        if (isset($battery))   $student->battery_level = $battery;
         if ($request->signal)    $student->signal_status = $request->signal;
         $student->save();
 
@@ -100,7 +102,7 @@ class StudentController extends Controller
                 'class'         => $student->class,
                 'latitude'      => $request->latitude,
                 'longitude'     => $request->longitude,
-                'battery_level' => $request->battery,
+                'battery_level' => $battery,
                 'signal_status' => $request->signal,
                 'read'          => false,
                 'status'        => 'pending',

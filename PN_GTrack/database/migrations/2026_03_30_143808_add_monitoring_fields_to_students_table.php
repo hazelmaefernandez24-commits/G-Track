@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::table('students', function (Blueprint $table) {
-    $table->integer('battery_level')->default(100);
-    $table->string('signal_status')->default('Good');
-    $table->string('location')->nullable();
-});
-
+        Schema::table('students', function (Blueprint $table) {
+            $table->integer('battery_level')->default(100);
+            $table->string('signal_status')->default('Good');
+            $table->string('location')->nullable();
+        });
+    }
 
     /**
      * Reverse the migrations.
@@ -24,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('students', function (Blueprint $table) {
-            //
+            $table->dropColumn(['battery_level', 'signal_status', 'location']);
+
         });
+        
     }
 };

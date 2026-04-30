@@ -252,11 +252,11 @@ class NotificationController extends Controller
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'battery_level' => 'nullable|integer|between:0,100',
+            'battery' => 'nullable|integer|between:0,100',
             'signal' => 'nullable|string',
             'location' => 'nullable|string',
-            'media' => 'nullable|file|mimes:mp4,mov,avi,mp3,wav,jpg,png,jpeg|max:20480', // 20MB max
+            'media' => 'nullable|file|mimes:mp4,mov,avi,jpg,png,jpeg|max:20480', // 20MB max
             'video' => 'nullable|file|mimes:mp4,mov,avi|max:20480',
-            'audio' => 'nullable|file|mimes:mp3,wav|max:20480',
         ]);
 
         $student = \App\Models\Student::where('student_id', $request->student_id)
@@ -279,9 +279,8 @@ class NotificationController extends Controller
             }
         }
 
-        $mediaUrl = $request->hasFile('media') ? asset('storage/' . $request->file('media')->store('alerts', 'public')) : null;
-        $videoUrl = $request->hasFile('video') ? asset('storage/' . $request->file('video')->store('alerts', 'public')) : null;
-        $audioUrl = $request->hasFile('audio') ? asset('storage/' . $request->file('audio')->store('alerts', 'public')) : null;
+        $mediaUrl = $request->hasFile('media') ? asset('storage/' . $request->file('media')->store('recordings/media', 'public')) : null;
+        $videoUrl = $request->hasFile('video') ? asset('storage/' . $request->file('video')->store('recordings/videos', 'public')) : null;
 
         $id = DB::table('notifications')->insertGetId([
             'student_id' => $student->id, // Use numeric ID for the relationship
@@ -291,12 +290,12 @@ class NotificationController extends Controller
             'message' => $request->message,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
-            'battery_level' => $request->battery_level,
+            'battery_level' => $request->input('battery_level', $request->input('battery')),
             'signal_status' => $request->signal,
             'location' => $request->location,
             'media_url' => $mediaUrl,
             'video_url' => $videoUrl,
-            'audio_url' => $audioUrl,
+            'audio_url' => null,
             'read' => false,
             'status' => 'pending', 
             'created_at' => now(),
@@ -307,7 +306,8 @@ class NotificationController extends Controller
         if ($type === 'sos' || $type === 'blackout') {
             if ($request->latitude) $student->latitude = $request->latitude;
             if ($request->longitude) $student->longitude = $request->longitude;
-            if ($request->battery_level) $student->battery_level = $request->battery_level;
+            $battery = $request->input('battery_level', $request->input('battery'));
+            if (isset($battery)) $student->battery_level = $battery;
             if ($request->signal) $student->signal_status = $request->signal;
             if ($type === 'sos') $student->sos_status = 'help';
             

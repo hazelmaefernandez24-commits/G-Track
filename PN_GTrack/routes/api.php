@@ -29,8 +29,9 @@ Route::middleware('api')->group(function () {
     Route::post('/location/update', [LocationController::class, 'update']);
     Route::post('/location/sos', [LocationController::class, 'setSOS']);
 
-    // 🔵 NOTIFICATIONS: Using the newly created JSON methods
+    // 🔵 NOTIFICATIONS & VIDEO UPLOAD
     Route::post('/notifications/send', [NotificationController::class, 'apiSend']);
+    Route::post('/upload-video', [NotificationController::class, 'apiSend']); // Mobile app endpoint
     Route::get('/notifications/{student_id}', [NotificationController::class, 'apiGet']);
 
     // 🟡 DEVICE STATUS

@@ -1,53 +1,64 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
-    <meta charset='UTF-8'/>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
     <title>G!Track - Notifications Dashboard</title>
     <style>
         /* ---- your existing styles remain unchanged ---- */
-        :root { 
-            --bg: #f8fafc; 
-            --card: #ffffff; 
-            --line: #e5e7eb; 
-            --text:#0f172a; 
-            --muted:#64748b; 
-            --blue:#2563eb; 
-            --red:#dc2626; 
-            --yellow:#f59e0b; 
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --line: #e5e7eb;
+            --text: #0f172a;
+            --muted: #64748b;
+            --blue: #2563eb;
+            --red: #dc2626;
+            --yellow: #f59e0b;
         }
-        *{box-sizing:border-box;}
-        body{
-            margin:0; 
-            font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,Noto Sans,Liberation Sans,sans-serif; 
-            background:var(--bg); color:var(--text);
-        }
-        .topbar{
-                height:64px;
-                background:#2563eb;
-                border-bottom:1px solid rgba(0,0,0,.06);
-                box-shadow: var(--shadow);
-                display:flex;
-                align-items:center;
-                justify-content:space-between;
-                padding:0 20px;
-            }
 
-        .brand{
-            display:flex;
-            align-items:center;
-            gap:12px;
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, Noto Sans, Liberation Sans, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .topbar {
+            height: 64px;
+            background: #2563eb;
+            border-bottom: 1px solid rgba(0, 0, 0, .06);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             color: #fff;
             text-decoration: none;
         }
 
-       .brand-badge{
-                width:34px;height:34px;border-radius:10px;
-                background:transparent;
-                display:flex;align-items:center;justify-content:center;
-            }
+        .brand-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-        
+
 
         .brand-text {
             display: flex;
@@ -57,7 +68,7 @@
         .brand-name {
             font-size: 19px;
             font-weight: 800;
-            line-height:1;
+            line-height: 1;
         }
 
         .brand-sub {
@@ -75,8 +86,8 @@
 
         .icon-btn {
             position: relative;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             width: 34px;
             height: 34px;
             border-radius: 10px;
@@ -88,7 +99,9 @@
             transition: all 0.2s;
         }
 
-        .icon-btn:hover { background: rgba(255,255,255,0.2); }
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
 
         .logout {
             background: none;
@@ -104,90 +117,111 @@
             border-radius: 10px;
             transition: all 0.2s;
         }
-        .logout:hover { background: rgba(255,255,255,0.1); }
 
-        .page-title h1{
-            margin:0;
-            font-size:26px;
-            font-weight:800;
-            letter-spacing:.1px;
+        .logout:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
-        .page-title p{
-            margin:6px 0 18px 0;
+
+        .page-title h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: .1px;
+        }
+
+        .page-title p {
+            margin: 6px 0 18px 0;
             color: #ff9900;
-            font-weight:500;
+            font-weight: 500;
         }
-        .cards{
-            display:grid;
+
+        .cards {
+            display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap:18px;
-            margin-top:14px;
+            gap: 18px;
+            margin-top: 14px;
             margin-bottom: 24px;
         }
+
         .container {
             max-width: 1300px;
             margin: 0 auto;
             padding: 20px 24px 40px 24px;
         }
 
-        .card{
-            background:#fff;
-            border:1px solid rgba(0,0,0,.08);
-            border-radius:16px;
-            padding:18px 18px 16px 18px;
-            position:relative;
-            overflow:hidden;
-            box-shadow: 0 1px 2px rgba(0,0,0,.04);
-            min-height:150px;
+        .card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, .08);
+            border-radius: 16px;
+            padding: 18px 18px 16px 18px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+            min-height: 150px;
         }
-        .card-head{
-            display:flex;
-            align-items:flex-start;
-            justify-content:space-between;
-            gap:122x;
-            margin-bottom:12px;
+
+        .card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 122x;
+            margin-bottom: 12px;
         }
-        .card-title{
-            font-size:14px;
-            font-weight:800;
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 800;
         }
-        .status-dot{
-            width:34px;height:34px;
-            border-radius:12px;
-            display:flex;align-items:center;justify-content:center;
-            border:1px solid rgba(0,0,0,.06);
-            background:#fff;
+
+        .status-dot {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(0, 0, 0, .06);
+            background: #fff;
         }
-        .stat-number{
-            font-size:28px;
-            font-weight:900;
-            margin-top:6px;
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 900;
+            margin-top: 6px;
         }
-        .stat-sub{
-            margin-top:6px;
-            font-size:13px;
+
+        .stat-sub {
+            margin-top: 6px;
+            font-size: 13px;
             color: #667085;
             font-weight: 500;
         }
-        .latest{
-            margin-top:6px;
+
+        .latest {
+            margin-top: 6px;
         }
-        .latest-time{
-            font-size:16px;
-            font-weight:800;
-            margin-top:6px;
+
+        .latest-time {
+            font-size: 16px;
+            font-weight: 800;
+            margin-top: 6px;
         }
-        .latest-date{
-            font-size:13px;
+
+        .latest-date {
+            font-size: 13px;
             color: #64748b;
-            margin-top:3px;
+            margin-top: 3px;
         }
-        .latest-icon{
-            width:34px;height:34px;
-            border-radius:12px;
-            display:flex;align-items:center;justify-content:center;
-            border:1px solid rgba(0,0,0,.06);
-            background:#fff;
+
+        .latest-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(0, 0, 0, .06);
+            background: #fff;
         }
 
         .overview-grid {
@@ -211,13 +245,13 @@
             padding: 16px 18px;
             border-top: 1px solid var(--line);
             border-bottom: 1px solid var(--line);
-            background: #f8fafc;
+            background: #2563eb;
             border-radius: 0 0 12px 12px;
         }
 
         .filter-label {
             font-weight: 700;
-            color: #0f172a;
+            color: #fff;
             font-size: 14px;
         }
 
@@ -236,35 +270,39 @@
             color: #0f172a;
         }
 
-        /* --- REVERTED TAB UI --- */
+        /* --- MAIN TAB UI (matches sub-tab pill style) --- */
         .tabs {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            display: flex;
+            gap: 1px;
+            background: #e2e8f0;
             border: 1px solid var(--line);
-            border-radius: 9px;
-            overflow: hidden;
-            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 3px;
             margin-top: 10px;
+            width: 100%;
         }
 
         .tab {
-            padding: 10px 12px;
+            flex: 1;
             text-align: center;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
             font-weight: 700;
-            font-size: 14px;
-            color: #475569;
+            color: #64748b;
             text-decoration: none;
             cursor: pointer;
-            border-right: 1px solid var(--line);
+            transition: all 0.2s;
         }
 
-        .tab:last-child {
-            border-right: none;
+        .tab:hover {
+            color: var(--blue);
         }
 
         .tab.active {
             background: #fff;
-            color: var(--text);
+            color: var(--blue);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         /* --- RESTORED LEGACY STYLES --- */
@@ -337,7 +375,7 @@
             color: #334155;
             font-size: 13px;
         }
-        
+
         .action-btn {
             border: none;
             border-radius: 8px;
@@ -346,8 +384,14 @@
             padding: 6px 12px;
             cursor: pointer;
         }
-        .ack-btn { background:#059669; }
-        .read-btn { background:#2563eb; }
+
+        .ack-btn {
+            background: #059669;
+        }
+
+        .read-btn {
+            background: #2563eb;
+        }
 
         /* Sub Tabs */
         .sub-tabs {
@@ -360,6 +404,7 @@
             margin-bottom: 16px;
             width: 100%;
         }
+
         .sub-tab {
             flex: 1;
             text-align: center;
@@ -372,11 +417,15 @@
             color: #64748b;
             transition: all 0.2s;
         }
-        .sub-tab:hover { color: var(--blue); }
+
+        .sub-tab:hover {
+            color: var(--blue);
+        }
+
         .sub-tab.active {
             background: #fff;
             color: var(--blue);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         /* --- MESSENGER-STYLE CHAT UI --- */
@@ -386,7 +435,7 @@
             border: 1px solid var(--line);
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .chat-header {
@@ -414,7 +463,7 @@
             font-size: 14px;
             line-height: 1.5;
             position: relative;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .bubble-left {
@@ -426,7 +475,8 @@
 
         .bubble-right {
             align-self: flex-end;
-            background: #f97316; /* Orange */
+            background: #f97316;
+            /* Orange */
             color: #fff;
             border-radius: 18px 18px 4px 18px;
         }
@@ -453,7 +503,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
         }
 
         .chat-input-row input {
@@ -478,12 +528,16 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .chat-send-btn:hover { background: #4f46e5; }
+
+        .chat-send-btn:hover {
+            background: #4f46e5;
+        }
+
         /* --- MESSENGER UI INTEGRATION --- */
         .messenger-wrapper {
             display: flex;
             height: 650px;
-            background: #a82626ff;
+            background: #2563eb;
             border: 1px solid var(--line);
             border-radius: 12px;
             overflow: hidden;
@@ -499,66 +553,139 @@
             flex-direction: column;
             flex-shrink: 0;
         }
+
         .panel-header {
             padding: 14px 16px 10px;
             border-bottom: 1px solid var(--line);
         }
-        .panel-title { font-size: 16px; font-weight: 800; margin-bottom: 10px; }
-        
-        .search-box {
-            display: flex; align-items: center;
-            background: #f1f5f9; border-radius: 20px;
-            padding: 8px 14px; gap: 8px;
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 800;
             margin-bottom: 10px;
         }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            border-radius: 20px;
+            padding: 8px 14px;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
         .search-box input {
-            background: none; border: none; outline: none;
-            font-size: 13px; color: var(--text); width: 100%;
+            background: none;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            color: var(--text);
+            width: 100%;
         }
 
         .class-tabs {
-            display: flex; gap: 4px;
-            background: #f1f5f9; border: 1px solid var(--line);
-            border-radius: 8px; padding: 3px;
+            display: flex;
+            gap: 4px;
+            background: #f1f5f9;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 3px;
         }
-        .class-tab {
-            flex: 1; text-align: center; padding: 5px 4px;
-            border-radius: 6px; font-size: 11px; font-weight: 700;
-            color: var(--muted); cursor: pointer; transition: all 0.15s;
-        }
-        .class-tab.active { background: #fff; color: var(--blue); box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
 
-        .student-list { flex: 1; overflow-y: auto; }
+        .class-tab {
+            flex: 1;
+            text-align: center;
+            padding: 5px 4px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .class-tab.active {
+            background: #fff;
+            color: var(--blue);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+        }
+
+        .student-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
         .alpha-heading {
             padding: 6px 16px 4px;
-            font-size: 10px; font-weight: 900; letter-spacing: 1px;
-            text-transform: uppercase; color: var(--blue);
-            background: #eff6ff; border-bottom: 1px solid #dbeafe;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--blue);
+            background: #eff6ff;
+            border-bottom: 1px solid #dbeafe;
         }
+
         .student-row {
-            display: flex; align-items: center; gap: 12px;
-            padding: 10px 16px; cursor: pointer;
-            border-bottom: 1px solid #f8fafc; transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f8fafc;
+            transition: background 0.15s;
         }
-        .student-row:hover { background: #f8fafc; }
-        .student-row.active { background: #eff6ff; border-left: 3px solid var(--blue); }
+
+        .student-row:hover {
+            background: #f8fafc;
+        }
+
+        .student-row.active {
+            background: #eff6ff;
+            border-left: 3px solid var(--blue);
+        }
 
         .avatar {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: #dbeafe; color: #1d4ed8;
-            font-weight: 800; font-size: 14px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; position: relative;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-weight: 800;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
         }
-        .avatar.female { background: #fce7f3; color: #be185d; }
+
+        .avatar.female {
+            background: #fce7f3;
+            color: #be185d;
+        }
+
         .unread-dot {
-            position: absolute; top: 0; right: 0;
-            width: 10px; height: 10px;
-            background: var(--blue); border-radius: 50%;
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            background: var(--blue);
+            border-radius: 50%;
             border: 2px solid #fff;
         }
-        .student-name { font-weight: 700; font-size: 13px; }
-        .student-sub { font-size: 11px; color: var(--muted); }
+
+        .student-name {
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .student-sub {
+            font-size: 11px;
+            color: var(--muted);
+        }
 
         /* RIGHT PANEL — Chat */
         .chat-panel {
@@ -568,122 +695,294 @@
             background: #f8fafc;
             overflow: hidden;
         }
+
         .chat-empty {
-            flex: 1; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            color: var(--muted); text-align: center; gap: 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            text-align: center;
+            gap: 10px;
         }
+
         .chat-header {
-            background: #fff; border-bottom: 1px solid var(--line);
+            background: #fff;
+            border-bottom: 1px solid var(--line);
             padding: 10px 20px;
-            display: flex; align-items: center; gap: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             flex-shrink: 0;
         }
-        .chat-header-name { font-weight: 800; font-size: 14px; }
-        .chat-header-sub { font-size: 11px; color: var(--muted); }
+
+        .chat-header-name {
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .chat-header-sub {
+            font-size: 11px;
+            color: var(--muted);
+        }
 
         .chat-messages {
-            flex: 1; overflow-y: auto;
+            flex: 1;
+            overflow-y: auto;
             padding: 20px;
-            display: flex; flex-direction: column; gap: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
-        .date-sep { text-align: center; margin: 15px 0 10px; }
+
+        .date-sep {
+            text-align: center;
+            margin: 15px 0 10px;
+        }
+
         .date-sep span {
-            background: #e2e8f0; color: #64748b;
-            font-size: 10px; font-weight: 800;
-            padding: 4px 12px; border-radius: 999px;
+            background: #e2e8f0;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 999px;
             text-transform: uppercase;
         }
 
-        .bubble-wrap { display: flex; gap: 8px; margin: 4px 0; align-items: flex-end; }
-        .bubble-wrap.admin { flex-direction: row-reverse; }
-        .bubble-content { display: flex; flex-direction: column; max-width: 75%; }
-        .bubble-wrap.admin .bubble-content { align-items: flex-end; }
-        
-        .bubble {
-            padding: 8px 14px; border-radius: 18px;
-            font-size: 14px; line-height: 1.4;
+        .bubble-wrap {
+            display: flex;
+            gap: 8px;
+            margin: 4px 0;
+            align-items: flex-end;
         }
-        .bubble.student { background: #ffffffff; color: var(--text); border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; }
-        .bubble.admin { background: var(--blue); color: #fff; border-bottom-right-radius: 4px; }
-        .bubble.sos-alert { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        .bubble-time { font-size: 10px; margin-top: 4px; color: var(--muted); }
+
+        .bubble-wrap.admin {
+            flex-direction: row-reverse;
+        }
+
+        .bubble-content {
+            display: flex;
+            flex-direction: column;
+            max-width: 75%;
+        }
+
+        .bubble-wrap.admin .bubble-content {
+            align-items: flex-end;
+        }
+
+        .bubble {
+            padding: 8px 14px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .bubble.student {
+            background: #fff;
+            color: var(--text);
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .bubble.admin {
+            background: var(--blue);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bubble.sos-alert {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .bubble-time {
+            font-size: 10px;
+            margin-top: 4px;
+            color: var(--muted);
+        }
+
 
         .chat-input-area {
-            background: #fff; border-top: 1px solid var(--line);
-            padding: 12px 20px; display: flex; align-items: flex-end; gap: 10px;
+            background: #fff;
+            border-top: 1px solid var(--line);
+            padding: 12px 20px;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
         }
+
         .input-wrap {
-            flex: 1; background: #f1f5f9; border: 1px solid var(--line);
-            border-radius: 20px; padding: 8px 16px;
+            flex: 1;
+            background: #f1f5f9;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 8px 16px;
         }
+
         .input-wrap textarea {
-            width: 100%; background: none; border: none; outline: none;
-            font-size: 14px; resize: none; line-height: 1.4;
-            max-height: 100px; font-family: inherit;
+            width: 100%;
+            background: none;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            resize: none;
+            line-height: 1.4;
+            max-height: 100px;
+            font-family: inherit;
         }
+
         .send-btn {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: var(--blue); color: #fff; border: none;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--blue);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
         }
-        .send-btn:disabled { background: #cbd5e1; }
+
+        .send-btn:disabled {
+            background: #cbd5e1;
+        }
 
         /* --- MODAL STYLES --- */
         .modal-backdrop {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center;
-            z-index: 1000; backdrop-filter: blur(4px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
         }
+
         .modal-content {
-            background: #fff; border-radius: 20px; width: 95%; max-width: 650px;
-            padding: 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-            position: relative; animation: modal-in 0.3s ease-out;
-            max-height: 85vh; display: flex; flex-direction: column;
+            background: #fff;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 650px;
+            padding: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            animation: modal-in 0.3s ease-out;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
         }
+
         @keyframes modal-in {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
+
         .modal-close {
-            position: absolute; top: 20px; right: 20px; cursor: pointer; color: var(--muted);
-            z-index: 10; padding: 4px; border-radius: 50%; transition: background 0.2s;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            color: var(--muted);
+            z-index: 10;
+            padding: 4px;
+            border-radius: 50%;
+            transition: background 0.2s;
         }
-        .modal-close:hover { background: #f1f5f9; color: var(--text); }
 
-        .modal-subject { font-size: 20px; font-weight: 800; margin-bottom: 4px; color: var(--text); line-height: 1.3; }
-        
+        .modal-close:hover {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .modal-subject {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
         .modal-body-container {
-            background: #f8fafc; border: 1px solid var(--line); border-radius: 14px; 
-            margin-top: 20px; overflow: hidden; display: flex; flex-direction: column;
+            background: #f8fafc;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
-        .modal-scroll-area {
-            padding: 24px; overflow-y: auto; flex: 1;
-        }
-        /* Custom Scrollbar for Modal */
-        .modal-scroll-area::-webkit-scrollbar { width: 6px; }
-        .modal-scroll-area::-webkit-scrollbar-track { background: #f1f5f9; }
-        .modal-scroll-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-        .broadcast-item-clickable { cursor: pointer; transition: all 0.2s; }
-        .broadcast-item-clickable:hover { background: #fefce8; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .modal-scroll-area {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Custom Scrollbar for Modal */
+        .modal-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-scroll-area::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .modal-scroll-area::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .broadcast-item-clickable {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .broadcast-item-clickable:hover {
+            background: #fefce8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
 
         @keyframes slide-down {
-            from { transform: translateY(-10px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
     </style>
     <!-- Quill Rich Text Editor -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 </head>
+
 <body>
     <header class="topbar">
         <a href="/dashboard" class="brand">
             <div class="brand-badge">
-                <img src="{{ asset('images/gtrack.png') }}" alt="logo" style="width:1500%;height:150%;object-fit:contain;" />
+                <img src="{{ asset('images/gtrack.png') }}" alt="logo"
+                    style="width:1500%;height:150%;object-fit:contain;" />
             </div>
             <div class="brand-text">
                 <div class="brand-name">Admin Dashboard</div>
@@ -703,7 +1002,8 @@
             <form action="{{ route('logout') }}" method="POST" style="display:inline;">
                 @csrf
                 <button type="submit" class="logout">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                         <polyline points="16 17 21 12 16 7"></polyline>
                         <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -716,7 +1016,8 @@
 
     <main class="container">
         @if(session('success'))
-            <div style='margin-bottom:12px;padding:10px 14px;border:1px solid #34d399;background:#d1fae5;color:#065f46;border-radius:10px; font-weight:600;'>
+            <div
+                style='margin-bottom:12px;padding:10px 14px;border:1px solid #34d399;background:#d1fae5;color:#065f46;border-radius:10px; font-weight:600;'>
                 {{ session('success') }}
             </div>
         @endif
@@ -731,17 +1032,22 @@
                 <div class="card-head">
                     <div>
                         <div class="card-title">Online Students</div>
-                        <div class="stat-number" id="online-count" style="color: #22c55e;">{{ $stats['onlineCount'] }}</div>
+                        <div class="stat-number" id="online-count" style="color: #22c55e;">{{ $stats['onlineCount'] }}
+                        </div>
                         <div class="stat-sub" style="color: #3b82f6;">
                             Currently online
                         </div>
                     </div>
                     <div class="status-dot" style="color: #22c55e;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Z" fill="currentColor"/>
-                            <path d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Z" fill="currentColor" opacity=".9"/>
-                            <path d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Z" fill="currentColor" opacity=".35"/>
-                            <path d="M16 13c-1.14 0-3.2.36-4.64 1.06.94.74 1.64 1.7 1.64 2.44V19h9v-2.5c0-2.33-4.67-3.5-6-3.5Z" fill="currentColor" opacity=".25"/>
+                            <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Z" fill="currentColor" />
+                            <path d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Z" fill="currentColor"
+                                opacity=".9" />
+                            <path d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Z" fill="currentColor"
+                                opacity=".35" />
+                            <path
+                                d="M16 13c-1.14 0-3.2.36-4.64 1.06.94.74 1.64 1.7 1.64 2.44V19h9v-2.5c0-2.33-4.67-3.5-6-3.5Z"
+                                fill="currentColor" opacity=".25" />
                         </svg>
                     </div>
                 </div>
@@ -751,17 +1057,22 @@
                 <div class="card-head">
                     <div>
                         <div class="card-title">Offline Students</div>
-                        <div class="stat-number" id="offline-count" style="color: #ef4444;">{{ $stats['offlineCount'] }}</div>
+                        <div class="stat-number" id="offline-count" style="color: #ef4444;">{{ $stats['offlineCount'] }}
+                        </div>
                         <div class="stat-sub" style="color: #f43f5e;">
                             Currently offline
                         </div>
                     </div>
                     <div class="status-dot" style="color: #ef4444;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Z" fill="currentColor"/>
-                            <path d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Z" fill="currentColor" opacity=".9"/>
-                            <path d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Z" fill="currentColor" opacity=".35"/>
-                            <path d="M16 13c-1.14 0-3.2.36-4.64 1.06.94.74 1.64 1.7 1.64 2.44V19h9v-2.5c0-2.33-4.67-3.5-6-3.5Z" fill="currentColor" opacity=".25"/>
+                            <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Z" fill="currentColor" />
+                            <path d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Z" fill="currentColor"
+                                opacity=".9" />
+                            <path d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Z" fill="currentColor"
+                                opacity=".35" />
+                            <path
+                                d="M16 13c-1.14 0-3.2.36-4.64 1.06.94.74 1.64 1.7 1.64 2.44V19h9v-2.5c0-2.33-4.67-3.5-6-3.5Z"
+                                fill="currentColor" opacity=".25" />
                         </svg>
                     </div>
                 </div>
@@ -778,8 +1089,10 @@
                     </div>
                     <div class="latest-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z" stroke="#6b7280" stroke-width="2" opacity=".9"/>
-                            <path d="M12 6v6l4 2" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z" stroke="#6b7280" stroke-width="2"
+                                opacity=".9" />
+                            <path d="M12 6v6l4 2" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
                     </div>
                 </div>
@@ -805,7 +1118,7 @@
                     </div>
                     <div class="status-dot" style="color: var(--red);">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 21h22L12 2 1 21Zm12-3h-2v-2h2v2Zm0-4h-2v-4h2v4Z" fill="currentColor"/>
+                            <path d="M1 21h22L12 2 1 21Zm12-3h-2v-2h2v2Zm0-4h-2v-4h2v4Z" fill="currentColor" />
                         </svg>
                     </div>
                 </div>
@@ -823,8 +1136,10 @@
                     </div>
                     <div class="status-dot" style="color: #f59e0b;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2Zm0 14H5.17L4 17.17V4h16v12Z" fill="currentColor"/>
-                            <path d="M7 9h10v2H7z" fill="currentColor" opacity=".3"/>
+                            <path
+                                d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2Zm0 14H5.17L4 17.17V4h16v12Z"
+                                fill="currentColor" />
+                            <path d="M7 9h10v2H7z" fill="currentColor" opacity=".3" />
                         </svg>
                     </div>
                 </div>
@@ -836,7 +1151,8 @@
                 <span class='filter-label'>Filter by Class</span>
                 <div class='select-wrap'>
                     <span style='color:#475569;font-size:15px;'>:</span>
-                    <select id='class-filter' onchange="location.href='?class=' + encodeURIComponent(this.value) + '&tab={{ $tab }}'">
+                    <select id='class-filter'
+                        onchange="location.href='?class=' + encodeURIComponent(this.value) + '&tab={{ $tab }}'">
                         <option value='all' {{ $class === 'all' ? 'selected' : '' }}>All Classes</option>
                         <option value='2026' {{ $dbClass === '2026' ? 'selected' : '' }}>Class 2026</option>
                         <option value='2027' {{ $dbClass === '2027' ? 'selected' : '' }}>Class 2027</option>
@@ -848,37 +1164,54 @@
 
         <div class='section'>
             <div class='tabs'>
-                <a class='tab {{ $tab === "student" ? "active" : "" }}' href='?class={{ urlencode($class) }}&tab=student'>Student Messages</a>
-                <a class='tab {{ $tab === "sos" ? "active" : "" }}' href='?class={{ urlencode($class) }}&tab=sos'>Emergency Alerts</a>
-                <a class='tab {{ $tab === "broadcast" ? "active" : "" }}' href='?class={{ urlencode($class) }}&tab=broadcast'>Broadcast Notifications</a>
+                <a class='tab {{ $tab === "student" ? "active" : "" }}'
+                    href='?class={{ urlencode($class) }}&tab=student'>Student Messages</a>
+                <a class='tab {{ $tab === "sos" ? "active" : "" }}'
+                    href='?class={{ urlencode($class) }}&tab=sos'>Emergency Alerts</a>
+                <a class='tab {{ $tab === "broadcast" ? "active" : "" }}'
+                    href='?class={{ urlencode($class) }}&tab=broadcast'>Broadcast Notifications</a>
             </div>
 
             <div class='card-panel'>
                 <div class='card-panel-grid'>
                     <div>
                         <h3 class='card-title'>{{ $class === 'all' ? 'All Classes' : $class }}</h3>
-                        <p class='card-sub'>{{ $notifications->count() }} {{ $notifications->count() === 1 ? 'message' : 'messages' }}</p>
+                        <p class='card-sub'>{{ $notifications->count() }}
+                            {{ $notifications->count() === 1 ? 'message' : 'messages' }}
+                        </p>
                     </div>
                 </div>
 
                 @if($tab === 'broadcast')
-                    <div id="broadcast-form-container" style="display: none; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); animation: slide-down 0.3s ease-out;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <div id="broadcast-form-container"
+                        style="display: none; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); animation: slide-down 0.3s ease-out;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
                             <div>
                                 <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800;">Compose New Broadcast</h3>
-                                <p style="margin: 0; font-size: 13px; color: var(--muted);">Prepare and send an announcement to students</p>
+                                <p style="margin: 0; font-size: 13px; color: var(--muted);">Prepare and send an announcement
+                                    to students</p>
                             </div>
-                            <button onclick="toggleBroadcastForm()" style="background: #f1f5f9; color: #64748b; border: none; padding: 8px; border-radius: 8px; cursor: pointer;">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            <button onclick="toggleBroadcastForm()"
+                                style="background: #f1f5f9; color: #64748b; border: none; padding: 8px; border-radius: 8px; cursor: pointer;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
                             </button>
                         </div>
 
-                        <form method="POST" action="/notifications/send" id="broadcast-form" style="display: flex; flex-direction: column; gap: 16px;">
+                        <form method="POST" action="/notifications/send" id="broadcast-form"
+                            style="display: flex; flex-direction: column; gap: 16px;">
                             @csrf
                             <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px;">
                                 <div>
-                                    <label style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Target Audience</label>
-                                    <select name="target" required style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
+                                    <label
+                                        style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Target
+                                        Audience</label>
+                                    <select name="target" required
+                                        style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
                                         <option value="all">All Students</option>
                                         <option value="2026">Class 2026</option>
                                         <option value="2027">Class 2027</option>
@@ -886,35 +1219,50 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Subject Line</label>
-                                    <input type="text" name="subject" required placeholder="Enter subject Title..." style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
+                                    <label
+                                        style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Subject
+                                        Line</label>
+                                    <input type="text" name="subject" required placeholder="Enter subject Title..."
+                                        style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
                                 </div>
                             </div>
-                            
+
                             <div>
-                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Message Content (Rich Text)</label>
-                                <div id="quill-editor" style="height: 150px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--line);"></div>
+                                <label
+                                    style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Message
+                                    Content (Rich Text)</label>
+                                <div id="quill-editor"
+                                    style="height: 150px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--line);">
+                                </div>
                                 <input type="hidden" name="message" id="broadcast-message-input">
                             </div>
 
                             <div style="display: flex; justify-content: flex-end; gap: 12px;">
-                                <button type="button" onclick="toggleBroadcastForm()" style="background: #f1f5f9; color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">
+                                <button type="button" onclick="toggleBroadcastForm()"
+                                    style="background: #f1f5f9; color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">
                                     Cancel
                                 </button>
-                                <button type="submit" style="background: var(--blue); color: #fff; border: none; padding: 12px 32px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s;">
+                                <button type="submit"
+                                    style="background: var(--blue); color: #fff; border: none; padding: 12px 32px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s;">
                                     Send Announcement Now
                                 </button>
                             </div>
                         </form>
                     </div>
 
-                    <div class='broadcast-info' style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                    <div class='broadcast-info'
+                        style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <strong>Broadcast Notifications History</strong>
                             <p style="margin: 4px 0 0 0;">Detailed log of all outbound school-wide announcements.</p>
                         </div>
-                        <button onclick="toggleBroadcastForm()" id="toggle-broadcast-btn" style="background: var(--blue); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); transition: all 0.2s;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <button onclick="toggleBroadcastForm()" id="toggle-broadcast-btn"
+                            style="background: var(--blue); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); transition: all 0.2s;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
                             Send New Broadcast
                         </button>
                     </div>
@@ -923,30 +1271,39 @@
                 <div class='messages'>
                     @if($tab === 'sos')
                         <div class="sub-tabs">
-                            <a href="?class={{ urlencode($class) }}&tab=sos&subtab=sos" class="sub-tab {{ $subtab === 'sos' ? 'active' : '' }}">
+                            <a href="?class={{ urlencode($class) }}&tab=sos&subtab=sos"
+                                class="sub-tab {{ $subtab === 'sos' ? 'active' : '' }}">
                                 SOS Alerts
                             </a>
-                            <a href="?class={{ urlencode($class) }}&tab=sos&subtab=blackout" class="sub-tab {{ $subtab === 'blackout' ? 'active' : '' }}">
+                            <a href="?class={{ urlencode($class) }}&tab=sos&subtab=blackout"
+                                class="sub-tab {{ $subtab === 'blackout' ? 'active' : '' }}">
                                 Blackout Alerts
                             </a>
                         </div>
 
                         @if($subtab === 'sos')
                             @forelse($notifications->where('type', 'sos') as $notification)
-                                <div class='message-item' style="{{ $notification->status === 'resolved' ? 'opacity: 0.7; border-left: 4px solid var(--muted);' : 'border-left: 4px solid var(--red);' }}">
+                                <div class='message-item'
+                                    style="{{ $notification->status === 'resolved' ? 'opacity: 0.7; border-left: 4px solid var(--muted);' : 'border-left: 4px solid var(--red);' }}">
                                     <div class='message-head'>
                                         <p class='message-title'>
-                                            SOS Alert: {{ $notification->student->name ?? 'Unknown Student' }} ({{ $notification->student->student_id ?? 'N/A' }})
+                                            SOS Alert: {{ $notification->student->name ?? 'Unknown Student' }}
+                                            ({{ $notification->student->student_id ?? 'N/A' }})
                                             @if($notification->status === 'resolved')
-                                                <span class='badge-pill' style='background:#f1f5f9;color:#64748b;border-color:#e2e8f0;'>I am Safe (Resolved)</span>
+                                                <span class='badge-pill'
+                                                    style='background:#f1f5f9;color:#64748b;border-color:#e2e8f0;'>I am Safe
+                                                    (Resolved)</span>
                                             @else
-                                                <span class='badge-pill' style='background:#fee2e2;color:#991b1b;border-color:#fecaca;'>Active Help Needed</span>
+                                                <span class='badge-pill'
+                                                    style='background:#fee2e2;color:#991b1b;border-color:#fecaca;'>Active Help
+                                                    Needed</span>
                                             @endif
                                         </p>
-                                        <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
+                                        <span
+                                            class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                                     </div>
                                     {{-- Message Body removed as per request --}}
-                                    
+
                                     @php
                                         // Get the student's latest GPS record from the locations table
                                         $latestLocation = $notification->student
@@ -957,77 +1314,97 @@
 
                                         // Prefer live locations table → student model → notification snapshot
                                         $currentBattery = $notification->student->battery_level ?? $notification->battery_level;
-                                        $currentSignal  = $notification->student->signal_status ?? $notification->signal_status;
-                                        $currentLat     = $latestLocation->latitude  ?? $notification->student->latitude  ?? $notification->latitude;
-                                        $currentLng     = $latestLocation->longitude ?? $notification->student->longitude ?? $notification->longitude;
+                                        $currentSignal = $notification->student->signal_status ?? $notification->signal_status;
+                                        $currentLat = $latestLocation->latitude ?? $notification->student->latitude ?? $notification->latitude;
+                                        $currentLng = $latestLocation->longitude ?? $notification->student->longitude ?? $notification->longitude;
                                     @endphp
 
-                                    <div class='message-meta' style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);'>
+                                    <div class='message-meta'
+                                        style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);'>
                                         <!-- MEDIA FEEDS SECTION -->
-                                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px;">
+                                        <div
+                                            style="margin-bottom: 12px;">
                                             <!-- Video Feed Container -->
-                                            <div style="background: #0f172a; border-radius: 8px; padding: 10px; min-height: 120px; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;">
-                                                <div style="position: absolute; top: 8px; left: 8px; background: rgba(220, 38, 38, 0.9); color: #fff; font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; z-index: 10; display: flex; align-items: center; gap: 4px;">
-                                                    <span style="width: 6px; height: 6px; background: #fff; border-radius: 50%; animate: pulse 1s infinite;"></span>
+                                            <div
+                                                style="background: #0f172a; border-radius: 8px; padding: 12px; min-height: 160px; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;">
+                                                <div
+                                                    style="position: absolute; top: 12px; left: 12px; background: rgba(220, 38, 38, 0.9); color: #fff; font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; z-index: 10; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                                                    <span
+                                                        style="width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulse 1s infinite;"></span>
                                                     Live Video Feed
                                                 </div>
-                                                
+
                                                 @if($notification->video_url || (isset($notification->media_url) && !Str::endsWith($notification->media_url, ['.mp3', '.wav'])))
-                                                    <video controls style="width: 100%; border-radius: 6px; max-height: 15100px;">
-                                                        <source src="{{ $notification->video_url ?? $notification->media_url }}" type="video/mp4">
-                                                    </video>
-                                                @else
-                                                    <div style="text-align: center; color: rgba(255,255,255,0.4);">
-                                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 8px; opacity: 0.5;">
-                                                            <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-                                                        </svg>
-                                                        <div style="font-size: 11px; font-weight: 700;">No Video Feed Available</div>
-                                                    </div>
-                                                @endif
-                                            </div>
-
-                                            <!-- Audio Feed Container -->
-                                            <div style="background: #1e293b; border-radius: 8px; padding: 10px; min-height: 120px; display: flex; flex-direction: column; justify-content: center; position: relative;">
-                                                <div style="position: absolute; top: 8px; left: 8px; background: rgba(37, 99, 235, 0.9); color: #fff; font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; z-index: 10;">
-                                                    Live Audio
-                                                </div>
-
-                                                @if($notification->audio_url || (isset($notification->media_url) && Str::endsWith($notification->media_url, ['.mp3', '.wav'])))
-                                                    <div style="padding-top: 10px;">
-                                                        <audio controls style="width: 100%;">
-                                                            <source src="{{ $notification->audio_url ?? $notification->media_url }}" type="audio/mpeg">
-                                                        </audio>
+                                                    <div style="position: relative;">
+                                                        <video controls style="width: 100%; border-radius: 6px; max-height: 400px; background: #000;">
+                                                            <source src="{{ $notification->video_url ?? $notification->media_url }}"
+                                                                type="video/mp4">
+                                                        </video>
+                                                        <div style="margin-top: 8px; display: flex; justify-content: flex-end;">
+                                                            <a href="{{ $notification->video_url ?? $notification->media_url }}" download 
+                                                               style="background: rgba(255,255,255,0.1); color: #fff; text-decoration: none; font-size: 11px; padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 6px; transition: all 0.2s;"
+                                                               onmouseover="this.style.background='rgba(255,255,255,0.2)'"
+                                                               onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                                                </svg>
+                                                                Save to Laptop
+                                                            </a>
+                                                        </div>
                                                     </div>
                                                 @else
-                                                    <div style="text-align: center; color: rgba(255,255,255,0.4);">
-                                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 8px; opacity: 0.5;">
-                                                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+                                                    <div style="text-align: center; color: rgba(255,255,255,0.4); padding: 40px 0;">
+                                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2"
+                                                            style="margin-bottom: 12px; opacity: 0.5;">
+                                                            <path d="M23 7l-7 5 7 5V7z" />
+                                                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
                                                         </svg>
-                                                        <div style="font-size: 11px; font-weight: 700;">No Audio Source</div>
+                                                        <div style="font-size: 13px; font-weight: 700;">No Video Feed Available</div>
+                                                        <p style="font-size: 11px; opacity: 0.6; margin-top: 4px;">Student device has not uploaded video data</p>
                                                     </div>
                                                 @endif
                                             </div>
                                         </div>
 
                                         <!-- TELEMETRY SECTION (Restored Original Style) -->
-                                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05);">
+                                        <div
+                                            style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05);">
                                             <div>
-                                                <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Live Battery</div>
-                                                <div style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? '#b91c1c' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
-                                                    🔋 {{ $currentBattery ?? 'N/A' }}{{ $currentBattery ? '%' : '' }}
+                                                <div
+                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                    Live Battery</div>
+                                                <div class="battery-display-{{ $notification->student->id ?? 'none' }}"
+                                                    style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? '#b91c1c' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
+                                                    🔋 {{ isset($currentBattery) ? $currentBattery . '%' : 'N/A' }}
                                                 </div>
                                             </div>
                                             <div>
-                                                <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Live Signal</div>
-                                                <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶 {{ $currentSignal ?? 'N/A' }}</div>
+                                                <div
+                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                    Live Signal</div>
+                                                <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶
+                                                    {{ $currentSignal ?? 'N/A' }}
+                                                </div>
                                             </div>
                                             <div style="grid-column: span 2;">
-                                                <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Last Known Location</div>
-                                                <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
+                                                <div
+                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                    Last Known Location</div>
+                                                <div
+                                                    style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
                                                     @if($currentLat)
-                                                        <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
-                                                            📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }} 
-                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                                                        <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}"
+                                                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                                                            📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }}
+                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                                stroke-linejoin="round">
+                                                                <line x1="7" y1="17" x2="17" y2="7"></line>
+                                                                <polyline points="7 7 17 7 17 17"></polyline>
+                                                            </svg>
                                                         </a>
                                                     @else
                                                         {{ $notification->location ?? 'Location Unavailable' }}
@@ -1036,23 +1413,40 @@
                                             </div>
 
                                             @if($notification->status !== 'resolved')
-                                                <div style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
+                                                <div
+                                                    style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
                                                     {{-- Acknowledged (Mark as Seen) --}}
                                                     @if(!$notification->read)
-                                                        <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge' style='display:inline;'>
+                                                        <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge'
+                                                            style='display:inline;'>
                                                             @csrf
-                                                            <button class='action-btn' style="font-size:11px; padding:8px 16px; border-radius: 8px; background: #3b82f6; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" type='submit'>
-                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                                            <button class='action-btn'
+                                                                style="font-size:11px; padding:8px 16px; border-radius: 8px; background: #3b82f6; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
+                                                                type='submit'>
+                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                                    stroke-linejoin="round">
+                                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                                </svg>
                                                                 Acknowledged
                                                             </button>
                                                         </form>
                                                     @endif
 
                                                     {{-- Mark as Resolved (Safe) --}}
-                                                    <form method='POST' action='/notifications/{{ $notification->id }}/resolve' style='display:inline;'>
+                                                    <form method='POST' action='/notifications/{{ $notification->id }}/resolve'
+                                                        style='display:inline;'>
                                                         @csrf
-                                                        <button class='action-btn ack-btn' style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;" type='submit'>
-                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                                        <button class='action-btn ack-btn'
+                                                            style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;"
+                                                            type='submit'>
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                                stroke-linejoin="round">
+                                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                                            </svg>
                                                             Mark as Resolved
                                                         </button>
                                                     </form>
@@ -1062,498 +1456,579 @@
                                     </div>
                                 </div>
                             @empty
-                                <div class='message-item' style='background:#f8fafc;border-style:dashed;text-align:center;color:var(--muted);'>No current SOS alerts.</div>
+                                <div class='message-item'
+                                    style='background:#f8fafc;border-style:dashed;text-align:center;color:var(--muted);'>No current
+                                    SOS alerts.</div>
                             @endforelse
                         @else
-                            @forelse($notifications->where('type', 'blackout') as $notification)
-                                <div class='message-item' style="border-left: 4px solid var(--blue);">
-                                    <div class='message-head'>
-                                        <p class='message-title'>
-                                            Blackout Alert: {{ $notification->student->name ?? 'Unknown Student' }}
-                                            <span class='badge-pill' style='background:#dbeafe;color:#1e40af;border-color:#bfdbfe;'>System Offline</span>
-                                        </p>
-                                        <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
-                                    </div>
-                                    {{-- Message from student removed: only battery, signal, and location are displayed --}}
-                                    @php
-                                        // Get the student's latest GPS record from the locations table
-                                        $latestLocation = $notification->student
-                                            ? \App\Models\Location::where('student_id', $notification->student->id)
-                                                ->orderBy('recorded_at', 'desc')
-                                                ->first()
-                                            : null;
-
-                                        // Prefer live locations table → student model → notification snapshot
-                                        $currentBattery = $notification->student->battery_level ?? $notification->battery_level;
-                                        $currentSignal  = $notification->student->signal_status ?? $notification->signal_status;
-                                        $currentLat     = $latestLocation->latitude  ?? $notification->student->latitude  ?? $notification->latitude;
-                                        $currentLng     = $latestLocation->longitude ?? $notification->student->longitude ?? $notification->longitude;
-                                    @endphp
-
-                                    <div class='message-meta' style='margin-top:12px; background: #f1f5f9; padding: 12px; border-radius: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; border: 1px solid rgba(0,0,0,0.05);'>
-                                        <div>
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Live Battery</div>
-                                            <div style="font-weight: 700; color: {{ $currentBattery < 20 ? 'var(--red)' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
-                                                🔋 {{ $currentBattery ?? 'N/A' }}{{ $currentBattery ? '%' : '' }}
+                                @forelse($notifications->where('type', 'blackout') as $notification)
+                                        <div class='message-item' style="border-left: 4px solid var(--blue);">
+                                            <div class='message-head'>
+                                                <p class='message-title'>
+                                                    Blackout Alert: {{ $notification->student->name ?? 'Unknown Student' }}
+                                                    <span class='badge-pill'
+                                                        style='background:#dbeafe;color:#1e40af;border-color:#bfdbfe;'>System Offline</span>
+                                                </p>
+                                                <span
+                                                    class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                                             </div>
-                                        </div>
-                                        <div>
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Live Signal</div>
-                                            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶 {{ $currentSignal ?? 'N/A' }}</div>
-                                        </div>
-                                        <div style="grid-column: span 2;">
-                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">Location</div>
-                                            <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
-                                                @if($currentLat)
-                                                    <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
-                                                        📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }} 
-                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-                                                    </a>
-                                                @else
-                                                    {{ $notification->location ?? 'Location Unavailable' }}
+                                            {{-- Message from student removed: only battery, signal, and location are displayed --}}
+                                            @php
+                                                // Get the student's latest GPS record from the locations table
+                                                $latestLocation = $notification->student
+                                                    ? \App\Models\Location::where('student_id', $notification->student->id)
+                                                        ->orderBy('recorded_at', 'desc')
+                                                        ->first()
+                                                    : null;
+
+                                                // Prefer live locations table → student model → notification snapshot
+                                                $currentBattery = $notification->student->battery_level ?? $notification->battery_level;
+                                                $currentSignal = $notification->student->signal_status ?? $notification->signal_status;
+                                                $currentLat = $latestLocation->latitude ?? $notification->student->latitude ?? $notification->latitude;
+                                                $currentLng = $latestLocation->longitude ?? $notification->student->longitude ?? $notification->longitude;
+                                            @endphp
+
+                                            <div class='message-meta'
+                                                style='margin-top:12px; background: #f1f5f9; padding: 12px; border-radius: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; border: 1px solid rgba(0,0,0,0.05);'>
+                                                <div>
+                                                    <div
+                                                        style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                        Live Battery</div>
+                                                    <div class="battery-display-{{ $notification->student->id ?? 'none' }}"
+                                                        style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? 'var(--red)' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
+                                                        🔋 {{ isset($currentBattery) ? $currentBattery . '%' : 'N/A' }}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div
+                                                        style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                        Live Signal</div>
+                                                    <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶
+                                                        {{ $currentSignal ?? 'N/A' }}
+                                                    </div>
+                                                </div>
+                                                <div style="grid-column: span 2;">
+                                                    <div
+                                                        style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                        Location</div>
+                                                    <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
+                                                        @if($currentLat)
+                                                            <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}"
+                                                                style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                                                                📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }}
+                                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                                    stroke-linejoin="round">
+                                                                    <line x1="7" y1="17" x2="17" y2="7"></line>
+                                                                    <polyline points="7 7 17 7 17 17"></polyline>
+                                                                </svg>
+                                                            </a>
+                                                        @else
+                                                            {{ $notification->location ?? 'Location Unavailable' }}
+                                                        @endif
+                                                    </div>
+                                                </div>
+
+                                                @if($notification->status !== 'resolved')
+                                                    <div
+                                                        style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
+                                                        {{-- Acknowledged (Mark as Seen) --}}
+                                                        @if(!$notification->read)
+                                                            <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge'
+                                                                style='display:inline;'>
+                                                                @csrf
+                                                                <button class='action-btn'
+                                                                    style="font-size:11px; padding:8px 16px; border-radius: 8px; background: #3b82f6; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
+                                                                    type='submit'>
+                                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                                        stroke-linejoin="round">
+                                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                                    </svg>
+                                                                    Acknowledged
+                                                                </button>
+                                                            </form>
+                                                        @endif
+
+                                                        {{-- Mark as Resolved (Safe) --}}
+                                                        <form method='POST' action='/notifications/{{ $notification->id }}/resolve'
+                                                            style='display:inline;'>
+                                                            @csrf
+                                                            <button class='action-btn ack-btn'
+                                                                style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;"
+                                                                type='submit'>
+                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                                    stroke-linejoin="round">
+                                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                                                </svg>
+                                                                Mark as Resolved
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 @endif
                                             </div>
                                         </div>
-
-                                        @if($notification->status !== 'resolved')
-                                            <div style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
-                                                {{-- Acknowledged (Mark as Seen) --}}
-                                                @if(!$notification->read)
-                                                    <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge' style='display:inline;'>
-                                                        @csrf
-                                                        <button class='action-btn' style="font-size:11px; padding:8px 16px; border-radius: 8px; background: #3b82f6; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" type='submit'>
-                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                                            Acknowledged
-                                                        </button>
-                                                    </form>
-                                                @endif
-
-                                                {{-- Mark as Resolved (Safe) --}}
-                                                <form method='POST' action='/notifications/{{ $notification->id }}/resolve' style='display:inline;'>
-                                                    @csrf
-                                                    <button class='action-btn ack-btn' style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;" type='submit'>
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                                                        Mark as Resolved
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        @endif
                                     </div>
-                                    </div>
-                                </div>
-                            @empty
-                                <div class='message-item' style='background:#f8fafc;border-style:dashed;text-align:center;color:var(--muted);'>No blackout events.</div>
+                                @empty
+                                <div class='message-item'
+                                    style='background:#f8fafc;border-style:dashed;text-align:center;color:var(--muted);'>No blackout
+                                    events.</div>
                             @endforelse
                         @endif
                     @elseif($tab === 'broadcast')
-                        @forelse($notifications as $notification)
-                            <div class='message-item broadcast-item-clickable' 
-                                 onclick="showBroadcastDetails('{{ addslashes($notification->subject ?? 'Broadcast Notification') }}', '{{ addslashes($notification->message) }}', '{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}')"
-                                 style="border-left: 4px solid var(--yellow);">
-                                <div class='message-head'>
-                                    <p class='message-title'>
-                                        {{ $notification->subject ?? 'No Subject' }}
-                                        <span class='badge-pill' style='background:#fef3c7;color:#92400e;border-color:#fde68a;'>Outbound</span>
-                                    </p>
-                                    <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
+                    @forelse($notifications as $notification)
+                        <div class='message-item broadcast-item-clickable'
+                            onclick="showBroadcastDetails('{{ addslashes($notification->subject ?? 'Broadcast Notification') }}', '{{ addslashes($notification->message) }}', '{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}')"
+                            style="border-left: 4px solid var(--yellow);">
+                            <div class='message-head'>
+                                <p class='message-title'>
+                                    {{ $notification->subject ?? 'No Subject' }}
+                                    <span class='badge-pill'
+                                        style='background:#fef3c7;color:#92400e;border-color:#fde68a;'>Outbound</span>
+                                </p>
+                                <span
+                                    class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
+                            </div>
+                            <div class='message-meta' style='margin-top:8px;'>
+                                @if($notification->class && $notification->class !== 'all') Class: {{ $notification->class }} |
+                                @endif
+                                <span class='badge-pill' style="font-size: 10px;">Sent to All</span>
+                            </div>
+                        </div>
+                    @empty
+                        <div class='message-item'
+                            style='background:#fff;border-color:#cbd5e1;text-align:center;padding:30px;color:var(--muted);'>No
+                            broadcast history.</div>
+                    @endforelse
+                @else
+                    {{-- MESSENGER-STYLE STUDENT CHAT --}}
+                    <div class="messenger-wrapper">
+                        {{-- Sidebar --}}
+                        <aside class="student-panel">
+                            <div class="panel-header">
+                                <div class="panel-title">Student Chats</div>
+                                <div class="search-box">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                    </svg>
+                                    <input type="text" id="student-search" placeholder="Search students..."
+                                        autocomplete="off">
                                 </div>
-                                <div class='message-meta' style='margin-top:8px;'>
-                                    @if($notification->class && $notification->class !== 'all') Class: {{ $notification->class }} | @endif
-                                    <span class='badge-pill' style="font-size: 10px;">Sent to All</span>
+                                <div class="class-tabs">
+                                    <div class="class-tab active" data-class="all">All</div>
+                                    <div class="class-tab" data-class="2026">2026</div>
+                                    <div class="class-tab" data-class="2027">2027</div>
+                                    <div class="class-tab" data-class="2028">2028</div>
                                 </div>
                             </div>
-                        @empty
-                            <div class='message-item' style='background:#fff;border-color:#cbd5e1;text-align:center;padding:30px;color:var(--muted);'>No broadcast history.</div>
-                        @endforelse
-                    @else
-                        {{-- MESSENGER-STYLE STUDENT CHAT --}}
-                        <div class="messenger-wrapper">
-                            {{-- Sidebar --}}
-                            <aside class="student-panel">
-                                <div class="panel-header">
-                                    <div class="panel-title">Student Chats</div>
-                                    <div class="search-box">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                                        <input type="text" id="student-search" placeholder="Search students..." autocomplete="off">
-                                    </div>
-                                    <div class="class-tabs">
-                                        <div class="class-tab active" data-class="all">All</div>
-                                        <div class="class-tab" data-class="2026">2026</div>
-                                        <div class="class-tab" data-class="2027">2027</div>
-                                        <div class="class-tab" data-class="2028">2028</div>
-                                    </div>
-                                </div>
-                                <div class="student-list" id="student-list-container">
-                                    @php $currentLetter = ''; @endphp
-                                    @forelse($sidebarStudents as $student)
-                                        @php
-                                            $letter = strtoupper(substr($student->name, 0, 1));
-                                            $isFemale = strtolower($student->gender ?? '') === 'female';
-                                            $unread = \App\Models\Notification::where(function($q) use ($student) {
-                                                    $q->where('student_id', $student->id)
-                                                      ->orWhere('student_id', $student->student_id);
-                                                })
-                                                ->where('sender_type', 'student')
-                                                ->where('read', false)
-                                                ->count();
-                                        @endphp
-                                        @if($letter !== $currentLetter)
-                                            @php $currentLetter = $letter; @endphp
-                                            <div class="alpha-heading alpha-row">{{ $letter }}</div>
-                                        @endif
-                                        <div class="student-row" 
-                                             data-id="{{ $student->id }}" 
-                                             data-name="{{ strtolower($student->name) }}" 
-                                             data-class="{{ $student->class }}"
-                                             data-display-name="{{ $student->name }}"
-                                             data-student-id="{{ $student->student_id }}"
-                                             data-gender="{{ strtolower($student->gender ?? '') }}">
-                                            <div class="avatar {{ $isFemale ? 'female' : '' }}">
-                                                {{ strtoupper(substr($student->name, 0, 1)) }}
-                                                @if($unread > 0)<div class="unread-dot"></div>@endif
-                                            </div>
-                                            <div class="student-info">
-                                                <div class="student-name">{{ $student->name }}</div>
-                                                <div class="student-sub">{{ $student->student_id }} · {{ $student->class }}</div>
-                                            </div>
+                            <div class="student-list" id="student-list-container">
+                                @php $currentLetter = ''; @endphp
+                                @forelse($sidebarStudents as $student)
+                                    @php
+                                        $letter = strtoupper(substr($student->name, 0, 1));
+                                        $isFemale = strtolower($student->gender ?? '') === 'female';
+                                        $unread = \App\Models\Notification::where(function ($q) use ($student) {
+                                            $q->where('student_id', $student->id)
+                                                ->orWhere('student_id', $student->student_id);
+                                        })
+                                            ->where('sender_type', 'student')
+                                            ->where('read', false)
+                                            ->count();
+                                    @endphp
+                                    @if($letter !== $currentLetter)
+                                        @php $currentLetter = $letter; @endphp
+                                        <div class="alpha-heading alpha-row">{{ $letter }}</div>
+                                    @endif
+                                    <div class="student-row" data-id="{{ $student->id }}"
+                                        data-name="{{ strtolower($student->name) }}" data-class="{{ $student->class }}"
+                                        data-display-name="{{ $student->name }}" data-student-id="{{ $student->student_id }}"
+                                        data-gender="{{ strtolower($student->gender ?? '') }}">
+                                        <div class="avatar {{ $isFemale ? 'female' : '' }}">
+                                            {{ strtoupper(substr($student->name, 0, 1)) }}
+                                            @if($unread > 0)
+                                            <div class="unread-dot"></div>@endif
                                         </div>
-                                    @empty
-                                        <div style="padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px;">No students found.</div>
-                                    @endforelse
-                                </div>
-                            </aside>
-
-                            {{-- Chat Panel --}}
-                            <section class="chat-panel">
-                                <div class="chat-empty" id="chat-empty">
-                                    <div style="background: #eff6ff; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                        <div class="student-info">
+                                            <div class="student-name">{{ $student->name }}</div>
+                                            <div class="student-sub">{{ $student->student_id }} · {{ $student->class }}</div>
+                                        </div>
                                     </div>
-                                    <p style="font-weight: 800; color: #0f172a; font-size: 16px;">Select a student</p>
-                                    <p style="font-size: 13px; color: var(--muted);">Click on a student to see message history</p>
-                                </div>
+                                @empty
+                                    <div style="padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px;">
+                                        No students found.</div>
+                                @endforelse
+                            </div>
+                        </aside>
 
-                                <div class="chat-header" id="chat-header" style="display:none;">
-                                    <div class="avatar" id="chat-header-avatar"></div>
-                                    <div class="student-info">
-                                        <div class="chat-header-name" id="chat-header-name">Student Name</div>
-                                        <div class="chat-header-sub" id="chat-header-sub">ID · Class</div>
-                                    </div>
+                        {{-- Chat Panel --}}
+                        <section class="chat-panel">
+                            <div class="chat-empty" id="chat-empty">
+                                <div
+                                    style="background: #eff6ff; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--blue)"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                    </svg>
                                 </div>
+                                <p style="font-weight: 800; color: #0f172a; font-size: 16px;">Select a student</p>
+                                <p style="font-size: 13px; color: var(--muted);">Click on a student to see message history
+                                </p>
+                            </div>
 
-                                <div class="chat-messages" id="chat-messages" style="display:none;"></div>
-
-                                <div class="chat-input-area" id="chat-input-area" style="display:none;">
-                                    <div class="input-wrap">
-                                        <textarea id="msg-input" rows="1" placeholder="Type a message..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-                                    </div>
-                                    <button class="send-btn" id="send-btn" title="Send message">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                                    </button>
+                            <div class="chat-header" id="chat-header" style="display:none;">
+                                <div class="avatar" id="chat-header-avatar"></div>
+                                <div class="student-info">
+                                    <div class="chat-header-name" id="chat-header-name">Student Name</div>
+                                    <div class="chat-header-sub" id="chat-header-sub">ID · Class</div>
                                 </div>
-                            </section>
-                        </div>
-                    @endif
-                </div>
+                            </div>
+
+                            <div class="chat-messages" id="chat-messages" style="display:none;"></div>
+
+                            <div class="chat-input-area" id="chat-input-area" style="display:none;">
+                                <div class="input-wrap">
+                                    <textarea id="msg-input" rows="1" placeholder="Type a message..."
+                                        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+                                </div>
+                                <button class="send-btn" id="send-btn" title="Send message">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="22" y1="2" x2="11" y2="13" />
+                                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </section>
+                    </div>
+                @endif
             </div>
+        </div>
         </div>
     </main>
 
 
     <script>
-    function pollDashboardStats() {
-        fetch('/api/dashboard/stats')
-            .then(res => res.json())
-            .then(data => {
-                const onlineEl  = document.getElementById('online-count');
-                const offlineEl = document.getElementById('offline-count');
-                const timeEl    = document.getElementById('latest-time');
-                const dateEl    = document.getElementById('latest-date');
-                if (onlineEl)  onlineEl.textContent  = data.onlineCount;
-                if (offlineEl) offlineEl.textContent = data.offlineCount;
-                if (timeEl)    timeEl.textContent    = data.latestTime ?? '—';
-                if (dateEl)    dateEl.textContent    = data.latestDate ?? '—';
-            })
-            .catch(err => console.error('Dashboard poll error:', err));
-    }
+        function pollDashboardStats() {
+            fetch('/api/dashboard/stats')
+                .then(res => res.json())
+                .then(data => {
+                    const onlineEl = document.getElementById('online-count');
+                    const offlineEl = document.getElementById('offline-count');
+                    const timeEl = document.getElementById('latest-time');
+                    const dateEl = document.getElementById('latest-date');
+                    if (onlineEl) onlineEl.textContent = data.onlineCount;
+                    if (offlineEl) offlineEl.textContent = data.offlineCount;
+                    if (timeEl) timeEl.textContent = data.latestTime ?? '—';
+                    if (dateEl) dateEl.textContent = data.latestDate ?? '—';
 
-    document.addEventListener('DOMContentLoaded', function () {
-        pollDashboardStats();
-        setInterval(pollDashboardStats, 10000); // Sync every 10s
+                    // LIVE TELEMETRY UPDATE for Notifications
+                    if (data.students) {
+                        data.students.forEach(s => {
+                            const batteryDivs = document.querySelectorAll('.battery-display-' + s.id);
+                            batteryDivs.forEach(div => {
+                                const level = s.battery_level;
+                                if (level !== null && level !== undefined) {
+                                    div.textContent = '🔋 ' + level + '%';
+                                    div.style.color = level < 20 ? '#ef4444' : '#0f172a';
+                                } else {
+                                    div.textContent = '🔋 N/A';
+                                    div.style.color = '#0f172a';
+                                }
+                            });
+                        });
+                    }
+                })
+                .catch(err => console.error('Dashboard poll error:', err));
+        }
 
-        // Global click listener for student rows (delegation)
-        document.addEventListener('click', function(e) {
-            const row = e.target.closest('.student-row');
-            if (row) {
-                try {
-                    handleStudentSelection(row);
-                } catch (err) {
-                    console.error('Selection error:', err);
+        document.addEventListener('DOMContentLoaded', function () {
+            pollDashboardStats();
+            setInterval(pollDashboardStats, 10000); // Sync every 10s
+
+            // Global click listener for student rows (delegation)
+            document.addEventListener('click', function (e) {
+                const row = e.target.closest('.student-row');
+                if (row) {
+                    try {
+                        handleStudentSelection(row);
+                    } catch (err) {
+                        console.error('Selection error:', err);
+                    }
+                }
+            });
+        });
+
+        // --- MESSENGER LOGIC ---
+        // --- Broadcast Details Modal Handling ---
+        function showBroadcastDetails(subject, message, time) {
+            const backdrop = document.getElementById('broadcast-modal');
+            document.getElementById('modal-subject').textContent = subject;
+            document.getElementById('modal-message').innerHTML = message;
+            document.getElementById('modal-time').textContent = time;
+            backdrop.style.display = 'flex';
+        }
+
+        function closeBroadcastModal(e) {
+            if (e.target.classList.contains('modal-backdrop')) {
+                e.target.style.display = 'none';
+            }
+        }
+
+        // --- Quill Rich Text Editor Initialization ---
+        var quill;
+        document.addEventListener('DOMContentLoaded', function () {
+            if (document.getElementById('quill-editor')) {
+                quill = new Quill('#quill-editor', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                            [{ 'align': [] }],
+                            ['clean']
+                        ]
+                    },
+                    placeholder: 'Type your announcement here...'
+                });
+
+                const form = document.getElementById('broadcast-form');
+                if (form) {
+                    form.onsubmit = function () {
+                        const messageInput = document.getElementById('broadcast-message-input');
+                        messageInput.value = quill.root.innerHTML;
+                    };
                 }
             }
         });
-    });
 
-    // --- MESSENGER LOGIC ---
-    // --- Broadcast Details Modal Handling ---
-    function showBroadcastDetails(subject, message, time) {
-        const backdrop = document.getElementById('broadcast-modal');
-        document.getElementById('modal-subject').textContent = subject;
-        document.getElementById('modal-message').innerHTML = message;
-        document.getElementById('modal-time').textContent = time;
-        backdrop.style.display = 'flex';
-    }
-
-    function closeBroadcastModal(e) {
-        if (e.target.classList.contains('modal-backdrop')) {
-            e.target.style.display = 'none';
-        }
-    }
-
-    // --- Quill Rich Text Editor Initialization ---
-    var quill;
-    document.addEventListener('DOMContentLoaded', function() {
-        if (document.getElementById('quill-editor')) {
-            quill = new Quill('#quill-editor', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'align': [] }],
-                        ['clean']
-                    ]
-                },
-                placeholder: 'Type your announcement here...'
-            });
-
-            const form = document.getElementById('broadcast-form');
-            if (form) {
-                form.onsubmit = function() {
-                    const messageInput = document.getElementById('broadcast-message-input');
-                    messageInput.value = quill.root.innerHTML;
-                };
+        function toggleBroadcastForm() {
+            const container = document.getElementById('broadcast-form-container');
+            const triggerBtn = document.getElementById('toggle-broadcast-btn');
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                triggerBtn.style.display = 'none';
+            } else {
+                container.style.display = 'none';
+                triggerBtn.style.display = 'flex';
             }
         }
-    });
 
-    function toggleBroadcastForm() {
-        const container = document.getElementById('broadcast-form-container');
-        const triggerBtn = document.getElementById('toggle-broadcast-btn');
-        if (container.style.display === 'none') {
-            container.style.display = 'block';
-            triggerBtn.style.display = 'none';
-        } else {
-            container.style.display = 'none';
-            triggerBtn.style.display = 'flex';
-        }
-    }
+        let activeStudentId = null;
+        let activeStudentName = '';
+        let activeIsFemale = false;
+        let msgPollTimer = null;
 
-    let activeStudentId = null;
-    let activeStudentName = '';
-    let activeIsFemale = false;
-    let msgPollTimer = null;
-
-    // Search
-    document.getElementById('student-search')?.addEventListener('input', function() {
-        filterStudentList();
-    });
-
-    // Class tabs
-    document.querySelectorAll('.class-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            document.querySelectorAll('.class-tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
+        // Search
+        document.getElementById('student-search')?.addEventListener('input', function () {
             filterStudentList();
         });
-    });
 
-    function filterStudentList() {
-        const q = document.getElementById('student-search').value.toLowerCase();
-        const cls = document.querySelector('.class-tab.active')?.dataset.class || 'all';
-        
-        document.querySelectorAll('.student-row').forEach(row => {
-            const nameMatch = row.dataset.name.includes(q);
-            const classMatch = cls === 'all' || row.dataset.class === cls;
-            row.style.display = (nameMatch && classMatch) ? 'flex' : 'none';
+        // Class tabs
+        document.querySelectorAll('.class-tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                document.querySelectorAll('.class-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                filterStudentList();
+            });
         });
 
-        // Hide alpha headings if no visible students in that group
-        document.querySelectorAll('.alpha-row').forEach(heading => {
-            let hasVisible = false;
-            let next = heading.nextElementSibling;
-            while (next && !next.classList.contains('alpha-row')) {
-                if (next.style.display !== 'none') { hasVisible = true; break; }
-                next = next.nextElementSibling;
+        function filterStudentList() {
+            const q = document.getElementById('student-search').value.toLowerCase();
+            const cls = document.querySelector('.class-tab.active')?.dataset.class || 'all';
+
+            document.querySelectorAll('.student-row').forEach(row => {
+                const nameMatch = row.dataset.name.includes(q);
+                const classMatch = cls === 'all' || row.dataset.class === cls;
+                row.style.display = (nameMatch && classMatch) ? 'flex' : 'none';
+            });
+
+            // Hide alpha headings if no visible students in that group
+            document.querySelectorAll('.alpha-row').forEach(heading => {
+                let hasVisible = false;
+                let next = heading.nextElementSibling;
+                while (next && !next.classList.contains('alpha-row')) {
+                    if (next.style.display !== 'none') { hasVisible = true; break; }
+                    next = next.nextElementSibling;
+                }
+                heading.style.display = hasVisible ? 'block' : 'none';
+            });
+        }
+
+        // Renamed to handleStudentSelection for better clarity with the delegation
+        function handleStudentSelection(row) {
+            const id = row.getAttribute('data-id');
+            const name = row.getAttribute('data-display-name') || 'Student';
+            const studentId = row.getAttribute('data-student-id') || 'N/A';
+            const cls = row.getAttribute('data-class') || 'N/A';
+            const gender = row.getAttribute('data-gender') || '';
+
+            // UI Updates
+            document.querySelectorAll('.student-row').forEach(r => r.classList.remove('active'));
+            row.classList.add('active');
+
+            const dot = row.querySelector('.unread-dot');
+            if (dot) dot.remove();
+
+            activeStudentId = id;
+            activeStudentName = name;
+            activeIsFemale = (gender === 'female');
+
+            // Header Updates
+            const avatarEl = document.getElementById('chat-header-avatar');
+            if (avatarEl) {
+                avatarEl.textContent = name.charAt(0).toUpperCase();
+                avatarEl.className = 'avatar' + (activeIsFemale ? ' female' : '');
             }
-            heading.style.display = hasVisible ? 'block' : 'none';
-        });
-    }
 
-    // Renamed to handleStudentSelection for better clarity with the delegation
-    function handleStudentSelection(row) {
-        const id = row.getAttribute('data-id');
-        const name = row.getAttribute('data-display-name') || 'Student';
-        const studentId = row.getAttribute('data-student-id') || 'N/A';
-        const cls = row.getAttribute('data-class') || 'N/A';
-        const gender = row.getAttribute('data-gender') || '';
+            const nameEl = document.getElementById('chat-header-name');
+            if (nameEl) nameEl.textContent = name;
 
-        // UI Updates
-        document.querySelectorAll('.student-row').forEach(r => r.classList.remove('active'));
-        row.classList.add('active');
+            const subEl = document.getElementById('chat-header-sub');
+            if (subEl) subEl.textContent = studentId + ' · Class ' + cls;
 
-        const dot = row.querySelector('.unread-dot');
-        if (dot) dot.remove();
+            // Panel Visibility
+            const emptyState = document.getElementById('chat-empty');
+            if (emptyState) emptyState.style.display = 'none';
 
-        activeStudentId = id;
-        activeStudentName = name;
-        activeIsFemale = (gender === 'female');
+            const headerPanel = document.getElementById('chat-header');
+            if (headerPanel) headerPanel.style.display = 'flex';
 
-        // Header Updates
-        const avatarEl = document.getElementById('chat-header-avatar');
-        if (avatarEl) {
-            avatarEl.textContent = name.charAt(0).toUpperCase();
-            avatarEl.className = 'avatar' + (activeIsFemale ? ' female' : '');
-        }
-        
-        const nameEl = document.getElementById('chat-header-name');
-        if (nameEl) nameEl.textContent = name;
+            const msgsPanel = document.getElementById('chat-messages');
+            if (msgsPanel) {
+                msgsPanel.style.display = 'flex';
+                msgsPanel.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b;font-size:13px;">Loading conversation...</div>';
+            }
 
-        const subEl = document.getElementById('chat-header-sub');
-        if (subEl) subEl.textContent = studentId + ' · Class ' + cls;
+            const inputPanel = document.getElementById('chat-input-area');
+            if (inputPanel) inputPanel.style.display = 'flex';
 
-        // Panel Visibility
-        const emptyState = document.getElementById('chat-empty');
-        if (emptyState) emptyState.style.display = 'none';
+            loadMessages(true);
 
-        const headerPanel = document.getElementById('chat-header');
-        if (headerPanel) headerPanel.style.display = 'flex';
-
-        const msgsPanel = document.getElementById('chat-messages');
-        if (msgsPanel) {
-            msgsPanel.style.display = 'flex';
-            msgsPanel.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b;font-size:13px;">Loading conversation...</div>';
+            clearInterval(msgPollTimer);
+            msgPollTimer = setInterval(() => loadMessages(false), 4000);
         }
 
-        const inputPanel = document.getElementById('chat-input-area');
-        if (inputPanel) inputPanel.style.display = 'flex';
-
-        loadMessages(true);
-
-        clearInterval(msgPollTimer);
-        msgPollTimer = setInterval(() => loadMessages(false), 4000);
-    }
-
-    // Helper for onclick-style calls if still in HTML
-    function openChat(row) {
-        handleStudentSelection(row);
-    }
-
-    async function loadMessages(forceScroll) {
-        if (!activeStudentId) return;
-        try {
-            const res = await fetch(`/messages/${activeStudentId}/json`);
-            if (!res.ok) throw new Error('Server error ' + res.status);
-            const data = await res.json();
-            renderMessages(data.messages, forceScroll);
-        } catch (e) { 
-            console.error('Poll error:', e);
-            const container = document.getElementById('chat-messages');
-            if (container) container.innerHTML = '<div style="color:red;padding:20px;text-align:center;">Error loading history: ' + e.message + '</div>';
+        // Helper for onclick-style calls if still in HTML
+        function openChat(row) {
+            handleStudentSelection(row);
         }
-    }
 
-    function renderMessages(messages, forceScroll) {
-        try {
-            const container = document.getElementById('chat-messages');
-            if (!container) return;
-            const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 80;
-            
-            let html = '';
-            let prevDate = '';
+        async function loadMessages(forceScroll) {
+            if (!activeStudentId) return;
+            try {
+                const res = await fetch(`/messages/${activeStudentId}/json`);
+                if (!res.ok) throw new Error('Server error ' + res.status);
+                const data = await res.json();
+                renderMessages(data.messages, forceScroll);
+            } catch (e) {
+                console.error('Poll error:', e);
+                const container = document.getElementById('chat-messages');
+                if (container) container.innerHTML = '<div style="color:red;padding:20px;text-align:center;">Error loading history: ' + e.message + '</div>';
+            }
+        }
 
-            if (!messages || !Array.isArray(messages) || messages.length === 0) {
-                html = '<div style="text-align:center;color:#64748b;font-size:13px;margin-top:40px;">No messages yet. Say hello! 👋</div>';
-            } else {
-                messages.forEach(msg => {
-                    const d = new Date(msg.created_at);
-                    const dateStr = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-                    const timeStr = d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
-                    const isAdmin = msg.sender_type === 'admin';
-                    const isEmergency = msg.type === 'sos' || msg.type === 'blackout';
+        function renderMessages(messages, forceScroll) {
+            try {
+                const container = document.getElementById('chat-messages');
+                if (!container) return;
+                const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 80;
 
-                    if (dateStr !== prevDate) {
-                        html += `<div class="date-sep"><span>${dateStr}</span></div>`;
-                        prevDate = dateStr;
-                    }
+                let html = '';
+                let prevDate = '';
 
-                    const bubClass = isAdmin ? 'admin' : 'student';
-                    const sosClass = isEmergency ? ' sos-alert' : '';
-                    const prefix = isEmergency ? '<b>🚨 ALERT:</b> ' : '';
+                if (!messages || !Array.isArray(messages) || messages.length === 0) {
+                    html = '<div style="text-align:center;color:#64748b;font-size:13px;margin-top:40px;">No messages yet. Say hello! 👋</div>';
+                } else {
+                    messages.forEach(msg => {
+                        const d = new Date(msg.created_at);
+                        const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        const timeStr = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                        const isAdmin = msg.sender_type === 'admin';
+                        const isEmergency = msg.type === 'sos' || msg.type === 'blackout';
 
-                    html += `
+                        if (dateStr !== prevDate) {
+                            html += `<div class="date-sep"><span>${dateStr}</span></div>`;
+                            prevDate = dateStr;
+                        }
+
+                        const bubClass = isAdmin ? 'admin' : 'student';
+                        const sosClass = isEmergency ? ' sos-alert' : '';
+                        const prefix = isEmergency ? '<b>🚨 ALERT:</b> ' : '';
+
+                        html += `
                         <div class="bubble-wrap ${bubClass}">
                             <div class="bubble-content">
                                 <div class="bubble ${bubClass}${sosClass}">${prefix}${escHtml(msg.message)}</div>
                                 <div class="bubble-time">${timeStr}</div>
                             </div>
                         </div>`;
-                });
-            }
+                    });
+                }
 
-            container.innerHTML = html;
-            if (forceScroll || wasAtBottom) {
-                container.scrollTop = container.scrollHeight;
+                container.innerHTML = html;
+                if (forceScroll || wasAtBottom) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            } catch (renderErr) {
+                console.error('Render error:', renderErr);
+                const container = document.getElementById('chat-messages');
+                if (container) container.innerHTML = '<div style="color:red;padding:20px;text-align:center;">Rendering error: ' + renderErr.message + '</div>';
             }
-        } catch (renderErr) {
-            console.error('Render error:', renderErr);
-            const container = document.getElementById('chat-messages');
-            if (container) container.innerHTML = '<div style="color:red;padding:20px;text-align:center;">Rendering error: ' + renderErr.message + '</div>';
         }
-    }
 
-    async function sendMessage() {
-        const input = document.getElementById('msg-input');
-        const text = input.value.trim();
-        if (!text || !activeStudentId) return;
+        async function sendMessage() {
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if (!text || !activeStudentId) return;
 
-        const btn = document.getElementById('send-btn');
-        btn.disabled = true;
+            const btn = document.getElementById('send-btn');
+            btn.disabled = true;
 
-        const fd = new FormData();
-        fd.append('message', text);
-        fd.append('_token', '{{ csrf_token() }}');
+            const fd = new FormData();
+            fd.append('message', text);
+            fd.append('_token', '{{ csrf_token() }}');
 
-        try {
-            await fetch(`/messages/new/${activeStudentId}`, { method: 'POST', body: fd });
-            input.value = '';
-            input.style.height = 'auto';
-            await loadMessages(true);
-        } catch (e) { console.error('Send error:', e); }
-        finally { btn.disabled = false; input.focus(); }
-    }
+            try {
+                await fetch(`/messages/new/${activeStudentId}`, { method: 'POST', body: fd });
+                input.value = '';
+                input.style.height = 'auto';
+                await loadMessages(true);
+            } catch (e) { console.error('Send error:', e); }
+            finally { btn.disabled = false; input.focus(); }
+        }
 
-    function escHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
+        function escHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
 
-    document.getElementById('send-btn')?.addEventListener('click', sendMessage);
-    document.getElementById('msg-input')?.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    });
+        document.getElementById('send-btn')?.addEventListener('click', sendMessage);
+        document.getElementById('msg-input')?.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        });
     </script>
 
     <!-- Broadcast Details Modal -->
     <div id="broadcast-modal" class="modal-backdrop" onclick="closeBroadcastModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="document.getElementById('broadcast-modal').style.display='none'">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
             </button>
-            <div id="modal-time" style="font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;"></div>
+            <div id="modal-time"
+                style="font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+            </div>
             <h2 id="modal-subject" class="modal-subject"></h2>
-            
+
             <div class="modal-body-container">
                 <div class="modal-scroll-area">
                     <div id="modal-message" style="line-height: 1.6; font-size: 15px; color: #334155;"></div>
@@ -1561,11 +2036,13 @@
             </div>
 
             <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
-                <button onclick="document.getElementById('broadcast-modal').style.display='none'" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer;">
+                <button onclick="document.getElementById('broadcast-modal').style.display='none'"
+                    style="background: #f1f5f9; color: #475569; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer;">
                     Close
                 </button>
             </div>
         </div>
     </div>
 </body>
+
 </html>

@@ -82,6 +82,7 @@ class LocationController extends Controller
             'latitude'   => 'nullable|numeric',
             'longitude'  => 'nullable|numeric',
             'battery'    => 'nullable|integer',
+            'battery_level' => 'nullable|integer',
             'signal'     => 'nullable|string',
         ]);
 
@@ -91,7 +92,8 @@ class LocationController extends Controller
         // Update live telemetry if provided
         if ($request->latitude)  $student->latitude  = $request->latitude;
         if ($request->longitude) $student->longitude = $request->longitude;
-        if ($request->battery)   $student->battery_level = $request->battery;
+        $battery = $request->input('battery_level', $request->input('battery'));
+        if (isset($battery))     $student->battery_level = $battery;
         if ($request->signal)    $student->signal_status = $request->signal;
         
         $student->last_update = now()->format('M d, Y h:i A');
@@ -107,7 +109,7 @@ class LocationController extends Controller
                 'class'         => $student->class,
                 'latitude'      => $request->latitude,
                 'longitude'     => $request->longitude,
-                'battery_level' => $request->battery,
+                'battery_level' => $battery,
                 'signal_status' => $request->signal,
                 'read'          => false,
                 'status'        => 'pending',

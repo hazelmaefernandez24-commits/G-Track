@@ -58,7 +58,7 @@
                         <span class="offline">● Offline</span>
                     @endif
                 </td>
-                <td>{{ $student->battery_level }}%</td>   
+                <td>{{ isset($student->battery_level) ? $student->battery_level . '%' : 'N/A' }}</td>   
                 <td>{{ $student->signal_status }}</td>   
                 <td>{{ $student->last_update }}</td>
                 <td>{{ $student->contact }}</td>

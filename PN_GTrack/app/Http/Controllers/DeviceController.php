@@ -12,8 +12,8 @@ class DeviceController extends Controller
     \App\Models\Student::updateOrCreate(
         ['student_id' => $request->student_id],
         [
-            'battery_level'  => $request->battery_level,
-            'signal_status'  => $request->signal, // Changed to match your migration name
+            'battery_level'  => $request->input('battery_level', $request->input('battery')),
+            'signal_status'  => $request->input('signal', $request->input('signal_status')), 
             'status'         => true,             // Use 'status' to match your 'onlineCount' logic
             'last_update'    => now()->format('M d, Y h:i A')
         ]
@@ -110,6 +110,7 @@ public function apiStats()
         'latestDate'     => $latestDate,
         'students'       => $students->map(function ($s) {
             return [
+                'id'             => $s->id,
                 'student_id'     => $s->student_id,
                 'name'           => $s->name,
                 'class'          => $s->class,
