@@ -96,4 +96,10 @@ Route::post('/notifications/{id}/reply', [NotificationController::class, 'reply'
 Route::get('/messages/{student_id}/json', [NotificationController::class, 'getMessagesJson']);
 Route::post('/messages/new/{student_id}', [NotificationController::class, 'sendMessageAjax']);
 
+// --- MANAGEMENT ROUTES (Main Admin Only) ---
+Route::middleware(['auth:admin', 'admin.role:main'])->prefix('admin')->group(function () {
+    Route::resource('students', \App\Http\Controllers\StudentManagementController::class);
+    Route::resource('admins', \App\Http\Controllers\AdminManagementController::class);
+});
+
 Route::get('/dashboard', [App\Http\Controllers\DeviceController::class, 'index']);

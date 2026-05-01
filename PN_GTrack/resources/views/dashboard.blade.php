@@ -272,6 +272,15 @@
     </svg>
     <span class="badge">{{ $sosCount }}</span>
 </a>
+                @if(Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === 'main')
+                <a href="/admin/students" class="logout" style="background: rgba(255,255,255,0.1); margin-right: 8px;">
+                    Students
+                </a>
+                <a href="/admin/admins" class="logout" style="background: rgba(255,255,255,0.1); margin-right: 8px;">
+                    Admins
+                </a>
+                @endif
+
                <form action="{{ route('logout') }}" method="POST" style="display:inline;">
                     @csrf
                     <button type="submit" class="logout">
