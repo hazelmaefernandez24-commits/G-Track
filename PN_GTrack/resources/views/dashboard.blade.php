@@ -1,780 +1,246 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>PN_G!track</title> 
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
-        <style>
-            :root{
-                --bg:#f6f7fb;
-                --text:#0f172a;
-                --muted:#6b7280;
-                --card-border:#e5e7eb;
-                --shadow: 0 1px 2px rgba(0,0,0,.04);
-                --blue:#4f46e5;
-                --online:#22c55e;
-                --offline:#ef4444;
-                --online-sub:#3b82f6;
-                --offline-sub:#f43f5e;
-            }
-            *{box-sizing:border-box;}
-            body{
-                margin:0;
-                background:var(--bg);
-                color:var(--text);
-                font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-            }
-            .topbar{
-                height:64px;
-                background:#2563eb;
-                border-bottom:1px solid rgba(0,0,0,.06);
-                box-shadow: var(--shadow);
-                display:flex;
-                align-items:center;
-                justify-content:space-between;
-                padding:0 20px;
-            }
-            .brand{
-                display:flex;
-                align-items:center;
-                gap:12px;
-                min-width:220px;
-            }
-            .brand-badge{
-                width:34px;height:34px;border-radius:10px;
-                background:transparent;
-                display:flex;align-items:center;justify-content:center;
-            }
-            .brand-title{
-                font-size:14px;
-                font-weight:700;
-                letter-spacing:.2px;
-                color:#fff;
-            }
-            .brand-sub{
-                font-size:20px;
-                color:#fff;
-                margin-top:2px;
-            }
-            .brand-text{
-               font-size: 19px;
-            font-weight: 800;
-            line-height:1;
-            }
-            .actions{
-                display:flex;
-                align-items:center;
-                gap:12px;
-            }
-            .icon-btn{
-                width:36px;height:36px;border-radius:12px;
-                border:1px solid rgba(255,255,255,.2);
-                background:rgba(255,255,255,.1);
-                display:flex;align-items:center;justify-content:center;
-                position:relative;
-                color:#fff;
-            }
-            .badge{
-                position:absolute;
-                top:-6px; right:-6px;
-                min-width:18px;height:18px;
-                padding:0 5px;
-                border-radius:999px;
-                background:#ef4444;
-                color:#fff;
-                font-size:11px;
-                font-weight:700;
-                display:flex;align-items:center;justify-content:center;
-                border:2px solid #fff;
-            }
-            .logout {
-                background: none;
-                border: none;
-                color: #fff;
-                font-weight: 700;
-                font-size: 14px;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                cursor: pointer;
-                padding: 8px 12px;
-                border-radius: 10px;
-                transition: all 0.2s;
-            }
-            .logout:hover { background: rgba(255,255,255,0.1); }
-            .container{
-                max-width:1180px;
-                margin:0 auto;
-                padding:24px 20px;
-            }
-            .page-title h1{
-                margin:0;
-                font-size:26px;
-                font-weight:800;
-                letter-spacing:.1px;
-            }
-            .page-title p{
-                margin:6px 0 18px 0;
-                color: #ff9900;
-                font-weight:500;
-            }
-            .cards{
-                display:grid;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-                gap:18px;
-                margin-top:14px;
-            }
-            @media (max-width: 900px){
-                .cards{grid-template-columns: 1fr; }
-                .brand{min-width:auto;}
-            }
-            .card{
-                background:#fff;
-                border:1px solid rgba(0,0,0,.08);
-                border-radius:16px;
-                padding:18px 18px 16px 18px;
-                position:relative;
-                overflow:hidden;
-                box-shadow: var(--shadow);
-                min-height:150px;
-            }
-            .card-head{
-                display:flex;
-                align-items:flex-start;
-                justify-content:space-between;
-                gap:12px;
-                margin-bottom:12px;
-            }
-            .card-title{
-                font-size:14px;
-                font-weight:800;
-            }
-            .status-dot{
-                width:34px;height:34px;
-                border-radius:12px;
-                display:flex;align-items:center;justify-content:center;
-                border:1px solid rgba(0,0,0,.06);
-                background:#fff;
-            }
-            .stat-number{
-                font-size:28px;
-                font-weight:900;
-                margin-top:6px;
-            }
-            .stat-sub{
-                margin-top:6px;
-                font-size:13px;
-                color: #667085;
-            }
-            .stat-sub strong{font-weight:800;}
-            .latest{
-                margin-top:6px;
-            }
-            .latest-time{
-                font-size:16px;
-                font-weight:800;
-                margin-top:6px;
-            }
-            .latest-date{
-                font-size:13px;
-                color: var(--muted);
-                margin-top:3px;
-            }
-            .latest-icon{
-                width:34px;height:34px;
-                border-radius:12px;
-                display:flex;align-items:center;justify-content:center;
-                border:1px solid rgba(0,0,0,.06);
-                background:#fff;
-            }
-            .card-icon-online{color: var(--online);}
-            .card-icon-offline{color: var(--offline);}
+@extends('layouts.app')
 
+@section('title', 'Overview')
+@section('subtitle', 'System status and analytics overview')
 
-            /* New Student Activity Table Styles */
-.activity-section {
-    margin-top: 24px;
-    background: #fff;
-    border: 1px solid rgba(0,0,0,.08);
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-}
-.table-container {
-    width: 100%;
-    overflow-x: auto;
-    margin-top: 16px;
-}
-.activity-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    text-align: left;
-}
-.activity-table th {
-    background: #f8fafc;
-    padding: 12px;
-    border-bottom: 2px solid #e5e7eb;
-    font-weight: 700;
-    color: var(--muted);
-    text-transform: uppercase;
-    font-size: 11px;
-}
-.activity-table td {
-    padding: 12px;
-    border-bottom: 1px solid #f1f5f9;
-    vertical-align: middle;
-}
-.activity-table tr:hover {
-    background: #fdfdfd;
-}
-.status-pill {
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-weight: 700;
-    font-size: 11px;
-}
-.status-online { background: #dcfce7; color: #166534; }
-.status-offline { background: #fee2e2; color: #991b1b; }
-.battery-text { font-weight: 600; color: #374151; }
-
-        </style>
-        <!-- Quill Rich Text Editor -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-</head>
-    <body>
-        <header class="topbar">
-            <div class="brand">
-                <div class="brand-badge" aria-hidden="true">
-                    <img src="{{ asset('images/gtrack.png') }}" alt="G!Track logo" style="width:1500%;height:150%;object-fit:contain;" />
-                </div>
-                <div class="brand-text">
-                    
-                    <div class="brand-sub">Admin Dashboard</div>
-                </div>
-            </div>
-
-            <div class="actions">
-                <a href="/notifications?tab=broadcast&class=all" class="icon-btn" aria-label="Broadcast Notifications">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2Z" fill="#0f172a"/>
-        <path d="M18 16v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2h16l-2-2Z" fill="#0f172a"/>
-    </svg>
-   <span class="badge">{{ $broadcastCount }}</span>
-</a>
-                <a href="/notifications?tab=sos&class=all" class="icon-btn" aria-label="SOS Alerts">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2L2 20h20L12 2Z" fill="#dc2626"/>
-        <text x="12" y="17" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">!</text>
-    </svg>
-    <span class="badge">{{ $sosCount }}</span>
-</a>
-                @if(Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === 'main')
-                <a href="/admin/students" class="logout" style="background: rgba(255,255,255,0.1); margin-right: 8px;">
-                    Students
-                </a>
-                <a href="/admin/admins" class="logout" style="background: rgba(255,255,255,0.1); margin-right: 8px;">
-                    Admins
-                </a>
-                @endif
-
-               <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="logout">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                        Logout
-                    </button>
-                </form>
-
-            </div>
-        </header>
-
-        <main class="container">
-            <div class="page-title">
-                <h1>System Status Monitoring</h1>
-                <p>Real-time overview of student tracking system</p>
-            </div>
-
-            <section class="cards">
-               
-                <article class="card">
-                    <div class="card-head">
-                        <div>
-                            <div class="card-title">Online Students</div>
-                            <div class="stat-number" id="online-count" style="color: var(--online);">{{ $onlineCount }}</div>
-                            <div class="stat-sub" style="color: var(--online-sub);">
-                                Currently online
-                            </div>
-                        </div>
-                        <div class="status-dot card-icon-online" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Z" fill="currentColor"/>
-                                <path d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Z" fill="currentColor" opacity=".9"/>
-                                <path d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Z" fill="currentColor" opacity=".35"/>
-                                <path d="M16 13c-1.14 0-3.2.36-4.64 1.06.94.74 1.64 1.7 1.64 2.44V19h9v-2.5c0-2.33-4.67-3.5-6-3.5Z" fill="currentColor" opacity=".25"/>
-                            </svg>
-                        </div>
-                    </div>
-                </article>
-
-               
-                <article class="card">
-                    <div class="card-head">
-                        <div>
-                            <div class="card-title">Offline Students</div>
-                            <div class="stat-number" id="offline-count" style="color: var(--offline);">{{ $offlineCount }}</div>
-                            <div class="stat-sub" style="color: var(--offline-sub);">
-                                Currently offline
-                            </div>
-                        </div>
-                        <div class="status-dot card-icon-offline" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Z" fill="currentColor"/>
-                                <path d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Z" fill="currentColor" opacity=".9"/>
-                                <path d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Z" fill="currentColor" opacity=".35"/>
-                                <path d="M16 13c-1.14 0-3.2.36-4.64 1.06.94.74 1.64 1.7 1.64 2.44V19h9v-2.5c0-2.33-4.67-3.5-6-3.5Z" fill="currentColor" opacity=".25"/>
-                            </svg>
-                        </div>
-                    </div>
-                </article>
-
-               
-                <article class="card">
-                    <div class="card-head">
-                        <div>
-                            <div class="card-title">Latest Update</div>
-                            <div class="latest">
-                                <div class="latest-time" id="latest-time">{{ $latestTime }}</div>
-                                <div class="latest-date" id="latest-date">{{ $latestDate }}</div>
-                            </div>
-                        </div>
-                        <div class="latest-icon" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z" stroke="#6b7280" stroke-width="2" opacity=".9"/>
-                                <path d="M12 6v6l4 2" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </div>
-                    </div>
-                </article>
-            </section>
-
-            
-            <div style="display: flex; gap: 16px; margin-top: 24px;">
-                <!-- Map Section (65%) -->
-                <div style="flex: 0 0 65%; display: flex; flex-direction: column;">
-                    <!-- Map Header with Class Filter -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h2 style="font-size: 18px; margin: 0;">Real-Time Location Tracking</h2>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <label for="class-filter" style="font-weight:600; font-size:14px;">Class:</label>
-                            <select id="class-filter" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:8px; font-size:13px;">
-                                <option>All Classes</option>
-                                <option>2026</option>
-                                <option>2027</option>
-                                <option>2028</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div id="map" style="height: 500px; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.06);"></div>
-                    <!-- Legend -->
-                    <div style="margin-top: 12px; font-size: 13px; display: flex; gap: 16px; align-items: center;">
-                        <span style="display: inline-flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; border: 2px solid #1e40af;"></span> Male</span>
-                        <span style="display: inline-flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444; border: 2px solid #b91c1e;"></span> Female</span>
-                    </div>
-                </div>
-
-                <!-- Notifications Section (35%) -->
-                <div style="flex: 0 0 35%;">
-                    <div style="background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 16px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,.04);">
-                        <!-- Notifications Header -->
-                        <div style="margin-bottom: 16px;">
-                            <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800;">Notifications Center</h3>
-                            <p style="margin: 0; font-size: 13px; color: #667085;">View all messages & system status</p>
-                        </div>
-
-
-                        <!-- Open Notifications Button -->
-                        <button onclick="window.location.href='/notifications'" style="width: 100%; background: #2563EB; color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563EB'">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2Z" fill="currentColor"/>
-                                <path d="M18 16v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2h16l-2-2Z" fill="currentColor" opacity=".9"/>
-                            </svg>
-                            Open Notifications Dashboard
-                        </button>
-                    </div>
-
-                    <!-- Send Notification Container -->
-                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #E5E7EB;">
-                        <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800;">Send Notification</h3>
-                        <p style="margin: 0 0 16px 0; font-size: 13px; color: #667085;">Send emergency announcements</p>
-
-                        @if(session('success'))
-    <div style="color: green; margin-bottom: 10px;">
-        {{ session('success') }}
-    </div>
-@endif
-
-<form method="POST" action="/notifications/send" id="dashboard-broadcast-form" style="display: flex; flex-direction: column; gap: 12px;">
-    @csrf
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Target Audience</label>
-            <select name="target" required style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;">
-                <option value="all">All Students</option>
-                <option value="2026">Class 2026</option>
-                <option value="2027">Class 2027</option>
-                <option value="2028">Class 2028</option>
-            </select>
-        </div>
-        <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Subject Line</label>
-            <input type="text" name="subject" required placeholder="Subject Title..." style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;">
-        </div>
-    </div>
-
-    <div>
-        <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Message Content (Rich Text)</label>
-        <div id="dashboard-quill-editor" style="height: 120px; background: #fff; border-radius: 6px; border: 1px solid #d1d5db;"></div>
-        <input type="hidden" name="message" id="dashboard-broadcast-message-input">
-    </div>
-
-    <button type="submit" style="width: 100%; background: #4f46e5; color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#4338ca'" onmouseout="this.style.background='#4f46e5'">
-        Send Broadcast Notification
-    </button>
-</form>
-                    </div>
-                </div>
-            </div>
-
-        </main>
-<!-- 🚨 SOS ALERT BANNER (shown dynamically) -->
-<div id="sos-banner" style="display:none; background:#dc2626; color:#fff; padding:14px 24px; font-size:15px; font-weight:700; text-align:center; position:sticky; top:64px; z-index:999; animation: sosPulse 1s infinite;">
-    🚨 SOS ALERT — A student is in danger! Check the dashboard immediately.
-</div>
+@push('styles')
 <style>
-@keyframes sosPulse { 0%,100%{background:#dc2626;} 50%{background:#b91c1c;} }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .stat-card {
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        box-shadow: var(--card-shadow);
+    }
+
+    .stat-content h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .stat-subtitle {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .online-icon { color: var(--online); background: #DCFCE7; }
+    .offline-icon { color: var(--offline); background: #FEE2E2; }
+    .update-icon { color: var(--text-muted); background: #F1F5F9; }
+
+    /* System Overview Cards */
+    .system-overview {
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .system-header {
+        margin-bottom: 24px;
+    }
+
+    .system-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .system-header p {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-top: 4px;
+    }
+
+    .quick-access-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .qa-card {
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        gap: 16px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .qa-card:hover {
+        border-color: var(--sidebar-active);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .qa-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .qa-blue { background: #EFF6FF; color: var(--sidebar-active); }
+    .qa-green { background: #DCFCE7; color: var(--online); }
+    .qa-purple { background: #F3E8FF; color: #9333EA; }
+    .qa-orange { background: #FFEDD5; color: #EA580C; }
+
+    .qa-content h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 4px;
+    }
+
+    .qa-content p {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.4;
+    }
 </style>
+@endpush
 
-<section class="activity-section">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <div>
-            <h3 style="margin: 0; font-size: 18px; font-weight: 800;">Student Activity Log</h3>
-            <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--muted);">
-                Detailed status of all registered student devices
-            </p>
+@section('content')
+
+<!-- Top Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-content">
+            <h3>Online Students</h3>
+            <div class="stat-value" style="color: var(--online);" id="online-count">{{ $onlineCount ?? 0 }}</div>
+            <div class="stat-subtitle">Currently online</div>
         </div>
-        
+        <div class="stat-icon online-icon">
+            <i data-lucide="user-check"></i>
+        </div>
     </div>
 
-    <div class="table-container">
-        <table class="activity-table">
-            <thead>
-                <tr>
-                    <th>Student ID</th>
-                    <th>Name</th>
-                    <th>Class</th>
-                    <th>Gender</th>
-                    <th>Status</th>
-                    <th>Battery</th>
-                    <th>Signal</th>
-                    <th>Last Update</th>
-                    <th>Contact</th>
-                </tr>
-            </thead>
-          <tbody id="student-table-body">
-    @foreach($students ?? [] as $student)
-    <tr>
-        <td style="font-weight: 700;">{{ $student->student_id }}</td>
-        <td>{{ $student->name }}</td>
-        <td>
-            <span style="background: #eff6ff; color: #1e40af; padding: 2px 6px; border-radius: 4px;">
-                {{ $student->class }}
-            </span>
-        </td>
-        <td>{{ $student->gender }}</td>
-        <td>
-            @if($student->sos_status === 'help')
-                <span class="status-pill status-offline">🚨 SOS ALERT</span>
-            @elseif($student->status)
-                <span class="status-pill status-online">● ONLINE</span>
-            @else
-                <span class="status-pill status-offline">● OFFLINE</span>
-            @endif
-        </td>
-        <td class="battery-text">
-            <div style="display:flex; align-items:center; gap:4px;">
-                <div style="width: 20px; height: 10px; border: 1px solid #9ca3af; border-radius: 2px; position: relative;">
-                    <div style="width: {{ $student->battery_level }}%; height: 100%; background: {{ $student->battery_level < 20 ? '#ef4444' : '#22c55e' }};"></div>
-                </div>
-                {{ isset($student->battery_level) ? $student->battery_level . '%' : 'N/A' }}
+    <div class="stat-card">
+        <div class="stat-content">
+            <h3>Offline Students</h3>
+            <div class="stat-value" style="color: var(--offline);" id="offline-count">{{ $offlineCount ?? 0 }}</div>
+            <div class="stat-subtitle">Currently offline</div>
+        </div>
+        <div class="stat-icon offline-icon">
+            <i data-lucide="user-minus"></i>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-content">
+            <h3>Latest Update</h3>
+            <div class="stat-value" style="font-size: 24px; margin-top: 6px;" id="latest-time">{{ $latestTime ?? '--:--' }}</div>
+            <div class="stat-subtitle" id="latest-date">{{ $latestDate ?? '' }}</div>
+        </div>
+        <div class="stat-icon update-icon">
+            <i data-lucide="clock"></i>
+        </div>
+    </div>
+</div>
+
+<!-- System Overview -->
+<div class="system-overview">
+    <div class="system-header">
+        <h2>System Overview</h2>
+        <p>Quick access to key features</p>
+    </div>
+
+    <div class="quick-access-grid">
+        <a href="/tracking" class="qa-card">
+            <div class="qa-icon qa-blue">
+                <i data-lucide="map-pin"></i>
             </div>
-        </td>
-        <td>
-            <span title="{{ $student->signal_status }}">
-                @if($student->signal_status == 'Strong') 📶 @else ⚠️ @endif
-                {{ $student->signal_status }}
-            </span>
-        </td>
-        <td style="color: var(--muted);">{{ $student->last_update }}</td>
-        <td>
-            <a href="tel:{{ $student->contact }}" style="color: var(--blue); text-decoration: none; font-weight: 600;">
-                {{ $student->contact }}
-            </a>
-        </td>
-    </tr>
-    @endforeach
+            <div class="qa-content">
+                <h3>Real-Time Tracking</h3>
+                <p>Monitor student locations on interactive map</p>
+            </div>
+        </a>
 
-    @if(count($students ?? []) == 0)
-    <tr id="no-data-row">
-        <td colspan="9" style="text-align:center; padding: 20px; color: var(--muted);">
-            No student data available.
-        </td>
-    </tr>
-    @endif
-</tbody>
+        <a href="/activity" class="qa-card">
+            <div class="qa-icon qa-green">
+                <i data-lucide="grid"></i>
+            </div>
+            <div class="qa-content">
+                <h3>Student Activity</h3>
+                <p>View detailed student status and information</p>
+            </div>
+        </a>
 
+        <a href="/notifications" class="qa-card">
+            <div class="qa-icon qa-purple">
+                <i data-lucide="bell"></i>
+            </div>
+            <div class="qa-content">
+                <h3>Notifications</h3>
+                <p>Send announcements and emergency alerts</p>
+            </div>
+        </a>
 
-        </table>
+        <a href="/notifications?tab=messages" class="qa-card">
+            <div class="qa-icon qa-orange">
+                <i data-lucide="message-square"></i>
+            </div>
+            <div class="qa-content">
+                <h3>Messages Dashboard</h3>
+                <p>View all student messages and communications</p>
+            </div>
+        </a>
     </div>
-</section>
+</div>
 
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-        <script>
-            let map;
-            let markers = [];
-            let selectedClass = 'All Classes';
+@endsection
 
-            function getColorByGender(gender) {
-                if (!gender) return '#6b7280';
-                return gender.toString().toLowerCase() === 'female' ? '#ef4444' : '#3b82f6';
-            }
+@push('scripts')
+<script>
+    // Poll just for the dashboard stats
+    function updateDashboardStats() {
+        fetch('/api/dashboard/stats')
+            .then(res => res.json())
+            .then(data => {
+                const onlineEl  = document.getElementById('online-count');
+                const offlineEl = document.getElementById('offline-count');
+                const timeEl    = document.getElementById('latest-time');
+                const dateEl    = document.getElementById('latest-date');
+                
+                if (onlineEl)  onlineEl.textContent  = data.onlineCount;
+                if (offlineEl) offlineEl.textContent = data.offlineCount;
+                if (timeEl)    timeEl.textContent    = data.latestTime ?? '--:--';
+                if (dateEl)    dateEl.textContent    = data.latestDate ?? '';
+            })
+            .catch(err => console.error('Dashboard stats update failed:', err));
+    }
 
-            function showPopup(location) {
-                const student = location.student || {};
-                const recorded = location.recorded_at ? new Date(location.recorded_at).toLocaleString() : 'Unknown';
-                const sos = location.sos_status || student.sos_status || 'safe';
-
-                const sosLabel = sos === 'help' ? '<span style="color:#ef4444;font-weight:700;">I Need Help</span>' : '<span style="color:#22c55e;font-weight:700;">I Am Safe</span>';
-
-                return `
-                    <div style="font-size:13px;line-height:1.3;min-width:220px;">
-                        <strong>${student.name || 'Unknown'}</strong><br>
-                        Gender: ${student.gender || 'Unknown'}<br>
-                        Class: ${student.class || 'Unknown'}<br>
-                        Email: ${student.email || 'N/A'}<br>
-                        Latitude: ${location.latitude}<br>
-                        Longitude: ${location.longitude}<br>
-                        Latest: ${recorded}<br>
-                        Status: ${sosLabel}<br>
-                        
-                    </div>
-                `;
-            }
-
-            function updateSOS(studentId, sosStatus) {
-                fetch('/api/location/sos', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ student_id: studentId, sos_status: sosStatus })
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error('SOS update failed ' + res.status);
-                    return res.json();
-                })
-                .then(() => {
-                    loadLocations();
-                })
-                .catch(err => console.error('Error setting SOS status:', err));
-            }
-
-            function clearMarkers() {
-                markers.forEach(marker => marker.remove());
-                markers = [];
-            }
-
-            function loadLocations() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const focusStudentId = urlParams.get('student_id');
-
-                const url = selectedClass === 'All Classes' ? '/api/location/all' : `/api/location/all?class=${selectedClass}`;
-                fetch(url)
-                    .then(res => {
-                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                        return res.json();
-                    })
-                    .then(data => {
-                        clearMarkers();
-                        if (!Array.isArray(data) || data.length === 0) return;
-
-                        const bounds = [];
-                        let focusMarker = null;
-
-                        data.forEach(loc => {
-                            const lat = parseFloat(loc.latitude);
-                            const lng = parseFloat(loc.longitude);
-                            if (Number.isNaN(lat) || Number.isNaN(lng)) return;
-
-                            const marker = L.circleMarker([lat, lng], {
-                                radius: 8,
-                                fillColor: getColorByGender(loc.student?.gender),
-                                color: '#1f2937',
-                                weight: 1,
-                                fillOpacity: 0.9,
-                            }).addTo(map);
-
-                            marker.bindPopup(showPopup(loc));
-                            markers.push(marker);
-                            bounds.push([lat, lng]);
-
-                            // Match student_id or STU... code
-                            if (focusStudentId && (loc.student_id == focusStudentId || (loc.student && loc.student.student_id == focusStudentId))) {
-                                focusMarker = marker;
-                            }
-                        });
-
-                        if (focusMarker) {
-                            map.setView(focusMarker.getLatLng(), 18);
-                            focusMarker.openPopup();
-                        } else if (bounds.length) {
-                            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
-                        }
-                    })
-                    .catch(err => console.error('Error loading location data:', err));
-            }
-
-            function initMap() {
-                map = L.map('map').setView([10.3157, 123.8854], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors',
-                    maxZoom: 19,
-                }).addTo(map);
-
-                document.getElementById('class-filter').addEventListener('change', function () {
-                    selectedClass = this.value;
-                    loadLocations();
-                });
-
-                loadLocations();
-                setInterval(loadLocations, 15000); // Refresh map every 15s
-
-                setTimeout(() => map.invalidateSize(), 350);
-            }
-
-            window.updateSOS = updateSOS;
-            window.addEventListener('DOMContentLoaded', initMap);
-        </script>
-
-        <!-- 🔄 REAL-TIME DASHBOARD POLLING -->
-        <script>
-        function buildStatusPill(student) {
-            if (student.sos_status === 'help') {
-                return '<span class="status-pill status-offline">🚨 SOS ALERT</span>';
-            } else if (student.status) {
-                return '<span class="status-pill status-online">● ONLINE</span>';
-            } else {
-                return '<span class="status-pill status-offline">● OFFLINE</span>';
-            }
-        }
-
-        function buildSignalIcon(signal) {
-            return signal === 'Strong' ? '📶' : '⚠️';
-        }
-
-        function buildBatteryCell(level) {
-            const color = level < 20 ? '#ef4444' : '#22c55e';
-            return `<div style="display:flex;align-items:center;gap:4px;">
-                <div style="width:20px;height:10px;border:1px solid #9ca3af;border-radius:2px;position:relative;">
-                    <div style="width:${level}%;height:100%;background:${color};"></div>
-                </div>
-                ${level !== null && level !== undefined ? level + '%' : 'N/A'}
-            </div>`;
-        }
-
-        function pollDashboardStats() {
-            fetch('/api/dashboard/stats')
-                .then(res => res.json())
-                .then(data => {
-                    // Update stat cards
-                    const onlineEl  = document.getElementById('online-count');
-                    const offlineEl = document.getElementById('offline-count');
-                    const timeEl    = document.getElementById('latest-time');
-                    const dateEl    = document.getElementById('latest-date');
-                    if (onlineEl)  onlineEl.textContent  = data.onlineCount;
-                    if (offlineEl) offlineEl.textContent = data.offlineCount;
-                    if (timeEl)    timeEl.textContent    = data.latestTime ?? '—';
-                    if (dateEl)    dateEl.textContent    = data.latestDate ?? '—';
-
-                    // Show or hide SOS banner
-                    const sosBanner = document.getElementById('sos-banner');
-                    if (sosBanner) {
-                        sosBanner.style.display = (data.sosStudents && data.sosStudents.length > 0) ? 'block' : 'none';
-                    }
-
-                    // Rebuild student table rows
-                    const tbody = document.getElementById('student-table-body');
-                    if (tbody && data.students) {
-                        if (data.students.length === 0) {
-                            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:#6b7280;">No student data available.</td></tr>';
-                        } else {
-                            tbody.innerHTML = data.students.map(s => `
-                                <tr>
-                                    <td style="font-weight:700;">${s.student_id}</td>
-                                    <td>${s.name}</td>
-                                    <td><span style="background:#eff6ff;color:#1e40af;padding:2px 6px;border-radius:4px;">${s.class}</span></td>
-                                    <td>${s.gender}</td>
-                                    <td>${buildStatusPill(s)}</td>
-                                    <td>${buildBatteryCell(s.battery_level)}</td>
-                                    <td>${buildSignalIcon(s.signal_status)} ${s.signal_status ?? '—'}</td>
-                                    <td style="color:#6b7280;">${s.last_update ?? '—'}</td>
-                                    <td><a href="tel:${s.contact}" style="color:#4f46e5;text-decoration:none;font-weight:600;">${s.contact ?? '—'}</a></td>
-                                </tr>
-                            `).join('');
-                        }
-                    }
-                })
-                .catch(err => console.error('Dashboard poll error:', err));
-        }
-
-        // Dashboard Broadcast Quill Initialization
-        var dashboardQuill;
-        document.addEventListener('DOMContentLoaded', function() {
-            if (document.getElementById('dashboard-quill-editor')) {
-                dashboardQuill = new Quill('#dashboard-quill-editor', {
-                    theme: 'snow',
-                    modules: {
-                        toolbar: [
-                            ['bold', 'italic', 'underline'],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            [{ 'align': [] }],
-                            ['clean']
-                        ]
-                    },
-                    placeholder: 'Type your announcement here...'
-                });
-
-                const form = document.getElementById('dashboard-broadcast-form');
-                if (form) {
-                    form.onsubmit = function() {
-                        const messageInput = document.getElementById('dashboard-broadcast-message-input');
-                        messageInput.value = dashboardQuill.root.innerHTML;
-                    };
-                }
-            }
-
-            pollDashboardStats();
-            setInterval(pollDashboardStats, 10000);
-        });
-        </script>
-    </body>
-</html>
+    setInterval(updateDashboardStats, 10000);
+</script>
+@endpush

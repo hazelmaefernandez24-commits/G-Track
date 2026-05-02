@@ -21,67 +21,9 @@ Route::get('/', function () {
 use App\Models\Notification;
 use Illuminate\Support\Facades\Schema;
 
-Route::get('/dashboard', function () {
-
-  
-    $latestLocations = DB::table('locations')
-        ->select('student_id', DB::raw('MAX(recorded_at) as last_seen'))
-        ->groupBy('student_id')
-        ->get();
-
-    $onlineCount = 0;
-    $offlineCount = 0;
-    $latestUpdate = null;
-
-    foreach ($latestLocations as $loc) {
-        $lastSeen = Carbon::parse($loc->last_seen);
-
-        if (!$latestUpdate || $lastSeen->gt($latestUpdate)) {
-            $latestUpdate = $lastSeen;
-        }
-
-        if ($lastSeen->diffInMinutes(now()) <= 10) {
-            $onlineCount++;
-        } else {
-            $offlineCount++;
-        }
-    }
-
-    if (!$latestUpdate) {
-        $latestTime = 'No updates yet';
-        $latestDate = '';
-    } else {
-        $latestTime = $latestUpdate->format('g:i:s A');
-        $latestDate = $latestUpdate->format('n/j/Y');
-    }
-
-
-    $broadcastCount = 0;
-$sosCount = 0;
-
-if (Schema::hasTable('notifications')) {
-
-   
-    $broadcastCount = DB::table('notifications')
-        ->where('read', false)
-        ->count();
-
-    // ONLY unread and non-resolved SOS alerts
-    $sosCount = DB::table('notifications')
-        ->where('type', 'sos')
-        ->where('status', '!=', 'resolved')
-        ->count();
-}
-
-    return view('dashboard', compact(
-        'onlineCount',
-        'offlineCount',
-        'latestTime',
-        'latestDate',
-        'broadcastCount',
-        'sosCount'
-    ));
-});
+// Remove closure, we use DeviceController for these
+Route::get('/tracking', [App\Http\Controllers\DeviceController::class, 'tracking']);
+Route::get('/activity', [App\Http\Controllers\DeviceController::class, 'activity']);
 
 Route::get('/notifications', [NotificationController::class, 'index']);
 

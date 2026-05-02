@@ -126,5 +126,16 @@ public function apiStats()
     ]);
 }
 
+public function tracking()
+{
+    $sosCount = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->count();
+    return view('tracking', compact('sosCount'));
+}
+
+public function activity()
+{
+    $sosCount = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->count();
+    return view('activity', compact('sosCount'));
+}
 
 }

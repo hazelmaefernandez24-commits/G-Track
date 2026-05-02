@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('layouts.app')
 
-<head>
-    <meta charset='UTF-8' />
-    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-    <title>G!Track - Notifications Dashboard</title>
-    <style>
+@section('title', 'Notifications')
+@section('subtitle', 'Send and manage notifications')
+
+@push('styles')
+<style>
         /* ---- your existing styles remain unchanged ---- */
         :root {
             --bg: #f8fafc;
@@ -971,135 +970,17 @@
                 opacity: 1;
             }
         }
-    </style>
-    <!-- Quill Rich Text Editor -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-</head>
+    
+</style>
+<!-- Quill Rich Text Editor -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+@endpush
 
-<body>
-    <header class="topbar">
-        <a href="/dashboard" class="brand">
-            <div class="brand-badge">
-                <img src="{{ asset('images/gtrack.png') }}" alt="logo"
-                    style="width:1500%;height:150%;object-fit:contain;" />
-            </div>
-            <div class="brand-text">
-                <div class="brand-name">Admin Dashboard</div>
-                <div class="brand-sub">Communications Center</div>
-            </div>
-        </a>
+@section('content')
 
-        <div class="actions">
-            <a href="/dashboard" class="logout">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                    <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                Main Dashboard
-            </a>
 
-            <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-                @csrf
-                <button type="submit" class="logout">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                        <polyline points="16 17 21 12 16 7"></polyline>
-                        <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
-                    Logout
-                </button>
-            </form>
-        </div>
-    </header>
-
-    <main class="container">
-        @if(session('success'))
-            <div
-                style='margin-bottom:12px;padding:10px 14px;border:1px solid #34d399;background:#d1fae5;color:#065f46;border-radius:10px; font-weight:600;'>
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <div class="page-title">
-            <h1>System Status Monitoring</h1>
-            <p>Real-time overview of student tracking system</p>
-        </div>
-
-        <section class="cards">
-            <article class="card">
-                <div class="card-head">
-                    <div>
-                        <div class="card-title">Online Students</div>
-                        <div class="stat-number" id="online-count" style="color: #22c55e;">{{ $stats['onlineCount'] }}
-                        </div>
-                        <div class="stat-sub" style="color: #3b82f6;">
-                            Currently online
-                        </div>
-                    </div>
-                    <div class="status-dot" style="color: #22c55e;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Z" fill="currentColor" />
-                            <path d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Z" fill="currentColor"
-                                opacity=".9" />
-                            <path d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Z" fill="currentColor"
-                                opacity=".35" />
-                            <path
-                                d="M16 13c-1.14 0-3.2.36-4.64 1.06.94.74 1.64 1.7 1.64 2.44V19h9v-2.5c0-2.33-4.67-3.5-6-3.5Z"
-                                fill="currentColor" opacity=".25" />
-                        </svg>
-                    </div>
-                </div>
-            </article>
-
-            <article class="card">
-                <div class="card-head">
-                    <div>
-                        <div class="card-title">Offline Students</div>
-                        <div class="stat-number" id="offline-count" style="color: #ef4444;">{{ $stats['offlineCount'] }}
-                        </div>
-                        <div class="stat-sub" style="color: #f43f5e;">
-                            Currently offline
-                        </div>
-                    </div>
-                    <div class="status-dot" style="color: #ef4444;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Z" fill="currentColor" />
-                            <path d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Z" fill="currentColor"
-                                opacity=".9" />
-                            <path d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Z" fill="currentColor"
-                                opacity=".35" />
-                            <path
-                                d="M16 13c-1.14 0-3.2.36-4.64 1.06.94.74 1.64 1.7 1.64 2.44V19h9v-2.5c0-2.33-4.67-3.5-6-3.5Z"
-                                fill="currentColor" opacity=".25" />
-                        </svg>
-                    </div>
-                </div>
-            </article>
-
-            <article class="card">
-                <div class="card-head">
-                    <div>
-                        <div class="card-title">Latest Update</div>
-                        <div class="latest">
-                            <div class="latest-time" id="latest-time">{{ $stats['latestTime'] }}</div>
-                            <div class="latest-date" id="latest-date">{{ $stats['latestDate'] }}</div>
-                        </div>
-                    </div>
-                    <div class="latest-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z" stroke="#6b7280" stroke-width="2"
-                                opacity=".9" />
-                            <path d="M12 6v6l4 2" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                </div>
-            </article>
-        </section>
-
-        <div class="page-title" style="margin-top: 32px;">
+    <div class="page-title" style="margin-bottom: 24px;">
             <h1>Notifications Overview</h1>
             <p>Summary of system communications and alerts</p>
         </div>
@@ -1709,7 +1590,7 @@
             </div>
         </div>
         </div>
-    </main>
+    
 
 
     <script>
@@ -2043,6 +1924,7 @@
             </div>
         </div>
     </div>
-</body>
 
-</html>
+
+
+@endsection

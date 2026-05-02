@@ -1,139 +1,105 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Management - G!Track</title>
-    <style>
-        :root{
-            --bg:#f6f7fb;
-            --text:#0f172a;
-            --muted:#6b7280;
-            --card-border:#e5e7eb;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --blue:#2563eb;
-            --green:#16a34a;
-            --red:#dc2626;
-        }
-        body{
-            margin:0;
-            background:var(--bg);
-            color:var(--text);
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-        }
-        .header{
-            height:64px;
-            background:var(--blue);
-            color:#fff;
-            display:flex;
-            align-items:center;
-            padding:0 20px;
-            justify-content: space-between;
-        }
-        .header h1{ font-size:18px; margin:0; }
-        .container{
-            max-width:1000px;
-            margin:20px auto;
-            padding:0 20px;
-        }
-        .card{
-            background:#fff;
-            border-radius:12px;
-            box-shadow: var(--shadow);
-            padding:20px;
-            margin-bottom:20px;
-        }
-        .btn{
-            padding:8px 16px;
-            border-radius:8px;
-            border:none;
-            font-weight:600;
-            cursor:pointer;
-            transition: all 0.2s;
-            text-decoration:none;
-            font-size:14px;
-        }
-        .btn-primary{ background:var(--blue); color:#fff; }
-        .btn-success{ background:var(--green); color:#fff; }
-        .btn-danger{ background:var(--red); color:#fff; }
-        .table-container{ overflow-x:auto; }
-        table{
-            width:100%;
-            border-collapse:collapse;
-            margin-top:20px;
-        }
-        th{
-            text-align:left;
-            padding:12px;
-            border-bottom:2px solid var(--card-border);
-            color:var(--muted);
-            font-size:12px;
-            text-transform:uppercase;
-        }
-        td{
-            padding:12px;
-            border-bottom:1px solid var(--card-border);
-            font-size:14px;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-content {
-            background-color: #fff;
-            padding: 24px;
-            border-radius: 16px;
-            width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-            margin: 0;
-        }
-        .form-group{ margin-bottom:16px; }
-        .form-group label{ display:block; margin-bottom:4px; font-size:13px; font-weight:600; }
-        .form-control{
-            width:100%;
-            padding:10px;
-            border:1px solid var(--card-border);
-            border-radius:8px;
-            font-size:14px;
-            box-sizing:border-box;
-        }
-        .alert{
-            padding:12px;
-            border-radius:8px;
-            margin-bottom:16px;
-            font-size:14px;
-        }
-        .alert-success{ background:#dcfce7; color:#166534; }
-        .alert-danger{ background:#fee2e2; color:#991b1b; }
-        .role-badge{
-            padding:2px 8px;
-            border-radius:4px;
-            font-size:11px;
-            font-weight:700;
-            text-transform:uppercase;
-        }
-        .role-main{ background:#eff6ff; color:#1e40af; }
-        .role-education{ background:#f3f4f6; color:#374151; }
-    </style>
-</head>
-<body>
-    <header class="header">
-        <h1>Admin Management</h1>
-        <a href="/dashboard" style="color:#fff; text-decoration:none; font-weight:600;">Back to Dashboard</a>
-    </header>
+@extends('layouts.app')
 
-    <div class="container">
+@section('title', 'Admin Management')
+@section('subtitle', 'Manage system administrators')
+
+@push('styles')
+<style>
+    .admin-mgmt-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+    }
+    .btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    .btn-primary { background: var(--sidebar-active); color: #fff; }
+    .btn-success { background: var(--online); color: #fff; }
+    .btn-danger { background: var(--offline); color: #fff; }
+    .table-container { overflow-x: auto; }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    th {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 2px solid var(--border-color);
+        color: var(--text-muted);
+        font-size: 12px;
+        text-transform: uppercase;
+    }
+    td {
+        padding: 12px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 14px;
+    }
+    .custom-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        backdrop-filter: blur(4px);
+        align-items: center;
+        justify-content: center;
+    }
+    .custom-modal-content {
+        background-color: #fff;
+        padding: 24px;
+        border-radius: 16px;
+        width: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        margin: 0;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 4px; font-size: 13px; font-weight: 600; }
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    .alert {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 14px;
+    }
+    .alert-success { background: #dcfce7; color: #166534; }
+    .alert-danger { background: #fee2e2; color: #991b1b; }
+    .role-badge{
+        padding:2px 8px;
+        border-radius:4px;
+        font-size:11px;
+        font-weight:700;
+        text-transform:uppercase;
+    }
+    .role-main{ background:#eff6ff; color:#1e40af; }
+    .role-education{ background:#f3f4f6; color:#374151; }
+</style>
+@endpush
+
+@section('content')
+    <div style="max-width: 1000px;">
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -151,7 +117,7 @@
             </div>
         @endif
 
-        <div class="card">
+        <div class="admin-mgmt-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h2 style="margin:0; font-size:20px;">System Administrators</h2>
                 <button class="btn btn-primary" onclick="openModal('addModal')">Add New Admin</button>
@@ -197,8 +163,8 @@
     </div>
 
     <!-- Add Modal -->
-    <div id="addModal" class="modal">
-        <div class="modal-content">
+    <div id="addModal" class="custom-modal">
+        <div class="custom-modal-content">
             <h3>Add New Admin</h3>
             <form action="/admin/admins" method="POST">
                 @csrf
@@ -230,8 +196,8 @@
     </div>
 
     <!-- Edit Modal -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
+    <div id="editModal" class="custom-modal">
+        <div class="custom-modal-content">
             <h3>Edit Admin</h3>
             <form id="editForm" method="POST">
                 @csrf
@@ -282,10 +248,9 @@
         }
 
         window.onclick = function(event) {
-            if (event.target.className === 'modal') {
+            if (event.target.className === 'custom-modal') {
                 event.target.style.display = 'none';
             }
         }
     </script>
-</body>
-</html>
+@endsection
