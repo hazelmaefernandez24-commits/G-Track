@@ -255,8 +255,8 @@ class NotificationController extends Controller
             'battery' => 'nullable|integer|between:0,100',
             'signal' => 'nullable|string',
             'location' => 'nullable|string',
-            'media' => 'nullable|file|mimes:mp4,mov,avi,jpg,png,jpeg|max:20480', // 20MB max
-            'video' => 'nullable|file|mimes:mp4,mov,avi|max:20480',
+            'media' => 'nullable|file|mimes:mp4,mov,avi,jpg,png,jpeg|max:25600', // 25MB max
+            'video' => 'nullable|file|mimes:mp4,mov,avi|max:25600', // 25MB max
         ]);
 
         $student = \App\Models\Student::where('student_id', $request->student_id)
@@ -279,40 +279,64 @@ class NotificationController extends Controller
             }
         }
 
-        $mediaUrl = $request->hasFile('media') ? asset('storage/' . $request->file('media')->store('recordings/media', 'public')) : null;
-        $videoUrl = $request->hasFile('video') ? asset('storage/' . $request->file('video')->store('recordings/videos', 'public')) : null;
+        try {
+            $mediaUrl = $request->hasFile('media') ? asset('storage/' . $request->file('media')->store('recordings/media', 'public')) : null;
+            $videoUrl = $request->hasFile('video') ? asset('storage/' . $request->file('video')->store('recordings/videos', 'public')) : null;
+        } catch (\Exception $e) {
+            \Log::error('Failed to upload media/video files: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload media files: ' . $e->getMessage()
+            ], 500);
+        }
 
-        $id = DB::table('notifications')->insertGetId([
-            'student_id' => $student->id, // Use numeric ID for the relationship
-            'class' => $student->class, 
-            'type' => $type,
-            'sender_type' => 'student',
-            'message' => $request->message,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'battery_level' => $request->input('battery_level', $request->input('battery')),
-            'signal_status' => $request->signal,
-            'location' => $request->location,
-            'media_url' => $mediaUrl,
-            'video_url' => $videoUrl,
-            'audio_url' => null,
-            'read' => false,
-            'status' => 'pending', 
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
+        try {
+            $id = DB::table('notifications')->insertGetId([
+                'student_id' => $student->id, // Use numeric ID for the relationship
+                'class' => $student->class, 
+                'type' => $type,
+                'sender_type' => 'student',
+                'message' => $request->message,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'battery_level' => $request->input('battery_level', $request->input('battery')),
+                'signal_status' => $request->signal,
+                'location' => $request->location,
+                'media_url' => $mediaUrl,
+                'video_url' => $videoUrl,
+                'audio_url' => null,
+                'read' => false,
+                'status' => 'pending', 
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to create notification: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create notification: ' . $e->getMessage()
+            ], 500);
+        }
 
         // If it's SOS or Blackout, update the Student's real-time map status
         if ($type === 'sos' || $type === 'blackout') {
-            if ($request->latitude) $student->latitude = $request->latitude;
-            if ($request->longitude) $student->longitude = $request->longitude;
-            $battery = $request->input('battery_level', $request->input('battery'));
-            if (isset($battery)) $student->battery_level = $battery;
-            if ($request->signal) $student->signal_status = $request->signal;
-            if ($type === 'sos') $student->sos_status = 'help';
-            
-            $student->last_update = now()->format('M d, Y h:i A');
-            $student->save();
+            try {
+                if ($request->latitude) $student->latitude = $request->latitude;
+                if ($request->longitude) $student->longitude = $request->longitude;
+                $battery = $request->input('battery_level', $request->input('battery'));
+                if (isset($battery)) $student->battery_level = $battery;
+                if ($request->signal) $student->signal_status = $request->signal;
+                if ($type === 'sos') $student->sos_status = 'help';
+                
+                $student->last_update = now()->format('M d, Y h:i A');
+                $student->save();
+            } catch (\Exception $e) {
+                \Log::error('Failed to update student status: ' . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Alert received but failed to update student status: ' . $e->getMessage()
+                ], 500);
+            }
         }
 
         return response()->json([

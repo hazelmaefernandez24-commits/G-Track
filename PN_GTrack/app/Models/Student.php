@@ -21,7 +21,9 @@ class Student extends Model
     'signal_status', 
     'last_update', 
     'contact',
-    'sos_status'
+    'sos_status',
+    'latitude',
+    'longitude'
 ];
 
     public function locations()
