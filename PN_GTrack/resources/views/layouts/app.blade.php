@@ -16,9 +16,9 @@
 
     <style>
         :root {
-            --sidebar-bg: #1A2238; /* Deep premium blue */
-            --sidebar-hover: #25304B;
-            --sidebar-active: #2563EB; /* Bright blue for active item */
+            --sidebar-bg: #0d47e6ff; /* Deep premium blue */
+            --sidebar-hover: #6180d0ff;
+            --sidebar-active: #5c8bf1ff; /* Bright blue for active item */
             --bg-color: #F8FAFC;
             --text-main: #0F172A;
             --text-muted: #64748B;
@@ -92,7 +92,7 @@
 
         .brand-text span {
             font-size: 12px;
-            color: #94A3B8;
+            color: #b6b7bbff;
             font-weight: 500;
         }
 
@@ -251,19 +251,19 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="brand-icon">
-                <img src="{{ asset('images/bg.png') }}" alt="G!Track logo">
+                <img src="{{ asset('images/gtrack.png') }}" alt="G!Track logo">
             </div>
             <div class="brand-text">
             
                 <h2>G!Track</h2>
-                <span>Admin System</span>
+                <span>ADMIN SYSTEM</span>
             </div>
         </div>
 
         <nav class="sidebar-nav">
             <a href="/dashboard" class="nav-item {{ request()->is('dashboard') ? 'active' : '' }}">
                 <i data-lucide="layout-dashboard"></i>
-                Overview
+                Dashboard
             </a>
             <a href="/tracking" class="nav-item {{ request()->is('tracking') ? 'active' : '' }}">
                 <i data-lucide="map-pin"></i>
@@ -279,7 +279,7 @@
             </a>
 
             @if(Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === 'main')
-            <div style="margin: 16px 16px 8px; font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px;">System Management</div>
+            <div style="margin: 16px 16px 8px; font-size: 11px; font-weight: 800; color: #b6b7bbff; text-transform: uppercase; letter-spacing: 0.5px;">System Management</div>
             <a href="/admin/students" class="nav-item {{ request()->is('admin/students*') ? 'active' : '' }}">
                 <i data-lucide="users-round"></i>
                 Manage Students

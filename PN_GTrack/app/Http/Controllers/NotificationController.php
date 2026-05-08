@@ -259,6 +259,13 @@ class NotificationController extends Controller
             'video' => 'nullable|file|mimes:mp4,mov,avi|max:25600', // 25MB max
         ]);
 
+        if ($request->target === 'sos' && !$request->hasFile('video')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'SOS alerts require a video feed before they are accepted.'
+            ], 422);
+        }
+
         $student = \App\Models\Student::where('student_id', $request->student_id)
             ->orWhere('id', $request->student_id)
             ->first();

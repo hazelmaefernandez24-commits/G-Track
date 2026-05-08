@@ -1266,7 +1266,15 @@
                                                 <div
                                                     style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
                                                     Live Signal</div>
-                                                <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶
+                                                @php
+                                                    $sigLower = strtolower($currentSignal ?? '');
+                                                    $sigColor = '#ef4444'; // Default to red/warning
+                                                    if (Str::contains($sigLower, ['excellent', 'strong', 'good'])) $sigColor = '#16a34a';
+                                                    elseif (Str::contains($sigLower, 'fair')) $sigColor = '#f59e0b';
+                                                    elseif (empty($sigLower) || $sigLower === 'n/a') $sigColor = '#0f172a';
+                                                @endphp
+                                                <div style="font-weight: 700; color: {{ $sigColor }}; font-size: 14px; margin-top: 2px;">
+                                                    {!! Str::contains($sigLower, ['excellent', 'strong', 'good', 'fair']) ? '📶' : '⚠️' !!}
                                                     {{ $currentSignal ?? 'N/A' }}
                                                 </div>
                                             </div>
@@ -1277,7 +1285,7 @@
                                                 <div
                                                     style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
                                                     @if($currentLat)
-                                                        <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}"
+                                                        <a href="/tracking?student_id={{ $notification->student->student_id ?? $notification->student_id }}"
                                                             style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
                                                             📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }}
                                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
@@ -1384,7 +1392,15 @@
                                                     <div
                                                         style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
                                                         Live Signal</div>
-                                                    <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 2px;">📶
+                                                    @php
+                                                        $sigLower = strtolower($currentSignal ?? '');
+                                                        $sigColor = '#ef4444'; // Default to red/warning
+                                                        if (Str::contains($sigLower, ['excellent', 'strong', 'good'])) $sigColor = '#16a34a';
+                                                        elseif (Str::contains($sigLower, 'fair')) $sigColor = '#f59e0b';
+                                                        elseif (empty($sigLower) || $sigLower === 'n/a') $sigColor = '#0f172a';
+                                                    @endphp
+                                                    <div style="font-weight: 700; color: {{ $sigColor }}; font-size: 14px; margin-top: 2px;">
+                                                        {!! Str::contains($sigLower, ['excellent', 'strong', 'good', 'fair']) ? '📶' : '⚠️' !!}
                                                         {{ $currentSignal ?? 'N/A' }}
                                                     </div>
                                                 </div>
@@ -1394,7 +1410,7 @@
                                                         Location</div>
                                                     <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
                                                         @if($currentLat)
-                                                            <a href="/dashboard?student_id={{ $notification->student->student_id ?? $notification->student_id }}"
+                                                            <a href="/tracking?student_id={{ $notification->student->student_id ?? $notification->student_id }}"
                                                                 style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
                                                                 📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }}
                                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none"

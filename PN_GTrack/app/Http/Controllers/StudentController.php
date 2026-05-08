@@ -83,6 +83,13 @@ class StudentController extends Controller
             return response()->json(['message' => 'Student not found'], 404);
         }
 
+        if ($request->sos_status === 'help') {
+            return response()->json([
+                'message' => 'SOS alerts must include a video feed. Use the upload-video endpoint for SOS.',
+                'sos_status' => 'safe'
+            ], 422);
+        }
+
         $student->sos_status  = $request->sos_status;
         $student->last_update = now()->format('M d, Y h:i A');
         if ($request->latitude)  $student->latitude  = $request->latitude;
@@ -92,28 +99,11 @@ class StudentController extends Controller
         if ($request->signal)    $student->signal_status = $request->signal;
         $student->save();
 
-        // Also log in notifications table
-        if ($request->sos_status === 'help') {
-            \App\Models\Notification::create([
-                'type'          => 'sos',
-                'sender_type'   => 'student',
-                'message'       => $student->name . ' (' . $student->student_id . ') sent an SOS alert!',
-                'student_id'    => $student->id, // Use numeric ID for the relationship
-                'class'         => $student->class,
-                'latitude'      => $request->latitude,
-                'longitude'     => $request->longitude,
-                'battery_level' => $battery,
-                'signal_status' => $request->signal,
-                'read'          => false,
-                'status'        => 'pending',
-            ]);
-        } else {
-            // "I am Safe" transition - Resolve existing SOS alerts
-            \App\Models\Notification::where('student_id', $student->id)
-                ->where('type', 'sos')
-                ->where('status', '!=', 'resolved')
-                ->update(['status' => 'resolved', 'read' => true]);
-        }
+        // "I am Safe" transition - Resolve existing SOS alerts
+        \App\Models\Notification::where('student_id', $student->id)
+            ->where('type', 'sos')
+            ->where('status', '!=', 'resolved')
+            ->update(['status' => 'resolved', 'read' => true]);
 
         return response()->json([
             'message'    => 'SOS status updated',

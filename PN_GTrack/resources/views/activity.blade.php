@@ -223,7 +223,15 @@
 
     function buildSignalIcon(signal) {
         if (!signal) return '<span style="color: #94A3B8;">—</span>';
-        return signal === 'Strong' ? '📶 Strong' : '⚠️ Weak';
+        
+        const sig = signal.toLowerCase();
+        if (sig.includes('excellent') || sig.includes('strong') || sig.includes('good')) {
+            return `<span style="color: #16A34A;">📶 ${signal}</span>`;
+        } else if (sig.includes('fair')) {
+            return `<span style="color: #F59E0B;">📶 ${signal}</span>`;
+        } else {
+            return `<span style="color: #EF4444;">⚠️ ${signal}</span>`;
+        }
     }
 
     function pollActivityData() {

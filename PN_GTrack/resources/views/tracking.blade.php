@@ -71,6 +71,46 @@
         z-index: 10; /* Keep it below header */
     }
 
+    /* Map Legend */
+    .map-legend {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 20px;
+        padding: 12px 20px;
+        background: #F8FAFC;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        width: fit-content;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .legend-marker {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        position: relative;
+    }
+
+    .legend-marker::after {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 50%;
+        border: 1px solid currentColor;
+    }
+
+    .marker-boy { background-color: #3B82F6; color: #3B82F6; }
+    .marker-girl { background-color: #EF4444; color: #EF4444; }
+
     /* Custom Leaflet popup */
     .leaflet-popup-content-wrapper {
         border-radius: 12px;
@@ -100,6 +140,17 @@
                 <option>2027</option>
                 <option>2028</option>
             </select>
+        </div>
+    </div>
+
+    <div class="map-legend">
+        <div class="legend-item">
+            <span class="legend-marker marker-boy"></span>
+            <span>Boys (Blue)</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-marker marker-girl"></span>
+            <span>Girls (Red)</span>
         </div>
     </div>
 

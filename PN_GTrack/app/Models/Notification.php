@@ -12,6 +12,7 @@ class Notification extends Model
     protected $fillable = [
         'student_id',
         'type',
+        'subject',
         'message',
         'read',
         'battery_level',
