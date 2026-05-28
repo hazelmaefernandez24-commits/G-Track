@@ -47,7 +47,7 @@ class NotificationSeeder extends Seeder
             'audio_url'    => null,
             'read'         => false,
             'status'       => 'pending',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subMinutes(8),
             'updated_at'   => Carbon::now()->subMinutes(8),
         ]);
@@ -69,7 +69,7 @@ class NotificationSeeder extends Seeder
             'audio_url'    => null,
             'read'         => true,  // Admin already acknowledged
             'status'       => 'pending',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subMinutes(25),
             'updated_at'   => Carbon::now()->subMinutes(20),
         ]);
@@ -91,7 +91,7 @@ class NotificationSeeder extends Seeder
             'audio_url'    => null,
             'read'         => true,
             'status'       => 'resolved',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subHours(2),
             'updated_at'   => Carbon::now()->subHours(1)->subMinutes(45),
         ]);
@@ -117,7 +117,7 @@ class NotificationSeeder extends Seeder
             'audio_url'    => null,
             'read'         => false,
             'status'       => 'pending',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subMinutes(5),
             'updated_at'   => Carbon::now()->subMinutes(5),
         ]);
@@ -139,7 +139,7 @@ class NotificationSeeder extends Seeder
             'audio_url'    => null,
             'read'         => true,
             'status'       => 'pending',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subHours(1),
             'updated_at'   => Carbon::now()->subHours(1),
         ]);
@@ -161,7 +161,7 @@ class NotificationSeeder extends Seeder
             'audio_url'    => null,
             'read'         => true,
             'status'       => 'resolved',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subHours(3),
             'updated_at'   => Carbon::now()->subHours(2)->subMinutes(30),
         ]);
@@ -188,7 +188,7 @@ class NotificationSeeder extends Seeder
             'audio_url'    => null,
             'read'         => true,
             'status'       => 'pending',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subHours(4),
             'updated_at'   => Carbon::now()->subHours(4),
         ]);
@@ -211,7 +211,7 @@ class NotificationSeeder extends Seeder
             'audio_url'    => null,
             'read'         => true,
             'status'       => 'pending',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subHours(6),
             'updated_at'   => Carbon::now()->subHours(6),
         ]);
@@ -234,7 +234,7 @@ class NotificationSeeder extends Seeder
             'audio_url'    => null,
             'read'         => true,
             'status'       => 'pending',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subDay(),
             'updated_at'   => Carbon::now()->subDay(),
         ]);
@@ -257,7 +257,7 @@ class NotificationSeeder extends Seeder
             'audio_url'    => null,
             'read'         => true,
             'status'       => 'pending',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subMinutes(45),
             'updated_at'   => Carbon::now()->subMinutes(45),
         ]);
@@ -275,7 +275,7 @@ class NotificationSeeder extends Seeder
             'message'      => 'Good morning po! Puwede po bang malaman ang schedule ng clearance signing?',
             'read'         => true,
             'status'       => 'replied',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subHours(5),
             'updated_at'   => Carbon::now()->subHours(5),
         ]);
@@ -287,7 +287,7 @@ class NotificationSeeder extends Seeder
             'message'      => 'Good morning, Hazel! The clearance signing is scheduled every Tuesday and Thursday, 8AM–12NN at the Registrar\'s Office. Please bring your complete requirements.',
             'read'         => false,
             'status'       => 'replied',
-            'parent_id'    => $hazelMsg1Id,
+            'reply_to_id'    => $hazelMsg1Id,
             'created_at'   => Carbon::now()->subHours(4)->subMinutes(50),
             'updated_at'   => Carbon::now()->subHours(4)->subMinutes(50),
         ]);
@@ -299,7 +299,7 @@ class NotificationSeeder extends Seeder
             'message'      => 'Thank you po! Dala ko na po yung lahat ng requirements. Magreregister na po ako bukas.',
             'read'         => true,
             'status'       => 'replied',
-            'parent_id'    => $hazelMsg1Id,
+            'reply_to_id'    => $hazelMsg1Id,
             'created_at'   => Carbon::now()->subHours(4)->subMinutes(30),
             'updated_at'   => Carbon::now()->subHours(4)->subMinutes(30),
         ]);
@@ -313,7 +313,7 @@ class NotificationSeeder extends Seeder
             'message'      => 'Sir/Ma\'am, the G-Track app keeps crashing when I try to send my location update. Is there a fix?',
             'read'         => true,
             'status'       => 'replied',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subHours(2),
             'updated_at'   => Carbon::now()->subHours(2),
         ]);
@@ -325,7 +325,7 @@ class NotificationSeeder extends Seeder
             'message'      => 'Hi John! Please try clearing the app cache and updating to the latest version (v2.1.0). If the issue persists, please visit the IT Office at Room 105 during office hours.',
             'read'         => false,
             'status'       => 'replied',
-            'parent_id'    => $johnMsg1Id,
+            'reply_to_id'    => $johnMsg1Id,
             'created_at'   => Carbon::now()->subHours(1)->subMinutes(50),
             'updated_at'   => Carbon::now()->subHours(1)->subMinutes(50),
         ]);
@@ -339,7 +339,7 @@ class NotificationSeeder extends Seeder
             'message'      => 'Ma\'am I need help. My classmates said my GPS is always wrong on the map. Can admin check?',
             'read'         => false,
             'status'       => 'pending',
-            'parent_id'    => null,
+            'reply_to_id'    => null,
             'created_at'   => Carbon::now()->subMinutes(15),
             'updated_at'   => Carbon::now()->subMinutes(15),
         ]);

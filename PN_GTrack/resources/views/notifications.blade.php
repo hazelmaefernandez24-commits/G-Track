@@ -803,6 +803,13 @@
             color: var(--muted);
         }
 
+        .sender-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 6px;
+            letter-spacing: 0.02em;
+        }
 
         .chat-input-area {
             background: #fff;
@@ -1478,7 +1485,7 @@
                     @elseif($tab === 'broadcast')
                     @forelse($notifications as $notification)
                         <div class='message-item broadcast-item-clickable'
-                            onclick="showBroadcastDetails('{{ addslashes($notification->subject ?? 'Broadcast Notification') }}', '{{ addslashes($notification->message) }}', '{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}')"
+                            onclick="showBroadcastDetails('{{ addslashes($notification->subject ?? 'Broadcast Notification') }}', '{{ addslashes($notification->message) }}', '{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}', '{{ addslashes($notification->sender_name ?? ($notification->sender_type === 'admin' ? 'Admin' : 'System')) }}')"
                             style="border-left: 4px solid var(--yellow);">
                             <div class='message-head'>
                                 <p class='message-title'>
@@ -1490,6 +1497,9 @@
                                     class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                             </div>
                             <div class='message-meta' style='margin-top:8px;'>
+                                <span style='font-weight:700;color:#475569;'>Sent by:</span> {{ $notification->sender_name ?? ($notification->sender_type === 'admin' ? 'Admin' : 'System') }}
+                            </div>
+                            <div class='message-meta' style='margin-top:6px;'>
                                 @if($notification->class && $notification->class !== 'all') Class: {{ $notification->class }} |
                                 @endif
                                 <span class='badge-pill' style="font-size: 10px;">Sent to All</span>
@@ -1588,17 +1598,23 @@
                             <div class="chat-messages" id="chat-messages" style="display:none;"></div>
 
                             <div class="chat-input-area" id="chat-input-area" style="display:none;">
-                                <div class="input-wrap">
-                                    <textarea id="msg-input" rows="1" placeholder="Type a message..."
-                                        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-                                </div>
-                                <button class="send-btn" id="send-btn" title="Send message">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="22" y1="2" x2="11" y2="13" />
-                                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                                    </svg>
-                                </button>
+                                @if($canMessage)
+                                    <div class="input-wrap">
+                                        <textarea id="msg-input" rows="1" placeholder="Type a message..."
+                                            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+                                    </div>
+                                    <button type="button" class="send-btn" id="send-btn" title="Send message">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="22" y1="2" x2="11" y2="13" />
+                                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                        </svg>
+                                    </button>
+                                @else
+                                    <div style="width:100%; padding:12px 14px; border-radius:12px; background:#fef2f2; color:#991b1b; font-size:13px; font-weight:600; text-align:center;">
+                                        Messaging is available for education staff only.
+                                    </div>
+                                @endif
                             </div>
                         </section>
                     </div>
@@ -1722,11 +1738,15 @@
 
         // --- MESSENGER LOGIC ---
         // --- Broadcast Details Modal Handling ---
-        function showBroadcastDetails(subject, message, time) {
+        function showBroadcastDetails(subject, message, time, senderLabel = '') {
             const backdrop = document.getElementById('broadcast-modal');
             document.getElementById('modal-subject').textContent = subject;
             document.getElementById('modal-message').innerHTML = message;
             document.getElementById('modal-time').textContent = time;
+            const senderEl = document.getElementById('modal-sender');
+            if (senderEl) {
+                senderEl.textContent = senderLabel ? 'Sent by: ' + senderLabel : 'Sent by: Admin';
+            }
             backdrop.style.display = 'flex';
         }
 
@@ -1912,10 +1932,12 @@
                         const bubClass = isAdmin ? 'admin' : 'student';
                         const sosClass = isEmergency ? ' sos-alert' : '';
                         const prefix = isEmergency ? '<b>🚨 ALERT:</b> ' : '';
+                        const senderLabel = isAdmin && msg.sender_name ? `<div class="sender-label">${escHtml(msg.sender_name)}</div>` : '';
 
                         html += `
                         <div class="bubble-wrap ${bubClass}">
                             <div class="bubble-content">
+                                ${senderLabel}
                                 <div class="bubble ${bubClass}${sosClass}">${prefix}${escHtml(msg.message)}</div>
                                 <div class="bubble-time">${timeStr}</div>
                             </div>
@@ -1934,35 +1956,112 @@
             }
         }
 
+        const canSendStudentMessages = {{ $canMessage ? 'true' : 'false' }};
+
         async function sendMessage() {
             const input = document.getElementById('msg-input');
-            const text = input.value.trim();
-            if (!text || !activeStudentId) return;
-
             const btn = document.getElementById('send-btn');
-            btn.disabled = true;
+            const text = input?.value.trim() || '';
 
-            const fd = new FormData();
-            fd.append('message', text);
-            fd.append('_token', '{{ csrf_token() }}');
+            if (!text) {
+                showSendError('Please type a reply before sending.');
+                input?.focus();
+                return;
+            }
+
+            if (!canSendStudentMessages) {
+                showSendError('Only education staff can send student replies.');
+                return;
+            }
+
+            if (!activeStudentId) {
+                showSendError('Select a student conversation first.');
+                return;
+            }
+
+            if (btn) btn.disabled = true;
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
             try {
-                await fetch(`/messages/new/${activeStudentId}`, { method: 'POST', body: fd });
+                const res = await fetch(`/messages/new/${activeStudentId}`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    redirect: 'follow',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ message: text })
+                });
+
+                if (!res.ok) {
+                    let errMsg = `Server error (${res.status})`;
+                    try {
+                        const j = await res.json();
+                        errMsg = j.message || errMsg;
+                    } catch (_) {
+                        if (res.status === 419 || res.status === 401 || res.status === 403) {
+                            errMsg = 'Your session expired or is not authorized. Please refresh and sign in again.';
+                        }
+                    }
+                    showSendError(errMsg);
+                    return;
+                }
+
+                const data = await res.json();
+                if (!data || data.success === false) {
+                    showSendError(data?.message || 'Message could not be sent.');
+                    return;
+                }
+
                 input.value = '';
                 input.style.height = 'auto';
                 await loadMessages(true);
-            } catch (e) { console.error('Send error:', e); }
-            finally { btn.disabled = false; input.focus(); }
+            } catch (e) {
+                console.error('Send error:', e);
+                showSendError('Network error — could not send message.');
+            } finally {
+                if (btn) btn.disabled = false;
+                input?.focus();
+            }
         }
+
+        function showSendError(msg) {
+            let toast = document.getElementById('send-error-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'send-error-toast';
+                toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2);';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = '⚠️ ' + msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 4000);
+        }
+
 
         function escHtml(str) {
             if (!str) return '';
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        document.getElementById('send-btn')?.addEventListener('click', sendMessage);
-        document.getElementById('msg-input')?.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        document.addEventListener('click', function (e) {
+            const sendBtn = e.target.closest('#send-btn');
+            if (sendBtn) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            const input = e.target.closest('#msg-input');
+            if (input && e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
         });
     </script>
 
@@ -1979,6 +2078,7 @@
             <div id="modal-time"
                 style="font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
             </div>
+            <div id="modal-sender" style="font-size: 12px; font-weight: 700; color: #2563eb; margin-bottom: 8px;"></div>
             <h2 id="modal-subject" class="modal-subject"></h2>
 
             <div class="modal-body-container">

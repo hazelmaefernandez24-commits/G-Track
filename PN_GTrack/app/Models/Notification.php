@@ -24,19 +24,22 @@ class Notification extends Model
         'video_url',
         'audio_url',
         'sender_type',
-        'parent_id',
+        'sender_name',
+        'reply_to_id',
         'class',
         'status',
     ];
 
-    public function parent()
+    // The original notification this reply is responding to
+    public function replyTo()
     {
-        return $this->belongsTo(Notification::class, 'parent_id');
+        return $this->belongsTo(Notification::class, 'reply_to_id');
     }
 
+    // All admin/student replies to this notification
     public function replies()
     {
-        return $this->hasMany(Notification::class, 'parent_id');
+        return $this->hasMany(Notification::class, 'reply_to_id');
     }
 
    

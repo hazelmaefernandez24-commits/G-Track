@@ -3,10 +3,49 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class NotificationController extends Controller
 {
+    private function replyColumnName(): string
+    {
+        return 'reply_to_id';
+    }
+
+    private function canSendMessages(): bool
+    {
+        return Auth::guard('admin')->check()
+            && Auth::guard('admin')->user()->role === 'education';
+    }
+
+    private function currentAdminName(): string
+    {
+        $user = Auth::guard('admin')->user();
+
+        if (!$user) {
+            return 'Education Staff';
+        }
+
+        return trim(implode(' ', array_filter([
+            $user->first_name,
+            $user->middle_initial,
+            $user->last_name,
+        ])));
+    }
+
+    private function currentSenderLabel(): string
+    {
+        $user = Auth::guard('admin')->user();
+        $roleLabel = $user && isset($user->role) && $user->role === 'education'
+            ? 'Education'
+            : 'Admin';
+        $name = $this->currentAdminName();
+
+        return $name ? $roleLabel . ' - ' . $name : $roleLabel;
+    }
+
     public function index(Request $request)
     {
         // Change default tab to 'student' to match your Blade logic
@@ -85,7 +124,8 @@ class NotificationController extends Controller
             'tab' => $tab,
             'subtab' => $subtab,
             'class' => $class,
-            'dbClass' => $dbClass
+            'dbClass' => $dbClass,
+            'canMessage' => $this->canSendMessages(),
         ]);
     }
 
@@ -121,6 +161,7 @@ class NotificationController extends Controller
             'class' => $studentClass, 
             'type' => $type,
             'sender_type' => 'admin',
+            'sender_name' => $this->currentSenderLabel(),
             'subject' => $request->subject,
             'message' => $request->message,
             'read' => true, // Admin-sent broadcasts are "read" by default for the admin
@@ -134,6 +175,10 @@ class NotificationController extends Controller
 
     public function reply(Request $request, $id)
     {
+        if (!$this->canSendMessages()) {
+            return redirect()->back()->with('error', 'Only education staff can send student messages.');
+        }
+
         $request->validate([
             'message' => 'required',
         ]);
@@ -143,12 +188,15 @@ class NotificationController extends Controller
             return redirect()->back()->with('error', 'Message not found.');
         }
 
+        $replyColumn = $this->replyColumnName();
+
         DB::table('notifications')->insert([
             'student_id' => $parent->student_id,
             'class' => $parent->class,
             'type' => 'admin_reply',
             'sender_type' => 'admin',
-            'parent_id' => $id,
+            'sender_name' => $this->currentAdminName(),
+            $replyColumn => $id,
             'message' => $request->message,
             'read' => false,
             'status' => 'replied',
@@ -231,7 +279,12 @@ class NotificationController extends Controller
             // Only show broadcasts or messages, hide system/admin alerts like blackout
             ->where('type', '!=', 'blackout')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function($notif) {
+                // Backward-compatibility: keep both names available for old and new schemas
+                // $notif->parent_id = $notif->reply_to_id ?? $notif->parent_id ?? null; // No longer needed
+                return $notif;
+            });
 
         return response()->json([
             'success' => true,
@@ -371,14 +424,27 @@ class NotificationController extends Controller
                   ->orWhere('student_id', $student->student_id);
             })
             ->orderBy('created_at', 'asc')
-            ->get();
+            ->get()
+            ->map(function($msg) {
+                // Backward-compatibility: keep both names available for old and new schemas
+                // $msg->parent_id = $msg->reply_to_id ?? $msg->parent_id ?? null; // No longer needed
+                return $msg;
+            });
 
         return response()->json(['messages' => $messages]);
     }
 
     public function sendMessageAjax(Request $request, $student_id)
     {
-        $request->validate(['message' => 'required']);
+        if (!$this->canSendMessages()) {
+            return response()->json(['success' => false, 'message' => 'Only education staff can send student messages.'], 403);
+        }
+
+        $message = trim((string) $request->input('message', ''));
+
+        if ($message === '') {
+            return response()->json(['success' => false, 'message' => 'Message cannot be empty.'], 422);
+        }
 
         $student = \App\Models\Student::where('id', $student_id)
             ->orWhere('student_id', $student_id)
@@ -388,17 +454,38 @@ class NotificationController extends Controller
             return response()->json(['success' => false], 404);
         }
 
+        // Find the latest message from the student to set as the reply_to_id parent
+        $latestStudentMessage = DB::table('notifications')
+            ->where(function($q) use ($student) {
+                $q->where('student_id', $student->id)
+                  ->orWhere('student_id', $student->student_id);
+            })
+            ->where('sender_type', 'student')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $replyColumn = $this->replyColumnName();
+
         $id = DB::table('notifications')->insertGetId([
             'student_id'  => $student->id,
             'class'       => $student->class,
             'type'        => 'admin_reply',
             'sender_type' => 'admin',
-            'message'     => $request->message,
+            'sender_name' => $this->currentAdminName(),
+            $replyColumn  => $latestStudentMessage ? $latestStudentMessage->id : null,
+            'message'     => $message,
             'read'        => false,
             'status'      => 'replied',
             'created_at'  => now(),
             'updated_at'  => now()
         ]);
+
+        // Also update the latest student message to marked as read/replied
+        if ($latestStudentMessage) {
+            DB::table('notifications')
+                ->where('id', $latestStudentMessage->id)
+                ->update(['status' => 'replied', 'read' => true]);
+        }
 
         return response()->json(['success' => true, 'id' => $id]);
     }
