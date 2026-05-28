@@ -26,6 +26,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('/dashboard', [DeviceController::class, 'index'])->name('dashboard');
     Route::get('/tracking', [DeviceController::class, 'tracking']);
     Route::get('/activity', [DeviceController::class, 'activity']);
+    Route::get('/students/{id}/history', [StudentManagementController::class, 'history'])->name('students.history');
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index']);

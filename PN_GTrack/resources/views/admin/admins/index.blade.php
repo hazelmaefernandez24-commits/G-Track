@@ -107,15 +107,7 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
-        @if($errors->any())
-            <div class="alert alert-danger" style="background:#fee2e2; color:#991b1b; padding:12px; border-radius:8px; margin-bottom:16px;">
-                <ul style="margin:0; padding-left:20px;">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+
 
         <div class="admin-mgmt-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -128,6 +120,7 @@
                     <thead>
                         <tr>
                             <th>Staff ID</th>
+                            <th>Name</th>
                             <th>Email</th>
                             <th>Role</th>
                             <th>Actions</th>
@@ -137,6 +130,7 @@
                         @foreach($admins as $admin)
                         <tr>
                             <td style="font-weight:700;">{{ $admin->staff_id }}</td>
+                            <td>{{ trim($admin->first_name . ($admin->middle_initial ? ' ' . $admin->middle_initial . '.' : '') . ' ' . $admin->last_name) }}</td>
                             <td>{{ $admin->email }}</td>
                             <td>
                                 <span class="role-badge {{ $admin->role === 'main' ? 'role-main' : 'role-education' }}">
@@ -166,15 +160,36 @@
     <div id="addModal" class="custom-modal">
         <div class="custom-modal-content">
             <h3>Add New Admin</h3>
-            <form action="/admin/admins" method="POST">
+            @if($errors->any() && old('_method') !== 'PUT')
+                <div class="alert alert-danger">
+                    <ul style="margin:0; padding-left:20px;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            <form id="addForm" action="/admin/admins" method="POST">
                 @csrf
                 <div class="form-group">
                     <label>Staff ID</label>
-                    <input type="text" name="staff_id" class="form-control" required>
+                    <input type="text" name="staff_id" class="form-control" required value="{{ old('_method') !== 'PUT' ? old('staff_id') : '' }}">
+                </div>
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" id="add_first_name" class="form-control" required value="{{ old('_method') !== 'PUT' ? old('first_name') : '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Middle Initial</label>
+                    <input type="text" name="middle_initial" id="add_middle_initial" class="form-control" maxlength="1" placeholder="(optional)" value="{{ old('_method') !== 'PUT' ? old('middle_initial') : '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" id="add_last_name" class="form-control" required value="{{ old('_method') !== 'PUT' ? old('last_name') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="email" class="form-control" required>
+                    <input type="email" name="email" class="form-control" required value="{{ old('_method') !== 'PUT' ? old('email') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>Role</label>
@@ -186,6 +201,10 @@
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" name="password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" name="password_confirmation" class="form-control" required>
                 </div>
                 <div style="display:flex; gap:10px; margin-top:20px;">
                     <button type="submit" class="btn btn-primary" style="flex:1;">Save Admin</button>
@@ -199,16 +218,38 @@
     <div id="editModal" class="custom-modal">
         <div class="custom-modal-content">
             <h3>Edit Admin</h3>
-            <form id="editForm" method="POST">
+            @if($errors->any() && old('_method') === 'PUT')
+                <div id="editErrorAlert" class="alert alert-danger">
+                    <ul style="margin:0; padding-left:20px;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            <form id="editForm" method="POST" action="/admin/admins/{{ old('_method') === 'PUT' ? old('edit_record_id') : '' }}">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="edit_record_id" id="edit_record_id" value="{{ old('edit_record_id') }}">
                 <div class="form-group">
                     <label>Staff ID</label>
-                    <input type="text" name="staff_id" id="edit_staff_id" class="form-control" required>
+                    <input type="text" name="staff_id" id="edit_staff_id" class="form-control" required value="{{ old('_method') === 'PUT' ? old('staff_id') : '' }}">
+                </div>
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" id="edit_first_name" class="form-control" required value="{{ old('_method') === 'PUT' ? old('first_name') : '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Middle Initial</label>
+                    <input type="text" name="middle_initial" id="edit_middle_initial" class="form-control" maxlength="1" placeholder="(optional)" value="{{ old('_method') === 'PUT' ? old('middle_initial') : '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" id="edit_last_name" class="form-control" required value="{{ old('_method') === 'PUT' ? old('last_name') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="email" id="edit_email" class="form-control" required>
+                    <input type="email" name="email" id="edit_email" class="form-control" required value="{{ old('_method') === 'PUT' ? old('email') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>Role</label>
@@ -218,8 +259,16 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Password (Leave blank to keep current)</label>
-                    <input type="password" name="password" class="form-control">
+                    <label>Current Password</label>
+                    <input type="password" name="current_password" id="edit_current_password" class="form-control" autocomplete="current-password">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" name="new_password" id="edit_new_password" class="form-control" autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" name="new_password_confirmation" id="edit_new_password_confirmation" class="form-control" autocomplete="new-password">
                 </div>
                 <div style="display:flex; gap:10px; margin-top:20px;">
                     <button type="submit" class="btn btn-primary" style="flex:1;">Update Admin</button>
@@ -238,14 +287,56 @@
             const modal = document.getElementById(id);
             modal.style.display = 'none'; 
         }
+
+        function clearEditErrors() {
+            const errorAlert = document.getElementById('editErrorAlert');
+            if (errorAlert) {
+                errorAlert.style.display = 'none';
+            }
+        }
         
         function editAdmin(admin) {
+            clearEditErrors();
             document.getElementById('editForm').action = '/admin/admins/' + admin.id;
+            document.getElementById('edit_record_id').value = admin.id;
             document.getElementById('edit_staff_id').value = admin.staff_id;
+            document.getElementById('edit_first_name').value = admin.first_name || '';
+            document.getElementById('edit_middle_initial').value = admin.middle_initial || '';
+            document.getElementById('edit_last_name').value = admin.last_name || '';
             document.getElementById('edit_email').value = admin.email;
             document.getElementById('edit_role').value = admin.role;
+            if (document.getElementById('edit_current_password')) {
+                document.getElementById('edit_current_password').value = '';
+            }
+            if (document.getElementById('edit_new_password')) {
+                document.getElementById('edit_new_password').value = '';
+            }
+            if (document.getElementById('edit_new_password_confirmation')) {
+                document.getElementById('edit_new_password_confirmation').value = '';
+            }
             openModal('editModal');
         }
+
+        document.getElementById('addForm')?.addEventListener('submit', function (e) {
+            const f = document.getElementById('add_first_name')?.value.trim() || '';
+            const m = document.getElementById('add_middle_initial')?.value.trim() || '';
+            const l = document.getElementById('add_last_name')?.value.trim() || '';
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const openAddOnError = {!! json_encode($errors->any() && old('_method') !== 'PUT') !!};
+            const openEditOnError = {!! json_encode($errors->any() && old('_method') === 'PUT' && old('edit_record_id')) !!};
+            if (openAddOnError) {
+                openModal('addModal');
+            }
+            if (openEditOnError) {
+                const editId = {!! json_encode(old('edit_record_id')) !!};
+                if (editId) {
+                    document.getElementById('editForm').action = '/admin/admins/' + editId;
+                    openModal('editModal');
+                }
+            }
+        });
 
         window.onclick = function(event) {
             if (event.target.className === 'custom-modal') {

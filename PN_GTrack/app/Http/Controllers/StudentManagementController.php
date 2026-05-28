@@ -19,16 +19,27 @@ class StudentManagementController extends Controller
     {
         $request->validate([
             'student_id' => 'required|unique:students,student_id',
-            'name' => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
             'email' => 'required|email|unique:students,email',
             'class' => 'required',
             'gender' => 'required',
             'contact' => 'required',
-            'password' => 'required|min:6',
+            'password' => 'required|min:6|confirmed',
         ]);
 
         \DB::transaction(function () use ($request) {
-            $student = Student::create($request->only(['student_id', 'name', 'email', 'class', 'gender', 'contact']));
+            $fullName = trim($request->first_name . ($request->middle_initial ? ' ' . $request->middle_initial . '.' : '') . ' ' . $request->last_name);
+
+            $student = Student::create(array_merge(
+                $request->only(['student_id', 'email', 'class', 'gender', 'contact']),
+                [
+                    'first_name' => $request->first_name,
+                    'middle_initial' => $request->middle_initial,
+                    'last_name' => $request->last_name,
+                    'name' => $fullName,
+                ]
+            ));
 
             StudentAuth::create([
                 'student_id' => $student->student_id,
@@ -46,28 +57,52 @@ class StudentManagementController extends Controller
 
         $request->validate([
             'student_id' => 'required|unique:students,student_id,' . $id,
-            'name' => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
             'email' => 'required|email|unique:students,email,' . $id,
             'class' => 'required',
             'gender' => 'required',
             'contact' => 'required',
+            'current_password' => 'nullable|required_with:new_password|min:6',
+            'new_password' => 'nullable|min:6|confirmed',
         ]);
 
-        \DB::transaction(function () use ($request, $student) {
-            $student->update($request->only(['student_id', 'name', 'email', 'class', 'gender', 'contact']));
+        if ($request->filled('new_password')) {
+            if (! $request->filled('current_password')) {
+                return redirect()->back()->withErrors(['current_password' => 'Current password is required to change password.'])->withInput();
+            }
 
-            if ($request->filled('password') || $student->wasChanged('email')) {
+            $studentAuth = StudentAuth::where('student_id', $student->student_id)->first();
+            if (! $studentAuth || ! Hash::check($request->current_password, $studentAuth->password)) {
+                return redirect()->back()->withErrors(['current_password' => 'Current password is incorrect.'])->withInput();
+            }
+        }
+
+        \DB::transaction(function () use ($request, $student) {
+            $fullName = trim($request->first_name . ($request->middle_initial ? ' ' . $request->middle_initial . '.' : '') . ' ' . $request->last_name);
+
+            $student->update(array_merge(
+                $request->only(['student_id', 'email', 'class', 'gender', 'contact']),
+                [
+                    'first_name' => $request->first_name,
+                    'middle_initial' => $request->middle_initial,
+                    'last_name' => $request->last_name,
+                    'name' => $fullName,
+                ]
+            ));
+
+            if ($request->filled('new_password') || $student->wasChanged('email')) {
                 $studentAuth = StudentAuth::where('student_id', $student->student_id)->first();
                 if ($studentAuth) {
                     $updateData = [];
-                    if ($request->filled('password')) $updateData['password'] = Hash::make($request->password);
+                    if ($request->filled('new_password')) $updateData['password'] = Hash::make($request->new_password);
                     if ($student->wasChanged('email')) $updateData['email'] = $student->email;
                     $studentAuth->update($updateData);
                 } else {
                     StudentAuth::create([
                         'student_id' => $student->student_id,
                         'email' => $student->email,
-                        'password' => Hash::make($request->password ?? 'password123'),
+                        'password' => Hash::make($request->new_password ?? 'password123'),
                     ]);
                 }
             }
@@ -86,5 +121,14 @@ class StudentManagementController extends Controller
         });
 
         return redirect()->back()->with('success', 'Student deleted successfully.');
+    }
+
+    public function history($id)
+    {
+        $student = Student::findOrFail($id);
+        $locations = $student->locations()->orderBy('recorded_at', 'desc')->get();
+        $sosCount = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->count();
+        
+        return view('history', compact('student', 'locations', 'sosCount'));
     }
 }

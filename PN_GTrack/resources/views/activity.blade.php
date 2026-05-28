@@ -131,6 +131,26 @@
         50% { transform: scale(1.5); opacity: 0.5; }
         100% { transform: scale(1); opacity: 1; }
     }
+
+    .btn {
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 11px;
+        display: inline-block;
+        text-align: center;
+    }
+    .btn-primary { 
+        background: var(--sidebar-bg); 
+        color: #fff; 
+    }
+    .btn-primary:hover {
+        background: var(--sidebar-hover);
+    }
 </style>
 @endpush
 
@@ -175,12 +195,13 @@
                     <th>Signal</th>
                     <th>Last Update</th>
                     <th>Contact</th>
+                    <th>Timeline</th>
                 </tr>
             </thead>
             <tbody id="student-table-body">
                 <!-- Data populated by JS -->
                 <tr>
-                    <td colspan="9" style="text-align: center; color: var(--text-muted);">Loading student data...</td>
+                    <td colspan="10" style="text-align: center; color: var(--text-muted);">Loading student data...</td>
                 </tr>
             </tbody>
         </table>
@@ -241,7 +262,7 @@
                 const tbody = document.getElementById('student-table-body');
                 
                 if (!data.students || data.students.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#64748B;">No student data available.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:#64748B;">No student data available.</td></tr>';
                     document.getElementById('student-count-display').textContent = '0 Students';
                     return;
                 }
@@ -255,7 +276,7 @@
                 document.getElementById('student-count-display').textContent = `${filteredStudents.length} Students`;
 
                 if (filteredStudents.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#64748B;">No students found for this class.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:#64748B;">No students found for this class.</td></tr>';
                     return;
                 }
 
@@ -271,6 +292,9 @@
                         <td style="color:var(--text-muted); font-size:12px;">${s.last_update || '—'}</td>
                         <td>
                             ${s.contact ? `<a href="tel:${s.contact}" style="color:var(--sidebar-active);text-decoration:none;font-weight:500;">${s.contact}</a>` : '<span style="color:#94A3B8;">—</span>'}
+                        </td>
+                        <td>
+                            <a href="/students/${s.id}/history" class="btn btn-primary">View History</a>
                         </td>
                     </tr>
                 `).join('');

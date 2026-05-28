@@ -1643,9 +1643,69 @@
                 .catch(err => console.error('Dashboard poll error:', err));
         }
 
+        // Poll the current page and update UI without disrupting an open conversation
+        function pollNotifications() {
+            fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(res => res.text())
+                .then(html => {
+                    try {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+
+                        // Always refresh the cards (summary stats)
+                        const newCards = doc.querySelector('.cards');
+                        const cardsEl = document.querySelector('.cards');
+                        if (newCards && cardsEl) cardsEl.innerHTML = newCards.innerHTML;
+
+                        // If a student convo is currently open, only refresh the student list (so active chat isn't removed)
+                        const studentListEl = document.getElementById('student-list-container');
+                        const newStudentList = doc.getElementById('student-list-container');
+
+                        if (typeof activeStudentId !== 'undefined' && activeStudentId) {
+                            if (newStudentList && studentListEl) {
+                                studentListEl.innerHTML = newStudentList.innerHTML;
+                                // Re-apply the 'active' class to the currently selected student row if it still exists
+                                const currentRow = document.querySelector(`.student-row[data-id="${activeStudentId}"]`);
+                                if (currentRow) {
+                                    document.querySelectorAll('.student-row').forEach(r => r.classList.remove('active'));
+                                    currentRow.classList.add('active');
+                                }
+                            }
+
+                            // Do not replace the chat panel content to avoid interrupting the open conversation
+                            return;
+                        }
+
+                        // Otherwise, replace the whole messages area (used when no convo is open)
+                        const newMessages = doc.querySelector('.messages');
+                        const messagesEl = document.querySelector('.messages');
+                        if (newMessages && messagesEl) {
+                            messagesEl.innerHTML = newMessages.innerHTML;
+                        }
+                    } catch (err) {
+                        console.error('Error parsing notifications HTML:', err);
+                    }
+                })
+                .catch(err => console.error('Notifications poll error:', err));
+        }
+
+        // Track active conversation state so polling doesn't remove the open chat
+        let activeStudentId = null;
+        let activeStudentName = '';
+        let activeIsFemale = false;
+        let msgPollTimer = null;
+
         document.addEventListener('DOMContentLoaded', function () {
             pollDashboardStats();
             setInterval(pollDashboardStats, 10000); // Sync every 10s
+
+            // Start notifications auto-refresh and schedule periodic sync
+            try {
+                pollNotifications();
+                setInterval(pollNotifications, 10000); // Refresh notifications every 10s
+            } catch (err) {
+                console.error('Failed to start notifications poll:', err);
+            }
 
             // Global click listener for student rows (delegation)
             document.addEventListener('click', function (e) {
@@ -1715,11 +1775,6 @@
                 triggerBtn.style.display = 'flex';
             }
         }
-
-        let activeStudentId = null;
-        let activeStudentName = '';
-        let activeIsFemale = false;
-        let msgPollTimer = null;
 
         // Search
         document.getElementById('student-search')?.addEventListener('input', function () {

@@ -19,13 +19,18 @@ class AdminManagementController extends Controller
     {
         $request->validate([
             'staff_id' => 'required|unique:admins,staff_id',
+            'first_name' => 'required',
+            'last_name' => 'required',
             'email' => 'required|email|unique:admins,email',
-            'password' => 'required|min:6',
+            'password' => 'required|min:6|confirmed',
             'role' => 'required|in:education,main',
         ]);
 
         Admin::create([
             'staff_id' => $request->staff_id,
+            'first_name' => $request->first_name,
+            'middle_initial' => $request->middle_initial,
+            'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
@@ -40,14 +45,28 @@ class AdminManagementController extends Controller
 
         $request->validate([
             'staff_id' => 'required|unique:admins,staff_id,' . $id,
+            'first_name' => 'required',
+            'last_name' => 'required',
             'email' => 'required|email|unique:admins,email,' . $id,
             'role' => 'required|in:education,main',
+            'current_password' => 'nullable|required_with:new_password|min:6',
+            'new_password' => 'nullable|min:6|confirmed',
         ]);
 
-        $admin->update($request->only(['staff_id', 'email', 'role']));
+        if ($request->filled('new_password')) {
+            if (! $request->filled('current_password')) {
+                return redirect()->back()->withErrors(['current_password' => 'Current password is required to change password.'])->withInput();
+            }
 
-        if ($request->filled('password')) {
-            $admin->update(['password' => Hash::make($request->password)]);
+            if (! Hash::check($request->current_password, $admin->password)) {
+                return redirect()->back()->withErrors(['current_password' => 'Current password is incorrect.'])->withInput();
+            }
+        }
+
+        $admin->update($request->only(['staff_id', 'first_name', 'middle_initial', 'last_name', 'email', 'role']));
+
+        if ($request->filled('new_password')) {
+            $admin->update(['password' => Hash::make($request->new_password)]);
         }
 
         return redirect()->back()->with('success', 'Admin updated successfully.');
