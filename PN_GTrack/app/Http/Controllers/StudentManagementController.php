@@ -19,13 +19,21 @@ class StudentManagementController extends Controller
     {
         $request->validate([
             'student_id' => 'required|unique:students,student_id',
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'email' => 'required|email|unique:students,email',
+            'first_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
+            'middle_initial' => ['nullable', 'regex:/^[A-Za-z]+$/u', 'max:1'],
+            'last_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
+            'email' => 'required|email:rfc|unique:students,email',
             'class' => 'required',
             'gender' => 'required',
-            'contact' => 'required',
+            'contact' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
             'password' => 'required|min:6|confirmed',
+        ], [
+            'first_name.regex' => 'First name must contain letters only.',
+            'middle_initial.regex' => 'Middle initial must contain letters only.',
+            'last_name.regex' => 'Last name must contain letters only.',
+            'email.email' => 'Please enter a valid email address.',
+            'contact.digits' => 'Contact number must be exactly 11 digits.',
+            'contact.regex' => 'Contact number must start with 09 and contain 11 digits.',
         ]);
 
         \DB::transaction(function () use ($request) {
@@ -57,14 +65,22 @@ class StudentManagementController extends Controller
 
         $request->validate([
             'student_id' => 'required|unique:students,student_id,' . $id,
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'email' => 'required|email|unique:students,email,' . $id,
+            'first_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
+            'middle_initial' => ['nullable', 'regex:/^[A-Za-z]+$/u', 'max:1'],
+            'last_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
+            'email' => 'required|email:rfc|unique:students,email,' . $id,
             'class' => 'required',
             'gender' => 'required',
-            'contact' => 'required',
+            'contact' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
             'current_password' => 'nullable|required_with:new_password|min:6',
             'new_password' => 'nullable|min:6|confirmed',
+        ], [
+            'first_name.regex' => 'First name must contain letters only.',
+            'middle_initial.regex' => 'Middle initial must contain letters only.',
+            'last_name.regex' => 'Last name must contain letters only.',
+            'email.email' => 'Please enter a valid email address.',
+            'contact.digits' => 'Contact number must be exactly 11 digits.',
+            'contact.regex' => 'Contact number must start with 09 and contain 11 digits.',
         ]);
 
         if ($request->filled('new_password')) {

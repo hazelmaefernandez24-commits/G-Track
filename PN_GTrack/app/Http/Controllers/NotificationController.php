@@ -17,7 +17,33 @@ class NotificationController extends Controller
     private function canSendMessages(): bool
     {
         return Auth::guard('admin')->check()
-            && Auth::guard('admin')->user()->role === 'education';
+            && in_array(Auth::guard('admin')->user()->role, ['education', 'main'], true);
+    }
+
+    private function currentAdminId(): ?int
+    {
+        $user = Auth::guard('admin')->user();
+
+        return $user ? (int) $user->getKey() : null;
+    }
+
+    private function scopeToCurrentAdmin($query)
+    {
+        $user = Auth::guard('admin')->user();
+
+        if (!$user) {
+            return $query;
+        }
+
+        if ($user->role === 'main') {
+            // Main admins see ONLY admin-related and broadcast messages (not student-to-education staff conversations)
+            return $query->where(function ($q) {
+                $q->where('sender_type', 'admin')        // Messages from admins
+                  ->orWhereIn('type', ['broadcast', 'sos', 'blackout']);  // System broadcasts and alerts
+            });
+        }
+
+        return $query->where('admin_id', $user->getKey());  // Education admins see only their assigned messages
     }
 
     private function currentAdminName(): string
@@ -61,6 +87,10 @@ class NotificationController extends Controller
 
         $query = \App\Models\Notification::with(['replies', 'student']);
 
+        if ($tab === 'student') {
+            $query = $this->scopeToCurrentAdmin($query);
+        }
+
         // --- FILTER BY TYPE (TAB) ---
         if ($tab === 'sos') {
             $query->whereIn('type', ['sos', 'blackout']);
@@ -77,17 +107,21 @@ class NotificationController extends Controller
 
         // --- FILTER BY CLASS ---
         if ($class !== 'all') {
-            $query->where(function ($q) use ($dbClass) {
+            $query->where(function ($q) use ($dbClass, $tab) {
                 $q->where('class', $dbClass)
-                  ->orWhere('class', 'all') // Include global broadcasts
                   ->orWhereHas('student', function ($sq) use ($dbClass) {
                       $sq->where('class', $dbClass);
                   });
+
+                if ($tab !== 'student') {
+                    $q->orWhere('class', 'all'); // Include global broadcasts only outside student message list
+                }
             });
         }
 
         // Get all relevant notifications
-        $allNotifications = $query->orderBy('created_at', 'asc')->get();
+        // Use descending order directly and reset keys for proper collection handling
+        $allNotifications = $query->orderBy('created_at', 'desc')->get();
 
         if ($tab === 'student') {
             // Group the messages by student for Messenger layout
@@ -95,7 +129,7 @@ class NotificationController extends Controller
             $notifications = $allNotifications->whereNotNull('student_id')->groupBy('student_id');
         } else {
             // For SOS and Broadcast, keep the list sorted by newest first
-            $notifications = $allNotifications->reverse();
+            $notifications = $allNotifications->values();
         }
 
         // --- STATS LOGIC ---
@@ -115,7 +149,23 @@ class NotificationController extends Controller
             'latestDate' => $latestDate
         ];
 
-        $sidebarStudents = \App\Models\Student::orderBy('name', 'asc')->get();
+        $threadStudentIds = $allNotifications
+            ->whereNotNull('student_id')
+            ->pluck('student_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $sidebarStudents = $threadStudentIds->isNotEmpty()
+            ? \App\Models\Student::whereIn('id', $threadStudentIds)->orderBy('name', 'asc')->get()
+            : collect();
+
+        $unreadCounts = \App\Models\Notification::selectRaw('student_id, count(*) as unread_count')
+            ->where('sender_type', 'student')
+            ->where('read', false)
+            ->whereNotNull('student_id')
+            ->groupBy('student_id')
+            ->pluck('unread_count', 'student_id');
 
         return view('notifications', [
             'notifications' => $notifications,
@@ -126,6 +176,7 @@ class NotificationController extends Controller
             'class' => $class,
             'dbClass' => $dbClass,
             'canMessage' => $this->canSendMessages(),
+            'unreadCounts' => $unreadCounts,
         ]);
     }
 
@@ -192,6 +243,7 @@ class NotificationController extends Controller
 
         DB::table('notifications')->insert([
             'student_id' => $parent->student_id,
+            'admin_id' => $this->currentAdminId(),
             'class' => $parent->class,
             'type' => 'admin_reply',
             'sender_type' => 'admin',
@@ -272,12 +324,14 @@ class NotificationController extends Controller
                 $q->where('class', 'all')
                 // 2. Class-specific broadcasts
                   ->orWhere('class', $student->class)
-                // 3. Direct messages to this student ID
-                  ->orWhere('student_id', $student->student_id)
+                // 3. Direct messages to this student reference
                   ->orWhere('student_id', $student->id);
             })
             // Only show broadcasts or messages, hide system/admin alerts like blackout
             ->where('type', '!=', 'blackout')
+            ->when(Auth::guard('admin')->check() && Auth::guard('admin')->user()->role !== 'main', function ($q) {
+                $q->where('admin_id', Auth::guard('admin')->id());
+            })
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($notif) {
@@ -350,9 +404,12 @@ class NotificationController extends Controller
             ], 500);
         }
 
+        $recipientAdminId = $request->input('admin_id', $request->input('recipient_admin_id', $request->input('target_admin_id', $request->input('to_admin_id'))));
+
         try {
             $id = DB::table('notifications')->insertGetId([
                 'student_id' => $student->id, // Use numeric ID for the relationship
+                'admin_id' => $recipientAdminId,
                 'class' => $student->class, 
                 'type' => $type,
                 'sender_type' => 'student',
@@ -418,10 +475,21 @@ class NotificationController extends Controller
         }
 
         // Fetch all messages related to this student
+        $markSeenQuery = DB::table('notifications')
+            ->where('student_id', $student->id)
+            ->where('sender_type', 'student')
+            ->where('read', false);
+
+        if (Auth::guard('admin')->check() && Auth::guard('admin')->user()->role !== 'main') {
+            $markSeenQuery->where('admin_id', Auth::guard('admin')->id());
+        }
+
+        $markSeenQuery->update(['read' => true]);
+
         $messages = DB::table('notifications')
-            ->where(function($q) use ($student) {
-                $q->where('student_id', $student->id)
-                  ->orWhere('student_id', $student->student_id);
+            ->where('student_id', $student->id)
+            ->when(Auth::guard('admin')->check() && Auth::guard('admin')->user()->role !== 'main', function ($q) {
+                $q->where('admin_id', Auth::guard('admin')->id());
             })
             ->orderBy('created_at', 'asc')
             ->get()
@@ -456,10 +524,7 @@ class NotificationController extends Controller
 
         // Find the latest message from the student to set as the reply_to_id parent
         $latestStudentMessage = DB::table('notifications')
-            ->where(function($q) use ($student) {
-                $q->where('student_id', $student->id)
-                  ->orWhere('student_id', $student->student_id);
-            })
+            ->where('student_id', $student->id)
             ->where('sender_type', 'student')
             ->orderBy('created_at', 'desc')
             ->first();
@@ -468,6 +533,7 @@ class NotificationController extends Controller
 
         $id = DB::table('notifications')->insertGetId([
             'student_id'  => $student->id,
+            'admin_id'    => $this->currentAdminId(),
             'class'       => $student->class,
             'type'        => 'admin_reply',
             'sender_type' => 'admin',
@@ -480,13 +546,55 @@ class NotificationController extends Controller
             'updated_at'  => now()
         ]);
 
-        // Also update the latest student message to marked as read/replied
-        if ($latestStudentMessage) {
-            DB::table('notifications')
-                ->where('id', $latestStudentMessage->id)
-                ->update(['status' => 'replied', 'read' => true]);
+        // Mark any unread student messages in this conversation as seen by the admin
+        $readMarkQuery = DB::table('notifications')
+            ->where('student_id', $student->id)
+            ->where('sender_type', 'student')
+            ->where('read', false);
+
+        if (Auth::guard('admin')->check() && Auth::guard('admin')->user()->role !== 'main') {
+            $readMarkQuery->where('admin_id', Auth::guard('admin')->id());
         }
 
+        $readMarkQuery->update(['read' => true]);
+
         return response()->json(['success' => true, 'id' => $id]);
+    }
+
+    public function allStudentsJson(Request $request)
+    {
+        $class = $request->query('class');
+        $query = \App\Models\Student::query();
+        if ($class && $class !== 'all') {
+            $query->where('class', $class);
+        }
+        $students = $query->orderBy('name', 'asc')->get(['id', 'name', 'student_id', 'class', 'status']);
+        return response()->json(['students' => $students]);
+    }
+
+    /**
+     * GET /api/admins
+     * Returns list of all available admins for messaging/notifications
+     */
+    public function getAdmins()
+    {
+        $admins = \App\Models\Admin::select('id', 'staff_id', 'first_name', 'middle_initial', 'last_name', 'email', 'role')
+            ->orderBy('last_name', 'asc')
+            ->orderBy('first_name', 'asc')
+            ->get()
+            ->map(function($admin) {
+                return [
+                    'id' => $admin->id,
+                    'name' => trim($admin->first_name . ' ' . $admin->last_name),
+                    'email' => $admin->email,
+                    'role' => $admin->role,
+                    'staff_id' => $admin->staff_id,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'admins' => $admins
+        ]);
     }
 }

@@ -34,17 +34,24 @@
             background:#fff;
             border-radius:16px;
             box-shadow: 0 20px 25px rgba(0,0,0,.15);
-            padding:40px;
+            padding:30px;
             position:relative;
         }
         .logo-section{
             text-align:center;
-            margin-bottom:30px;
+            margin-bottom:15px;
         }
+
+        .logo-section h1{
+            text-align:center;
+            margin-bottom:3px;
+             margin-top:0px;
+        }
+
         .logo-section img{
             width:80px;
             height:auto;
-            margin-bottom:16px;
+            margin-bottom:5px;
         }
         .logo-title{
             font-size:24px;
@@ -142,8 +149,9 @@
         <div class="login-card">
             
             <div class="logo-section">
-                <img src="{{ asset('images/gtrack.png') }}" alt="PN_GTrack Logo">
-                <p class="logo-subtitle">Admin Authentication Portal</p>
+                <img src="{{ asset('images/finalLOGO.png') }}" alt="PN_GTrack Logo">
+                <h1>G!Track</h1>
+                <p class="logo-subtitle">Authentication Portal</p>
             </div>
 
             

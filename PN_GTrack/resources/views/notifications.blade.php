@@ -318,6 +318,7 @@
             grid-template-columns: 1fr auto;
             gap: 10px;
             align-items: center;
+            
         }
 
         .badge-pill {
@@ -355,13 +356,19 @@
         .message-head {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            gap: 16px;
         }
 
         .message-title {
             margin: 0;
             font-weight: 700;
             font-size: 14px;
+            line-height: 1.3;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
         }
 
         .message-meta {
@@ -583,31 +590,25 @@
             width: 100%;
         }
 
-        .class-tabs {
-            display: flex;
-            gap: 4px;
-            background: #f1f5f9;
+        .class-filter-wrap {
+            margin-top: 8px;
+            display: block;
+        }
+
+        .class-filter-select {
+            width: 100%;
             border: 1px solid var(--line);
-            border-radius: 8px;
-            padding: 3px;
-        }
-
-        .class-tab {
-            flex: 1;
-            text-align: center;
-            padding: 5px 4px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--muted);
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .class-tab.active {
+            border-radius: 10px;
+            padding: 8px 10px;
             background: #fff;
-            color: var(--blue);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+            color: var(--text);
+            font-size: 13px;
+            outline: none;
+        }
+
+        .class-filter-select:focus {
+            border-color: rgba(59, 130, 246, 0.55);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
         }
 
         .student-list {
@@ -665,15 +666,23 @@
             color: #be185d;
         }
 
-        .unread-dot {
+        .unread-badge {
             position: absolute;
-            top: 0;
-            right: 0;
-            width: 10px;
-            height: 10px;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
             background: var(--blue);
-            border-radius: 50%;
+            border-radius: 999px;
             border: 2px solid #fff;
+            line-height: 1;
         }
 
         .student-name {
@@ -986,9 +995,9 @@
 
 @section('content')
 
-
+{{--
     <div class="page-title" style="margin-bottom: 24px;">
-            <h1>Notifications Overview</h1>
+            
             <p>Summary of system communications and alerts</p>
         </div>
 
@@ -1033,6 +1042,7 @@
                 </div>
             </article>
         </section>
+        --}}
 
         <div class='section' style="margin-top: 24px;">
             <div class='filter-block' style="border-radius: 12px; border: 1px solid var(--line);">
@@ -1063,10 +1073,12 @@
             <div class='card-panel'>
                 <div class='card-panel-grid'>
                     <div>
-                        <h3 class='card-title'>{{ $class === 'all' ? 'All Classes' : $class }}</h3>
-                        <p class='card-sub'>{{ $notifications->count() }}
+                        <h3 class="card-title" style="font-size: 17px;">
+    {{ $class === 'all' ? 'All Classes' : 'Class of ' . $class }}
+</h3>
+                       {{-- <p class='card-sub'>{{ $notifications->count() }}
                             {{ $notifications->count() === 1 ? 'message' : 'messages' }}
-                        </p>
+                        </p> --}}
                     </div>
                 </div>
 
@@ -1175,8 +1187,8 @@
                                     style="{{ $notification->status === 'resolved' ? 'opacity: 0.7; border-left: 4px solid var(--muted);' : 'border-left: 4px solid var(--red);' }}">
                                     <div class='message-head'>
                                         <p class='message-title'>
-                                            SOS Alert: {{ $notification->student->name ?? 'Unknown Student' }}
-                                            ({{ $notification->student->student_id ?? 'N/A' }})
+                                            SOS Alert: {{ optional($notification->student)->name ?? 'Unknown Student' }}
+                                            ({{ optional($notification->student)->student_id ?? 'N/A' }})
                                             @if($notification->status === 'resolved')
                                                 <span class='badge-pill'
                                                     style='background:#f1f5f9;color:#64748b;border-color:#e2e8f0;'>I am Safe
@@ -1200,11 +1212,11 @@
                                                 ->first()
                                             : null;
 
-                                        // Prefer live locations table → student model → notification snapshot
-                                        $currentBattery = $notification->student->battery_level ?? $notification->battery_level;
-                                        $currentSignal = $notification->student->signal_status ?? $notification->signal_status;
-                                        $currentLat = $latestLocation->latitude ?? $notification->student->latitude ?? $notification->latitude;
-                                        $currentLng = $latestLocation->longitude ?? $notification->student->longitude ?? $notification->longitude;
+                                        // Prefer the notification snapshot first, then live student data
+                                        $currentBattery = $notification->battery_level ?? optional($notification->student)->battery_level;
+                                        $currentSignal = $notification->signal_status ?? optional($notification->student)->signal_status;
+                                        $currentLat = $latestLocation->latitude ?? optional($notification->student)->latitude ?? $notification->latitude;
+                                        $currentLng = $latestLocation->longitude ?? optional($notification->student)->longitude ?? $notification->longitude;
                                     @endphp
 
                                     <div class='message-meta'
@@ -1264,7 +1276,7 @@
                                                 <div
                                                     style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
                                                     Live Battery</div>
-                                                <div class="battery-display-{{ $notification->student->id ?? 'none' }}"
+                                                <div class="notification-battery-display-{{ $notification->id }}"
                                                     style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? '#b91c1c' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
                                                     🔋 {{ isset($currentBattery) ? $currentBattery . '%' : 'N/A' }}
                                                 </div>
@@ -1292,7 +1304,7 @@
                                                 <div
                                                     style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
                                                     @if($currentLat)
-                                                        <a href="/tracking?student_id={{ $notification->student->student_id ?? $notification->student_id }}"
+                                                        <a href="/tracking?student_id={{ optional($notification->student)->student_id ?? $notification->student_id }}"
                                                             style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
                                                             📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }}
                                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
@@ -1361,9 +1373,8 @@
                                         <div class='message-item' style="border-left: 4px solid var(--blue);">
                                             <div class='message-head'>
                                                 <p class='message-title'>
-                                                    Blackout Alert: {{ $notification->student->name ?? 'Unknown Student' }}
-                                                    <span class='badge-pill'
-                                                        style='background:#dbeafe;color:#1e40af;border-color:#bfdbfe;'>System Offline</span>
+                                                    Blackout Alert: {{ optional($notification->student)->name ?? 'Unknown Student' }}
+                                                   
                                                 </p>
                                                 <span
                                                     class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
@@ -1377,65 +1388,67 @@
                                                         ->first()
                                                     : null;
 
-                                                // Prefer live locations table → student model → notification snapshot
-                                                $currentBattery = $notification->student->battery_level ?? $notification->battery_level;
-                                                $currentSignal = $notification->student->signal_status ?? $notification->signal_status;
-                                                $currentLat = $latestLocation->latitude ?? $notification->student->latitude ?? $notification->latitude;
-                                                $currentLng = $latestLocation->longitude ?? $notification->student->longitude ?? $notification->longitude;
+                                                // Prefer the notification snapshot first, then live student data
+                                                $currentBattery = $notification->battery_level ?? optional($notification->student)->battery_level;
+                                                $currentSignal = $notification->signal_status ?? optional($notification->student)->signal_status;
+                                                $currentLat = $latestLocation->latitude ?? optional($notification->student)->latitude ?? $notification->latitude;
+                                                $currentLng = $latestLocation->longitude ?? optional($notification->student)->longitude ?? $notification->longitude;
                                             @endphp
 
                                             <div class='message-meta'
-                                                style='margin-top:12px; background: #f1f5f9; padding: 12px; border-radius: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; border: 1px solid rgba(0,0,0,0.05);'>
-                                                <div>
-                                                    <div
-                                                        style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
-                                                        Live Battery</div>
-                                                    <div class="battery-display-{{ $notification->student->id ?? 'none' }}"
-                                                        style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? 'var(--red)' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
-                                                        🔋 {{ isset($currentBattery) ? $currentBattery . '%' : 'N/A' }}
+                                                style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);'>
+                                                <div
+                                                    style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                                                    <div>
+                                                        <div
+                                                            style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                            Live Battery</div>
+                                                        <div class="notification-battery-display-{{ $notification->id }}"
+                                                            style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? 'var(--red)' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
+                                                            🔋 {{ isset($currentBattery) ? $currentBattery . '%' : 'N/A' }}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div>
-                                                    <div
-                                                        style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
-                                                        Live Signal</div>
-                                                    @php
-                                                        $sigLower = strtolower($currentSignal ?? '');
-                                                        $sigColor = '#ef4444'; // Default to red/warning
-                                                        if (Str::contains($sigLower, ['excellent', 'strong', 'good'])) $sigColor = '#16a34a';
-                                                        elseif (Str::contains($sigLower, 'fair')) $sigColor = '#f59e0b';
-                                                        elseif (empty($sigLower) || $sigLower === 'n/a') $sigColor = '#0f172a';
-                                                    @endphp
-                                                    <div style="font-weight: 700; color: {{ $sigColor }}; font-size: 14px; margin-top: 2px;">
-                                                        {!! Str::contains($sigLower, ['excellent', 'strong', 'good', 'fair']) ? '📶' : '⚠️' !!}
-                                                        {{ $currentSignal ?? 'N/A' }}
+                                                    <div>
+                                                        <div
+                                                            style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                            Live Signal</div>
+                                                        @php
+                                                            $sigLower = strtolower($currentSignal ?? '');
+                                                            $sigColor = '#ef4444'; // Default to red/warning
+                                                            if (Str::contains($sigLower, ['excellent', 'strong', 'good'])) $sigColor = '#16a34a';
+                                                            elseif (Str::contains($sigLower, 'fair')) $sigColor = '#f59e0b';
+                                                            elseif (empty($sigLower) || $sigLower === 'n/a') $sigColor = '#0f172a';
+                                                        @endphp
+                                                        <div style="font-weight: 700; color: {{ $sigColor }}; font-size: 14px; margin-top: 2px;">
+                                                            {!! Str::contains($sigLower, ['excellent', 'strong', 'good', 'fair']) ? '📶' : '⚠️' !!}
+                                                            {{ $currentSignal ?? 'N/A' }}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div style="grid-column: span 2;">
-                                                    <div
-                                                        style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
-                                                        Location</div>
-                                                    <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
-                                                        @if($currentLat)
-                                                            <a href="/tracking?student_id={{ $notification->student->student_id ?? $notification->student_id }}"
-                                                                style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
-                                                                📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }}
-                                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                                    stroke-linejoin="round">
-                                                                    <line x1="7" y1="17" x2="17" y2="7"></line>
-                                                                    <polyline points="7 7 17 7 17 17"></polyline>
-                                                                </svg>
-                                                            </a>
-                                                        @else
-                                                            {{ $notification->location ?? 'Location Unavailable' }}
-                                                        @endif
+                                                    <div style="grid-column: span 2;">
+                                                        <div
+                                                            style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                            Last Known Location</div>
+                                                        <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
+                                                            @if($currentLat)
+                                                                <a href="/tracking?student_id={{ optional($notification->student)->student_id ?? $notification->student_id }}"
+                                                                    style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                                                                    📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }}
+                                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                                        stroke-linejoin="round">
+                                                                        <line x1="7" y1="17" x2="17" y2="7"></line>
+                                                                        <polyline points="7 7 17 7 17 17"></polyline>
+                                                                    </svg>
+                                                                </a>
+                                                            @else
+                                                                {{ $notification->location ?? 'Location Unavailable' }}
+                                                            @endif
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                @if($notification->status !== 'resolved')
-                                                    <div
-                                                        style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
+                                                    @if($notification->status !== 'resolved')
+                                                        <div
+                                                            style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
                                                         {{-- Acknowledged (Mark as Seen) --}}
                                                         @if(!$notification->read)
                                                             <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge'
@@ -1516,7 +1529,34 @@
                         {{-- Sidebar --}}
                         <aside class="student-panel">
                             <div class="panel-header">
-                                <div class="panel-title">Student Chats</div>
+                                <div class="panel-title" style="display: flex; align-items: center; gap: 10px;">
+                                    Student Chats
+                                    <button id="view-students-btn" type="button" onclick="openStudentsModal()" style="margin-left: 50px; padding: 4px 12px; font-size: 12px; font-weight: 700; border-radius: 8px; border: 1px solid #2563eb; background: #fff; color: #2563eb; cursor: pointer; transition: background 0.2s;">
+                                        View students
+                                    </button>
+                                </div>
+                                    <!-- All Students Modal -->
+                                    <div id="all-students-modal" onclick="closeStudentsModal(event)" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.18); align-items:center; justify-content:center;">
+                                        <div onclick="event.stopPropagation()" style="background:#fff; border-radius:16px; max-width:480px; width:96vw; max-height:80vh; overflow:auto; box-shadow:0 8px 32px rgba(0,0,0,0.18); padding:28px 24px 18px 24px; position:relative;">
+                                            <button type="button" onclick="closeStudentsModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:20px; color:#64748b; cursor:pointer;">&times;</button>
+                                            <h2 style="font-size:20px; font-weight:800; margin-bottom:12px;">All Students</h2>
+                                            <div style="margin-bottom:12px; display:flex; gap:10px; align-items:center;">
+                                                <label for="modal-class-filter" style="font-weight:700; font-size:13px;">Class:</label>
+                                                <select id="modal-class-filter" style="padding:6px 12px; border-radius:8px; border:1px solid #e5e7eb; font-size:13px;">
+                                                    <option value="all">All</option>
+                                                    <option value="2026">2026</option>
+                                                    <option value="2027">2027</option>
+                                                    <option value="2028">2028</option>
+                                                </select>
+                                            </div>
+                                            <div style="margin-bottom:10px;">
+                                                <input id="modal-student-search" type="text" placeholder="Search students..." style="width:100%; padding:7px 12px; border-radius:8px; border:1px solid #e5e7eb; font-size:13px;">
+                                            </div>
+                                            <div id="modal-student-list" style="max-height:48vh; overflow:auto;">
+                                                <div style="text-align:center; color:#64748b; font-size:13px; padding:30px 0;">Loading...</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 <div class="search-box">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1524,14 +1564,9 @@
                                         <line x1="21" y1="21" x2="16.65" y2="16.65" />
                                     </svg>
                                     <input type="text" id="student-search" placeholder="Search students..."
-                                        autocomplete="off">
+                                        autocomplete="off" oninput="filterStudentList()">
                                 </div>
-                                <div class="class-tabs">
-                                    <div class="class-tab active" data-class="all">All</div>
-                                    <div class="class-tab" data-class="2026">2026</div>
-                                    <div class="class-tab" data-class="2027">2027</div>
-                                    <div class="class-tab" data-class="2028">2028</div>
-                                </div>
+                               
                             </div>
                             <div class="student-list" id="student-list-container">
                                 @php $currentLetter = ''; @endphp
@@ -1539,13 +1574,16 @@
                                     @php
                                         $letter = strtoupper(substr($student->name, 0, 1));
                                         $isFemale = strtolower($student->gender ?? '') === 'female';
-                                        $unread = \App\Models\Notification::where(function ($q) use ($student) {
-                                            $q->where('student_id', $student->id)
-                                                ->orWhere('student_id', $student->student_id);
-                                        })
+                                        $unread = $unreadCounts[$student->id] ?? 0;
+                                        if ($unread === 0) {
+                                            $unread = \App\Models\Notification::where(function ($q) use ($student) {
+                                                $q->where('student_id', $student->id)
+                                                  ->orWhere('student_id', $student->student_id);
+                                            })
                                             ->where('sender_type', 'student')
                                             ->where('read', false)
                                             ->count();
+                                        }
                                     @endphp
                                     @if($letter !== $currentLetter)
                                         @php $currentLetter = $letter; @endphp
@@ -1558,7 +1596,7 @@
                                         <div class="avatar {{ $isFemale ? 'female' : '' }}">
                                             {{ strtoupper(substr($student->name, 0, 1)) }}
                                             @if($unread > 0)
-                                            <div class="unread-dot"></div>@endif
+                                            <div class="unread-badge">{{ $unread > 99 ? '99+' : $unread }}</div>@endif
                                         </div>
                                         <div class="student-info">
                                             <div class="student-name">{{ $student->name }}</div>
@@ -1655,12 +1693,15 @@
                             });
                         });
                     }
+                    // Do not update notification snapshot batteries; these should remain the battery level captured when the alert was created.
                 })
                 .catch(err => console.error('Dashboard poll error:', err));
         }
 
         // Poll the current page and update UI without disrupting an open conversation
         function pollNotifications() {
+            if (isStudentsModalOpen) return;
+
             fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                 .then(res => res.text())
                 .then(html => {
@@ -1728,16 +1769,111 @@
                 const row = e.target.closest('.student-row');
                 if (row) {
                     try {
+                        if (row.classList.contains('modal-student-row')) {
+                            closeStudentsModal();
+                        }
                         handleStudentSelection(row);
                     } catch (err) {
                         console.error('Selection error:', err);
                     }
                 }
             });
+
+            // Student message filters
+            document.getElementById('student-search')?.addEventListener('input', filterStudentList);
+            document.getElementById('student-class-filter')?.addEventListener('change', filterStudentList);
+            filterStudentList();
         });
 
         // --- MESSENGER LOGIC ---
         // --- Broadcast Details Modal Handling ---
+        let isStudentsModalOpen = false;
+
+        function openStudentsModal() {
+            const modal = document.getElementById('all-students-modal');
+            if (!modal) return;
+            isStudentsModalOpen = true;
+            modal.style.display = 'flex';
+            const modalClassFilter = document.getElementById('modal-class-filter');
+            if (modalClassFilter && !modalClassFilter.dataset.listenerAttached) {
+                modalClassFilter.addEventListener('change', loadAllStudents);
+                modalClassFilter.dataset.listenerAttached = '1';
+            }
+            const modalSearch = document.getElementById('modal-student-search');
+            if (modalSearch && !modalSearch.dataset.listenerAttached) {
+                modalSearch.addEventListener('input', filterModalStudentList);
+                modalSearch.dataset.listenerAttached = '1';
+            }
+            loadAllStudents();
+        }
+
+        function closeStudentsModal(event) {
+            const modal = document.getElementById('all-students-modal');
+            if (!modal) return;
+            if (event && event.target !== modal) return;
+            isStudentsModalOpen = false;
+            modal.style.display = 'none';
+        }
+
+        function openStudentFromModal(row) {
+            closeStudentsModal();
+            handleStudentSelection(row);
+        }
+
+        function loadAllStudents() {
+            const classVal = document.getElementById('modal-class-filter')?.value || 'all';
+            const listDiv = document.getElementById('modal-student-list');
+            if (!listDiv) return;
+
+            listDiv.innerHTML = '<div style="text-align:center; color:#64748b; font-size:13px; padding:30px 0;">Loading...</div>';
+            fetch(`/students/all/json?class=${encodeURIComponent(classVal)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.students || data.students.length === 0) {
+                        listDiv.innerHTML = '<div style="text-align:center; color:#64748b; font-size:13px; padding:30px 0;">No students found.</div>';
+                        return;
+                    }
+
+                    const selectedClass = classVal.toString();
+                    const students = selectedClass === 'all'
+                        ? data.students
+                        : data.students.filter(stu => ((stu['class'] || '').toString() === selectedClass));
+
+                    if (students.length === 0) {
+                        listDiv.innerHTML = '<div style="text-align:center; color:#64748b; font-size:13px; padding:30px 0;">No students found.</div>';
+                        return;
+                    }
+
+                    let html = '';
+                    students.forEach(stu => {
+                        const online = Boolean(stu['status']);
+                        const studentName = (stu['name'] || 'Student');
+                        const studentClass = (stu['class'] || 'N/A');
+                        html += `<div class="student-row modal-student-row" data-id="${escHtml(stu['student_id'] || stu['id'])}" data-name="${(studentName).toLowerCase()}" data-class="${escHtml(studentClass)}" data-display-name="${escHtml(studentName)}" data-student-id="${escHtml(stu['student_id'] || '')}" data-gender="" onclick="openStudentFromModal(this)" style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f1f5f9;cursor:pointer;">
+                            <span style="width:28px;height:28px;border-radius:50%;background:${online ? '#d1fae5' : '#f3f4f6'};color:${online ? '#059669' : '#64748b'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;">${(studentName || 'S').charAt(0).toUpperCase()}</span>
+                            <span style="flex:1;">
+                                <span style="font-weight:700;">${escHtml(studentName)}</span><br>
+                                <span style="font-size:12px;color:#64748b;">${escHtml(stu['student_id'] || '')} · ${escHtml(studentClass)}</span>
+                            </span>
+                            <span style="font-size:12px;font-weight:700;color:${online ? '#059669' : '#64748b'};">${online ? 'Online' : 'Offline'}</span>
+                        </div>`;
+                    });
+                    listDiv.innerHTML = html;
+                    filterModalStudentList();
+                })
+                .catch(() => {
+                    listDiv.innerHTML = '<div style="text-align:center; color:#ef4444; font-size:13px; padding:30px 0;">Error loading students.</div>';
+                });
+        }
+
+        function filterModalStudentList() {
+            const q = (document.getElementById('modal-student-search')?.value || '').toLowerCase();
+            document.querySelectorAll('#modal-student-list .modal-student-row').forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(q) ? 'flex' : 'none';
+            });
+        }
+
         function showBroadcastDetails(subject, message, time, senderLabel = '') {
             const backdrop = document.getElementById('broadcast-modal');
             document.getElementById('modal-subject').textContent = subject;
@@ -1796,23 +1932,12 @@
             }
         }
 
-        // Search
-        document.getElementById('student-search')?.addEventListener('input', function () {
-            filterStudentList();
-        });
-
-        // Class tabs
-        document.querySelectorAll('.class-tab').forEach(tab => {
-            tab.addEventListener('click', function () {
-                document.querySelectorAll('.class-tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                filterStudentList();
-            });
-        });
+        document.getElementById('modal-class-filter')?.addEventListener('change', loadAllStudents);
+        document.getElementById('modal-student-search')?.addEventListener('input', filterModalStudentList);
 
         function filterStudentList() {
             const q = document.getElementById('student-search').value.toLowerCase();
-            const cls = document.querySelector('.class-tab.active')?.dataset.class || 'all';
+            const cls = document.getElementById('student-class-filter')?.value || 'all';
 
             document.querySelectorAll('.student-row').forEach(row => {
                 const nameMatch = row.dataset.name.includes(q);
@@ -1844,7 +1969,7 @@
             document.querySelectorAll('.student-row').forEach(r => r.classList.remove('active'));
             row.classList.add('active');
 
-            const dot = row.querySelector('.unread-dot');
+            const dot = row.querySelector('.unread-badge');
             if (dot) dot.remove();
 
             activeStudentId = id;
@@ -1880,6 +2005,7 @@
             const inputPanel = document.getElementById('chat-input-area');
             if (inputPanel) inputPanel.style.display = 'flex';
 
+            closeStudentsModal();
             loadMessages(true);
 
             clearInterval(msgPollTimer);

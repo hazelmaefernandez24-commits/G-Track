@@ -77,8 +77,8 @@
         }
 
         .brand-icon img {
-            width: 130%;
-            height: 130%;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
             display: block;
         }
@@ -190,6 +190,53 @@
             transition: all 0.2s;
         }
 
+        .profile-btn {
+            position: relative;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--text-muted);
+        }
+
+        .profile-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #EFF6FF;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--sidebar-active);
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            min-width: 220px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            padding: 12px;
+            z-index: 200;
+            display: none;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .profile-dropdown .name { font-weight: 700; color: var(--text-main); }
+        .profile-dropdown .meta { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+
         .notification-btn:hover {
             background-color: #F1F5F9;
             color: var(--text-main);
@@ -251,7 +298,7 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="brand-icon">
-                <img src="{{ asset('images/gtrack.png') }}" alt="G!Track logo">
+                <img src="{{ asset('images/finalLOGO.png') }}" alt="G!Track logo">
             </div>
             <div class="brand-text">
             
@@ -321,6 +368,52 @@
                         <span class="notification-badge">{{ $sosCount }}</span>
                     @endif
                 </a>
+
+                {{-- Profile button + dropdown --}}
+                <div style="position:relative">
+                    <button id="profileBtn" class="profile-btn" aria-expanded="false" aria-haspopup="true">
+                        <span class="profile-avatar">
+                            @php
+                                $user = Auth::guard('admin')->check() ? Auth::guard('admin')->user() : Auth::user();
+                                $initials = '';
+                                $displayName = null;
+                                if ($user) {
+                                    $displayName = $user->name ?? $user->user_name ?? null;
+                                    if (!$displayName && isset($user->first_name, $user->last_name)) {
+                                        $displayName = trim($user->first_name
+                                            . ($user->middle_initial ? ' ' . $user->middle_initial . '.' : '')
+                                            . ' ' . $user->last_name);
+                                    }
+                                    $displayName = is_string($displayName) ? trim($displayName) : '';
+                                    if ($displayName !== '') {
+                                        $parts = preg_split('/\\s+/', $displayName);
+                                        $parts = array_filter($parts, fn($p) => $p !== '');
+                                        $letters = array_map(function($p) { return mb_substr($p, 0, 1); }, $parts);
+                                        $initials = strtoupper(implode('', $letters));
+                                        if ($initials === '') {
+                                            $initials = strtoupper(mb_substr($displayName, 0, 1));
+                                        }
+                                    }
+                                }
+                            @endphp
+                            {{ $initials ?: 'A' }}
+                        </span>
+                    </button>
+
+                    <div id="profileDropdown" class="profile-dropdown" role="menu">
+                        @if($user)
+                            <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+                                <div style="width:46px;height:46px;border-radius:50%;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--sidebar-active);">{{ $initials ?: 'A' }}</div>
+                                <div>
+                                    <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;"><strong>Name:</strong> {{ $displayName ?: 'Unknown' }}</div>
+                                    <div style="font-size:13px; color:var(--text-muted);"><strong>Role:</strong> {{ $user->role ?? 'N/A' }}</div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="meta">Not signed in</div>
+                        @endif
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -363,6 +456,28 @@
         // Only poll if we are authenticated/on a valid page
         setInterval(pollGlobalStats, 10000);
         pollGlobalStats();
+
+        // Profile dropdown toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileBtn = document.getElementById('profileBtn');
+            const profileDropdown = document.getElementById('profileDropdown');
+
+            if (profileBtn && profileDropdown) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const open = profileDropdown.classList.toggle('show');
+                    profileBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                });
+
+                // Close when clicking outside
+                document.addEventListener('click', function(ev) {
+                    if (!profileDropdown.contains(ev.target) && !profileBtn.contains(ev.target)) {
+                        profileDropdown.classList.remove('show');
+                        profileBtn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+        });
     </script>
     
     @stack('scripts')

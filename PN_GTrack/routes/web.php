@@ -40,6 +40,9 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('/messages/{student_id}/json', [NotificationController::class, 'getMessagesJson']);
     Route::post('/messages/new/{student_id}', [NotificationController::class, 'sendMessageAjax']);
 
+    // All students JSON for modal
+    Route::get('/students/all/json', [NotificationController::class, 'allStudentsJson']);
+
     // --- MANAGEMENT ROUTES (Main Admin Only) ---
     Route::middleware(['admin.role:main'])->prefix('admin')->group(function () {
         Route::resource('students', StudentManagementController::class);

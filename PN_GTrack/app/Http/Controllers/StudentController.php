@@ -75,19 +75,19 @@ class StudentController extends Controller
         $request->validate([
             'student_id' => 'required',
             'sos_status' => 'required|in:safe,help',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'battery_level' => 'nullable|integer|between:0,100',
+            'battery' => 'nullable|integer|between:0,100',
+            'signal' => 'nullable|string',
         ]);
 
-        $student = Student::where('student_id', $request->student_id)->first();
+        $student = Student::where('student_id', $request->student_id)
+            ->orWhere('id', $request->student_id)
+            ->first();
 
         if (!$student) {
             return response()->json(['message' => 'Student not found'], 404);
-        }
-
-        if ($request->sos_status === 'help') {
-            return response()->json([
-                'message' => 'SOS alerts must include a video feed. Use the upload-video endpoint for SOS.',
-                'sos_status' => 'safe'
-            ], 422);
         }
 
         $student->sos_status  = $request->sos_status;
@@ -96,18 +96,42 @@ class StudentController extends Controller
         if ($request->longitude) $student->longitude = $request->longitude;
         $battery = $request->input('battery_level', $request->input('battery'));
         if (isset($battery))   $student->battery_level = $battery;
-        if ($request->signal)    $student->signal_status = $request->signal;
+        if ($request->signal)   $student->signal_status = $request->signal;
+        $student->status = true;
         $student->save();
 
-        // "I am Safe" transition - Resolve existing SOS alerts
-        \App\Models\Notification::where('student_id', $student->id)
-            ->where('type', 'sos')
-            ->where('status', '!=', 'resolved')
-            ->update(['status' => 'resolved', 'read' => true]);
+        if ($request->sos_status === 'help') {
+            $activeAlert = \App\Models\Notification::where('student_id', $student->id)
+                ->where('type', 'sos')
+                ->where('status', '!=', 'resolved')
+                ->first();
+
+            if (!$activeAlert) {
+                \App\Models\Notification::create([
+                    'type' => 'sos',
+                    'sender_type' => 'student',
+                    'message' => $student->name . ' (' . $student->student_id . ') sent an SOS alert.',
+                    'student_id' => $student->id,
+                    'class' => $student->class,
+                    'latitude' => $student->latitude,
+                    'longitude' => $student->longitude,
+                    'battery_level' => $student->battery_level,
+                    'signal_status' => $student->signal_status,
+                    'read' => false,
+                    'status' => 'pending',
+                ]);
+            }
+        } else {
+            \App\Models\Notification::where('student_id', $student->id)
+                ->where('type', 'sos')
+                ->where('status', '!=', 'resolved')
+                ->update(['status' => 'resolved', 'read' => true]);
+        }
 
         return response()->json([
             'message'    => 'SOS status updated',
-            'sos_status' => $request->sos_status
+            'sos_status' => $request->sos_status,
+            'battery_level' => $student->battery_level,
         ]);
     }
 

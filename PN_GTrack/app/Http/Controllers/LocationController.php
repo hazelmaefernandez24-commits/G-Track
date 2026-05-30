@@ -11,21 +11,29 @@ class LocationController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'student_id' => 'required|integer|exists:students,id',
+            'student_id' => 'required',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'sos_status' => 'nullable|in:safe,help',
         ]);
 
+        $student = Student::where('id', $validated['student_id'])
+            ->orWhere('student_id', $validated['student_id'])
+            ->first();
+
+        if (!$student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
+
         $location = Location::create([
-            'student_id' => $validated['student_id'],
+            'student_id' => $student->id,
             'latitude' => $validated['latitude'],
             'longitude' => $validated['longitude'],
             'recorded_at' => now(),
             'sos_status' => $validated['sos_status'] ?? 'safe',
         ]);
 
-        $student = Student::find($validated['student_id']);
+        $student = Student::find($student->id);
         if ($student) {
             $student->status = true; // Mark as online when sending GPS
             $student->last_update = now()->format('M d, Y h:i A');
@@ -77,7 +85,7 @@ class LocationController extends Controller
     {
         // Now supporting more fields from mobile to make the SOS alert rich
         $request->validate([
-            'student_id' => 'required|exists:students,id',
+            'student_id' => 'required',
             'sos_status' => 'required|in:safe,help',
             'latitude'   => 'nullable|numeric',
             'longitude'  => 'nullable|numeric',
@@ -86,7 +94,9 @@ class LocationController extends Controller
             'signal'     => 'nullable|string',
         ]);
 
-        $student = Student::findOrFail($request->student_id);
+        $student = Student::where('id', $request->student_id)
+            ->orWhere('student_id', $request->student_id)
+            ->firstOrFail();
         $student->sos_status = $request->sos_status;
         
         // Update live telemetry if provided

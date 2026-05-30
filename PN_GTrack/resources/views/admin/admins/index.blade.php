@@ -173,11 +173,11 @@
                 @csrf
                 <div class="form-group">
                     <label>Staff ID</label>
-                    <input type="text" name="staff_id" class="form-control" required value="{{ old('_method') !== 'PUT' ? old('staff_id') : '' }}">
+                    <input type="text" name="staff_id" class="form-control" value="{{ old('_method') !== 'PUT' ? old('staff_id') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>First Name</label>
-                    <input type="text" name="first_name" id="add_first_name" class="form-control" required value="{{ old('_method') !== 'PUT' ? old('first_name') : '' }}">
+                    <input type="text" name="first_name" id="add_first_name" class="form-control" value="{{ old('_method') !== 'PUT' ? old('first_name') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>Middle Initial</label>
@@ -185,26 +185,26 @@
                 </div>
                 <div class="form-group">
                     <label>Last Name</label>
-                    <input type="text" name="last_name" id="add_last_name" class="form-control" required value="{{ old('_method') !== 'PUT' ? old('last_name') : '' }}">
+                    <input type="text" name="last_name" id="add_last_name" class="form-control" value="{{ old('_method') !== 'PUT' ? old('last_name') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="email" class="form-control" required value="{{ old('_method') !== 'PUT' ? old('email') : '' }}">
+                    <input type="email" name="email" class="form-control" value="{{ old('_method') !== 'PUT' ? old('email') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>Role</label>
-                    <select name="role" class="form-control" required>
+                    <select name="role" class="form-control">
                         <option value="education">Education</option>
                         <option value="main">Main Admin</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" name="password" class="form-control" required>
+                    <input type="password" name="password" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Confirm Password</label>
-                    <input type="password" name="password_confirmation" class="form-control" required>
+                    <input type="password" name="password_confirmation" class="form-control">
                 </div>
                 <div style="display:flex; gap:10px; margin-top:20px;">
                     <button type="submit" class="btn btn-primary" style="flex:1;">Save Admin</button>
@@ -233,11 +233,11 @@
                 <input type="hidden" name="edit_record_id" id="edit_record_id" value="{{ old('edit_record_id') }}">
                 <div class="form-group">
                     <label>Staff ID</label>
-                    <input type="text" name="staff_id" id="edit_staff_id" class="form-control" required value="{{ old('_method') === 'PUT' ? old('staff_id') : '' }}">
+                    <input type="text" name="staff_id" id="edit_staff_id" class="form-control" value="{{ old('_method') === 'PUT' ? old('staff_id') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>First Name</label>
-                    <input type="text" name="first_name" id="edit_first_name" class="form-control" required value="{{ old('_method') === 'PUT' ? old('first_name') : '' }}">
+                    <input type="text" name="first_name" id="edit_first_name" class="form-control" value="{{ old('_method') === 'PUT' ? old('first_name') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>Middle Initial</label>
@@ -245,15 +245,15 @@
                 </div>
                 <div class="form-group">
                     <label>Last Name</label>
-                    <input type="text" name="last_name" id="edit_last_name" class="form-control" required value="{{ old('_method') === 'PUT' ? old('last_name') : '' }}">
+                    <input type="text" name="last_name" id="edit_last_name" class="form-control" value="{{ old('_method') === 'PUT' ? old('last_name') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="email" id="edit_email" class="form-control" required value="{{ old('_method') === 'PUT' ? old('email') : '' }}">
+                    <input type="email" name="email" id="edit_email" class="form-control" value="{{ old('_method') === 'PUT' ? old('email') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>Role</label>
-                    <select name="role" id="edit_role" class="form-control" required>
+                    <select name="role" id="edit_role" class="form-control">
                         <option value="education">Education</option>
                         <option value="main">Main Admin</option>
                     </select>

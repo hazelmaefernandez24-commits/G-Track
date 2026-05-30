@@ -34,6 +34,9 @@ Route::middleware('api')->group(function () {
     Route::post('/upload-video', [NotificationController::class, 'apiSend']); // Mobile app endpoint
     Route::get('/notifications/{student_id}', [NotificationController::class, 'apiGet']);
 
+    // 👨‍💼 ADMIN LIST
+    Route::get('/admins', [NotificationController::class, 'getAdmins']);
+
     // 🟡 DEVICE STATUS
     // 'update' is correct (returns JSON)
     Route::post('/device/status', [DeviceController::class, 'update']);

@@ -19,11 +19,17 @@ class AdminManagementController extends Controller
     {
         $request->validate([
             'staff_id' => 'required|unique:admins,staff_id',
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'email' => 'required|email|unique:admins,email',
+            'first_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
+            'middle_initial' => ['nullable', 'regex:/^[A-Za-z]+$/u', 'max:1'],
+            'last_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
+            'email' => 'required|email:rfc|unique:admins,email',
             'password' => 'required|min:6|confirmed',
             'role' => 'required|in:education,main',
+        ], [
+            'first_name.regex' => 'First name must contain letters only.',
+            'middle_initial.regex' => 'Middle initial must contain letters only.',
+            'last_name.regex' => 'Last name must contain letters only.',
+            'email.email' => 'Please enter a valid email address.',
         ]);
 
         Admin::create([
@@ -45,12 +51,18 @@ class AdminManagementController extends Controller
 
         $request->validate([
             'staff_id' => 'required|unique:admins,staff_id,' . $id,
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'email' => 'required|email|unique:admins,email,' . $id,
+            'first_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
+            'middle_initial' => ['nullable', 'regex:/^[A-Za-z]+$/u', 'max:1'],
+            'last_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
+            'email' => 'required|email:rfc|unique:admins,email,' . $id,
             'role' => 'required|in:education,main',
             'current_password' => 'nullable|required_with:new_password|min:6',
             'new_password' => 'nullable|min:6|confirmed',
+        ], [
+            'first_name.regex' => 'First name must contain letters only.',
+            'middle_initial.regex' => 'Middle initial must contain letters only.',
+            'last_name.regex' => 'Last name must contain letters only.',
+            'email.email' => 'Please enter a valid email address.',
         ]);
 
         if ($request->filled('new_password')) {

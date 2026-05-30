@@ -203,18 +203,18 @@
                     <thead>
                         <tr>
                             <th>Recorded At</th>
-                            <th>Latitude</th>
-                            <th>Longitude</th>
+                            <th>Location</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($locations as $index => $loc)
-                        <tr id="row-{{ $loc->id }}">
+                        <tr id="row-{{ $loc->id }}" data-id="{{ $loc->id }}" data-lat="{{ $loc->latitude }}" data-lng="{{ $loc->longitude }}">
                             <td style="font-weight: 500;">{{ $loc->recorded_at ? $loc->recorded_at->format('M d, Y h:i A') : 'N/A' }}</td>
-                            <td style="font-family: monospace; font-size: 12px; color: var(--text-muted);">{{ number_format($loc->latitude, 6) }}</td>
-                            <td style="font-family: monospace; font-size: 12px; color: var(--text-muted);">{{ number_format($loc->longitude, 6) }}</td>
+                            <td id="address-{{ $loc->id }}" data-lat="{{ $loc->latitude }}" data-lng="{{ $loc->longitude }}" style="font-size: 13px; color: var(--text-main); min-width: 220px;">
+                                <span style="color: var(--text-muted);">Loading address…</span>
+                            </td>
                             <td>
                                 <span class="badge {{ $loc->sos_status === 'help' ? 'badge-sos' : 'badge-safe' }}">
                                     {{ $loc->sos_status }}
@@ -303,14 +303,10 @@
                     ? '<span style="display:inline-block;padding:2px 8px;background:#FEE2E2;color:#DC2626;border-radius:4px;font-weight:700;font-size:12px;margin-top:4px;">🚨 Needs Help</span>' 
                     : '<span style="display:inline-block;padding:2px 8px;background:#DCFCE7;color:#16A34A;border-radius:4px;font-weight:700;font-size:12px;margin-top:4px;">✓ Safe</span>';
 
-                marker.bindPopup(`
-                    <div style="font-size: 13px; line-height: 1.5; min-width: 150px; font-family: 'Inter', sans-serif;">
-                        <div style="font-weight:700; margin-bottom:4px; color:#0F172A;">${isLatest ? 'Latest Location' : 'Historical Location'}</div>
-                        <div style="color: #64748B;">Time: ${new Date(loc.recorded_at).toLocaleString()}</div>
-                        <div style="color: #64748B; font-family: monospace; font-size:11px;">Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}</div>
-                        <div>${statusLabel}</div>
-                    </div>
-                `);
+                loc.statusLabel = statusLabel;
+                loc.isLatest = isLatest;
+
+                marker.bindPopup(formatPopupContent(loc, null));
 
                 markers[loc.id] = marker;
                 // Add to path from oldest to newest (locations is descending, so we reverse for path drawing)
@@ -331,6 +327,96 @@
         }
 
         setTimeout(() => map.invalidateSize(), 350);
+
+        if (locations.length > 0) {
+            loadLocationAddresses(locations);
+        }
+    }
+
+    function formatPopupContent(loc, address) {
+        const lat = parseFloat(loc.latitude);
+        const lng = parseFloat(loc.longitude);
+        const locationText = address
+            ? `<div style="color: #0F172A; font-weight:600; margin-top: 6px;">${address}</div>`
+            : `<div style="color: #64748B; font-family: monospace; font-size:11px; margin-top: 6px;">Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}</div>`;
+
+        const title = loc.sos_status === 'help'
+            ? 'SOS Location'
+            : (loc.isLatest ? 'Latest Location' : 'Historical Location');
+
+        return `
+            <div style="font-size: 13px; line-height: 1.5; min-width: 170px; font-family: 'Inter', sans-serif;">
+                <div style="font-weight:700; margin-bottom:4px; color:#0F172A;">${title}</div>
+                <div style="color: #64748B;">Time: ${new Date(loc.recorded_at).toLocaleString()}</div>
+                ${locationText}
+                <div>${loc.statusLabel}</div>
+            </div>
+        `;
+    }
+
+    async function reverseGeocodeCoordinates(lat, lng) {
+        if (!lat || !lng) {
+            throw new Error('Missing coordinates');
+        }
+
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&zoom=18&addressdetails=1`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Geocoding request failed');
+        }
+        const data = await response.json();
+
+        if (data.address) {
+            const components = [];
+            const priority = ['road', 'pedestrian', 'footway', 'cycleway', 'house_number', 'neighbourhood', 'suburb', 'city_district', 'city', 'town', 'village', 'county', 'state', 'country'];
+            for (const key of priority) {
+                if (data.address[key] && !components.includes(data.address[key])) {
+                    components.push(data.address[key]);
+                }
+                if (components.length >= 3) break;
+            }
+            if (components.length > 0) {
+                return components.join(', ');
+            }
+        }
+
+        return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    }
+
+    async function loadLocationAddresses(locations) {
+        for (const loc of locations) {
+            const addressCell = document.getElementById(`address-${loc.id}`);
+            const lat = parseFloat(loc.latitude);
+            const lng = parseFloat(loc.longitude);
+
+            if (!addressCell || !lat || !lng) {
+                if (addressCell) {
+                    addressCell.innerHTML = '<span style="color: var(--text-muted);">Coordinates unavailable</span>';
+                }
+                continue;
+            }
+
+            try {
+                const address = await reverseGeocodeCoordinates(lat, lng);
+                loc.address = address;
+                addressCell.innerHTML = `
+                    <div style="font-weight:600;">${address}</div>
+                    <div style="font-size:11px; color: #64748B; margin-top:4px;">${lat.toFixed(6)}, ${lng.toFixed(6)}</div>
+                `;
+
+                const marker = markers[loc.id];
+                if (marker) {
+                    const popup = marker.getPopup();
+                    if (popup) {
+                        popup.setContent(formatPopupContent(loc, address));
+                    }
+                }
+            } catch (error) {
+                addressCell.innerHTML = '<span style="color: var(--text-muted);">Unable to resolve address</span>';
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
     }
 
     function focusOnLocation(lat, lng, id) {
