@@ -36,10 +36,10 @@ class NotificationController extends Controller
         }
 
         if ($user->role === 'main') {
-            // Main admins see ONLY admin-related and broadcast messages (not student-to-education staff conversations)
-            return $query->where(function ($q) {
-                $q->where('sender_type', 'admin')        // Messages from admins
-                  ->orWhereIn('type', ['broadcast', 'sos', 'blackout']);  // System broadcasts and alerts
+            // Main admins only see conversations assigned to them and broadcasts/alerts.
+            return $query->where(function ($q) use ($user) {
+                $q->where('admin_id', $user->getKey())
+                  ->orWhereIn('type', ['broadcast', 'sos', 'blackout']);
             });
         }
 
@@ -160,10 +160,17 @@ class NotificationController extends Controller
             ? \App\Models\Student::whereIn('id', $threadStudentIds)->orderBy('name', 'asc')->get()
             : collect();
 
-        $unreadCounts = \App\Models\Notification::selectRaw('student_id, count(*) as unread_count')
+        $user = Auth::guard('admin')->user();
+        $unreadCountsQuery = \App\Models\Notification::selectRaw('student_id, count(*) as unread_count')
             ->where('sender_type', 'student')
             ->where('read', false)
-            ->whereNotNull('student_id')
+            ->whereNotNull('student_id');
+
+        if ($user && in_array($user->role, ['education', 'main'], true)) {
+            $unreadCountsQuery->where('admin_id', $user->getKey());
+        }
+
+        $unreadCounts = $unreadCountsQuery
             ->groupBy('student_id')
             ->pluck('unread_count', 'student_id');
 
@@ -177,6 +184,8 @@ class NotificationController extends Controller
             'dbClass' => $dbClass,
             'canMessage' => $this->canSendMessages(),
             'unreadCounts' => $unreadCounts,
+            'currentAdminId' => $user ? $user->getKey() : null,
+            'currentAdminRole' => $user ? $user->role : null,
         ]);
     }
 
@@ -318,7 +327,19 @@ class NotificationController extends Controller
             ], 404);
         }
 
-        $notifications = DB::table('notifications')
+        // Apply access control based on user role
+        $user = Auth::guard('admin')->user();
+        
+        // Main admins should not be able to view student conversations via API
+        if ($user && $user->role === 'main') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied',
+                'notifications' => []
+            ], 403);
+        }
+
+        $notificationsQuery = DB::table('notifications')
             ->where(function($q) use ($student) {
                 // 1. Global broadcasts
                 $q->where('class', 'all')
@@ -328,10 +349,18 @@ class NotificationController extends Controller
                   ->orWhere('student_id', $student->id);
             })
             // Only show broadcasts or messages, hide system/admin alerts like blackout
-            ->where('type', '!=', 'blackout')
-            ->when(Auth::guard('admin')->check() && Auth::guard('admin')->user()->role !== 'main', function ($q) {
-                $q->where('admin_id', Auth::guard('admin')->id());
-            })
+            ->where('type', '!=', 'blackout');
+
+        // Apply role-based filtering
+        if (Auth::guard('admin')->check()) {
+            $user = Auth::guard('admin')->user();
+            if ($user->role === 'education') {
+                // Education staff only see their own conversations
+                $notificationsQuery->where('admin_id', Auth::guard('admin')->id());
+            }
+        }
+
+        $notifications = $notificationsQuery
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($notif) {
@@ -474,23 +503,30 @@ class NotificationController extends Controller
             return response()->json(['messages' => []]);
         }
 
+        // Apply access control based on user role
+        $user = Auth::guard('admin')->user();
+
         // Fetch all messages related to this student
         $markSeenQuery = DB::table('notifications')
             ->where('student_id', $student->id)
             ->where('sender_type', 'student')
             ->where('read', false);
 
-        if (Auth::guard('admin')->check() && Auth::guard('admin')->user()->role !== 'main') {
-            $markSeenQuery->where('admin_id', Auth::guard('admin')->id());
+        if ($user && in_array($user->role, ['education', 'main'], true)) {
+            $markSeenQuery->where('admin_id', $user->getKey());
         }
 
         $markSeenQuery->update(['read' => true]);
 
-        $messages = DB::table('notifications')
-            ->where('student_id', $student->id)
-            ->when(Auth::guard('admin')->check() && Auth::guard('admin')->user()->role !== 'main', function ($q) {
-                $q->where('admin_id', Auth::guard('admin')->id());
-            })
+        $messagesQuery = DB::table('notifications')
+            ->where('student_id', $student->id);
+
+        if ($user && in_array($user->role, ['education', 'main'], true)) {
+            // Only show messages for the admin currently logged in.
+            $messagesQuery->where('admin_id', $user->getKey());
+        }
+
+        $messages = $messagesQuery
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function($msg) {
@@ -552,8 +588,12 @@ class NotificationController extends Controller
             ->where('sender_type', 'student')
             ->where('read', false);
 
-        if (Auth::guard('admin')->check() && Auth::guard('admin')->user()->role !== 'main') {
-            $readMarkQuery->where('admin_id', Auth::guard('admin')->id());
+        // Only education staff can mark messages as read
+        if (Auth::guard('admin')->check()) {
+            $user = Auth::guard('admin')->user();
+            if ($user->role === 'education') {
+                $readMarkQuery->where('admin_id', Auth::guard('admin')->id());
+            }
         }
 
         $readMarkQuery->update(['read' => true]);

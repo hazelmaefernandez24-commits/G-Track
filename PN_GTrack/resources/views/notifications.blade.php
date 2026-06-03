@@ -1576,13 +1576,18 @@
                                         $isFemale = strtolower($student->gender ?? '') === 'female';
                                         $unread = $unreadCounts[$student->id] ?? 0;
                                         if ($unread === 0) {
-                                            $unread = \App\Models\Notification::where(function ($q) use ($student) {
+                                            $unreadQuery = \App\Models\Notification::where(function ($q) use ($student) {
                                                 $q->where('student_id', $student->id)
                                                   ->orWhere('student_id', $student->student_id);
                                             })
                                             ->where('sender_type', 'student')
-                                            ->where('read', false)
-                                            ->count();
+                                            ->where('read', false);
+
+                                            if (isset($currentAdminId) && in_array($currentAdminRole, ['education', 'main'])) {
+                                                $unreadQuery->where('admin_id', $currentAdminId);
+                                            }
+
+                                            $unread = $unreadQuery->count();
                                         }
                                     @endphp
                                     @if($letter !== $currentLetter)

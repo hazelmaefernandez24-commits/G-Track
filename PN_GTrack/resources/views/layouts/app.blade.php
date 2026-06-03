@@ -405,7 +405,7 @@
                             <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
                                 <div style="width:46px;height:46px;border-radius:50%;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--sidebar-active);">{{ $initials ?: 'A' }}</div>
                                 <div>
-                                    <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;"><strong>Name:</strong> {{ $displayName ?: 'Unknown' }}</div>
+                                    <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;"><strong></strong> {{ $displayName ?: 'Unknown' }}</div>
                                     <div style="font-size:13px; color:var(--text-muted);"><strong>Role:</strong> {{ $user->role ?? 'N/A' }}</div>
                                 </div>
                             </div>
