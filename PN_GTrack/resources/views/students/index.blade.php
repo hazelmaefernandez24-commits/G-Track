@@ -3,24 +3,34 @@
 <head>
     <title>Student Activity</title>
     <style>
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #F8FBFF; color: #404040; }
+        h2 { margin: 0 0 14px; color: #404040; }
+        p { margin: 4px 0; color: rgba(64,64,64,0.75); }
         table {
             border-collapse: collapse;
             width: 100%;
+            background: #FFFFFF;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px -30px rgba(64, 64, 64, 0.25);
         }
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            border: 1px solid rgba(34, 187, 234, 0.18);
+            padding: 12px 10px;
+            text-align: left;
         }
         th {
-            background-color: #f4f4f4;
+            background-color: rgba(34, 187, 234, 0.12);
+            color: #404040;
+            font-weight: 700;
         }
         .online {
-            color: green;
-            font-weight: bold;
+            color: #22BBEA;
+            font-weight: 700;
         }
         .offline {
-            color: red;
-            font-weight: bold;
+            color: #FF9933;
+            font-weight: 700;
         }
     </style>
 </head>

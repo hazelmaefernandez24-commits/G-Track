@@ -24,6 +24,21 @@
             display:flex;
             align-items:center;
             justify-content:center;
+            position:relative;
+        }
+        body::before{
+            content:'';
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background-image:url('{{ asset("images/PNlogo.png") }}');
+            background-size:cover;
+            background-position:center;
+            opacity: 0.03;
+            z-index:-1;
+            pointer-events:none;
         }
         .login-container{
             width:100%;
@@ -145,8 +160,9 @@
     </style>
 </head>
 <body>
+    
     <div class="login-container">
-        <div class="login-card">
+        <div class="login-card">    
             
             <div class="logo-section">
                 <img src="{{ asset('images/finalLOGO.png') }}" alt="PN_GTrack Logo">

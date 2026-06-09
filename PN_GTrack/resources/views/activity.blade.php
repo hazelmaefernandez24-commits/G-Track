@@ -135,8 +135,9 @@
     .btn {
         padding: 6px 12px;
         border-radius: 6px;
-        border: none;
+        border: 2px solid transparent;
         font-weight: 600;
+        color: #FF9933;
         cursor: pointer;
         transition: all 0.2s;
         text-decoration: none;
@@ -146,10 +147,14 @@
     }
     .btn-primary { 
         background: var(--sidebar-bg); 
-        color: #fff; 
+        
+        background-color: #22bbea;
+
+
     }
     .btn-primary:hover {
         background: var(--sidebar-hover);
+
     }
 </style>
 @endpush

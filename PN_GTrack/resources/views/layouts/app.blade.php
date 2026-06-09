@@ -16,17 +16,18 @@
 
     <style>
         :root {
-            --sidebar-bg: #0d47e6ff; /* Deep premium blue */
-            --sidebar-hover: #6180d0ff;
-            --sidebar-active: #5c8bf1ff; /* Bright blue for active item */
-            --bg-color: #F8FAFC;
-            --text-main: #0F172A;
-            --text-muted: #64748B;
-            --border-color: #E2E8F0;
-            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            
-            --online: #22C55E;
-            --offline: #EF4444;
+            --primary: #22BBEA;
+            --primary-dark: #009DE1;
+            --accent: #FF9933;
+            --accent-dark: #FF9933;
+            --text-main: #404040;
+            --text-muted: rgba(64, 64, 64, 0.72);
+            --bg-color: #F8FBFF;
+            --panel-bg: #FFFFFF;
+            --border-color: rgba(34, 187, 234, 0.18);
+            --card-shadow: 0 20px 50px -30px rgba(64, 64, 64, 0.25);
+            --online: #22BBEA;
+            --offline: #FF9933;
         }
 
         * {
@@ -41,12 +42,28 @@
             color: var(--text-main);
             display: flex;
             min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            
+            background-size: cover;
+            background-position: center;
+            opacity: 0.10;
+            z-index: -1;
+            pointer-events: none;
         }
 
         /* --- SIDEBAR --- */
         .sidebar {
             width: 260px;
-            background-color: var(--sidebar-bg);
+            background: linear-gradient(180deg, #009DE1 0%, #22BBEA 100%);
             color: #FFFFFF;
             display: flex;
             flex-direction: column;
@@ -92,7 +109,7 @@
 
         .brand-text span {
             font-size: 12px;
-            color: #b6b7bbff;
+            color: rgb(12, 20, 59);
             font-weight: 500;
         }
 
@@ -109,23 +126,23 @@
             align-items: center;
             gap: 12px;
             padding: 12px 16px;
-            color: #CBD5E1;
+            color: rgba(255, 255, 255, 0.88);
             text-decoration: none;
-            border-radius: 10px;
-            font-weight: 500;
+            border-radius: 12px;
+            font-weight: 600;
             font-size: 14px;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         .nav-item:hover {
-            background-color: var(--sidebar-hover);
+            background-color: rgba(255, 255, 255, 0.16);
             color: #FFFFFF;
         }
 
         .nav-item.active {
-            background-color: var(--sidebar-active);
+            background-color: rgba(255, 255, 255, 0.22);
             color: #FFFFFF;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 14px 40px -24px rgba(0, 157, 225, 0.6);
         }
 
         .nav-item i {
@@ -155,7 +172,7 @@
             align-items: center;
             justify-content: space-between;
             background: #FFFFFF;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid rgba(34, 187, 234, 0.16);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -174,8 +191,8 @@
         }
 
         .header-actions {
-            display: flex;
-            align-items: center;
+            display: flex; 
+            align-items: center;    
             gap: 20px;
         }
 
@@ -208,12 +225,12 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: #EFF6FF;
+            background: rgba(34, 187, 234, 0.16);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            color: var(--sidebar-active);
+            color: var(--primary-dark);
         }
 
         .profile-dropdown {
@@ -222,10 +239,10 @@
             top: calc(100% + 8px);
             min-width: 220px;
             background: #FFFFFF;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border: 1px solid rgba(34, 187, 234, 0.14);
+            border-radius: 14px;
             box-shadow: var(--card-shadow);
-            padding: 12px;
+            padding: 16px;
             z-index: 200;
             display: none;
         }
@@ -238,7 +255,7 @@
         .profile-dropdown .meta { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
 
         .notification-btn:hover {
-            background-color: #F1F5F9;
+            background-color: rgba(34, 187, 234, 0.08);
             color: var(--text-main);
         }
 
@@ -246,12 +263,12 @@
             position: absolute;
             top: 2px;
             right: 2px;
-            background-color: var(--offline);
-            color: white;
+            background-color: var(--accent);
+            color: #404040;
             font-size: 10px;
             font-weight: 700;
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -267,9 +284,9 @@
 
         /* Global Card Styles */
         .card {
-            background: #FFFFFF;
+            background: var(--panel-bg);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
+            border-radius: 18px;
             padding: 24px;
             box-shadow: var(--card-shadow);
         }
@@ -277,17 +294,17 @@
         /* SOS Banner */
         #sos-banner {
             display: none;
-            background: #DC2626;
-            color: #FFFFFF;
-            padding: 12px 24px;
+            background: var(--accent);
+            color: var(--text-main);
+            padding: 14px 24px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             text-align: center;
-            animation: sosPulse 1s infinite;
+            animation: sosPulse 2s infinite;
         }
-        @keyframes sosPulse { 
-            0%, 100% { background: #DC2626; } 
-            50% { background: #B91C1C; } 
+        @keyframes sosPulse {
+            0%, 100% { background: var(--accent); }
+            50% { background: var(--accent-dark); }
         }
 
     </style>
@@ -326,7 +343,7 @@
             </a>
 
             @if(Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === 'main')
-            <div style="margin: 16px 16px 8px; font-size: 11px; font-weight: 800; color: #b6b7bbff; text-transform: uppercase; letter-spacing: 0.5px;">System Management</div>
+            <div style="margin: 16px 16px 8px; font-size: 11px; font-weight: 800; color: rgb(12, 20, 59); text-transform: uppercase; letter-spacing: 0.5px;">System Management</div>
             <a href="/admin/students" class="nav-item {{ request()->is('admin/students*') ? 'active' : '' }}">
                 <i data-lucide="users-round"></i>
                 Manage Students

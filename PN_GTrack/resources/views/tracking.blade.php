@@ -8,8 +8,8 @@
 <style>
     .map-card {
         background: #FFFFFF;
-        border: 1px solid var(--border-color);
-        border-radius: 16px;
+        border: 1px solid rgba(34, 187, 234, 0.18);
+        border-radius: 18px;
         padding: 24px;
         box-shadow: var(--card-shadow);
     }
@@ -60,8 +60,8 @@
     }
 
     .filter-select:focus {
-        border-color: var(--sidebar-active);
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        border-color: var(--primary-dark);
+        box-shadow: 0 0 0 2px rgba(0, 157, 225, 0.14);
     }
 
     #map {
@@ -78,9 +78,9 @@
         gap: 24px;
         margin-bottom: 20px;
         padding: 12px 20px;
-        background: #F8FAFC;
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
+        background: rgba(34, 187, 234, 0.08);
+        border-radius: 14px;
+        border: 1px solid rgba(34, 187, 234, 0.18);
         width: fit-content;
     }
 
@@ -108,8 +108,8 @@
         border: 1px solid currentColor;
     }
 
-    .marker-boy { background-color: #3B82F6; color: #3B82F6; }
-    .marker-girl { background-color: #EF4444; color: #EF4444; }
+    .marker-boy { background-color: var(--primary); color: var(--primary); }
+    .marker-girl { background-color: var(--accent); color: var(--accent); }
 
     /* Custom Leaflet popup */
     .leaflet-popup-content-wrapper {
@@ -167,8 +167,8 @@
     let selectedClass = 'All Classes';
 
     function getColorByGender(gender) {
-        if (!gender) return '#64748B'; // muted
-        return gender.toString().toLowerCase() === 'female' ? '#EF4444' : '#3B82F6';
+        if (!gender) return 'rgba(64, 64, 64, 0.48)';
+        return gender.toString().toLowerCase() === 'female' ? '#FF9933' : '#22BBEA';
     }
 
     function showPopup(location) {
@@ -177,15 +177,15 @@
         const sos = location.sos_status || student.sos_status || 'safe';
 
         const sosLabel = sos === 'help' 
-            ? '<span style="display:inline-block;padding:2px 8px;background:#FEE2E2;color:#DC2626;border-radius:4px;font-weight:700;font-size:12px;margin-top:4px;">🚨 Needs Help</span>' 
-            : '<span style="display:inline-block;padding:2px 8px;background:#DCFCE7;color:#16A34A;border-radius:4px;font-weight:700;font-size:12px;margin-top:4px;">✓ Safe</span>';
+            ? '<span style="display:inline-block;padding:2px 8px;background:rgba(255, 153, 51, 0.16);color:var(--accent);border-radius:4px;font-weight:700;font-size:12px;margin-top:4px;">🚨 Needs Help</span>' 
+            : '<span style="display:inline-block;padding:2px 8px;background:rgba(34, 187, 234, 0.12);color:#009DE1;border-radius:4px;font-weight:700;font-size:12px;margin-top:4px;">✓ Safe</span>';
 
         return `
             <div style="font-size:13px; line-height:1.5; min-width:200px;">
-                <div style="font-size:15px; font-weight:700; color:#0F172A; margin-bottom:4px;">${student.name || 'Unknown Student'}</div>
-                <div style="color:#64748B; margin-bottom:8px;">ID: ${student.student_id || 'N/A'} • Class: ${student.class || 'N/A'}</div>
-                <div style="display:flex; justify-content:space-between; border-top:1px solid #E2E8F0; padding-top:8px; margin-top:8px;">
-                    <span style="color:#64748B;">Latest Update:</span>
+                <div style="font-size:15px; font-weight:700; color:#404040; margin-bottom:4px;">${student.name || 'Unknown Student'}</div>
+                <div style="color:rgba(64, 64, 64, 0.72); margin-bottom:8px;">ID: ${student.student_id || 'N/A'} • Class: ${student.class || 'N/A'}</div>
+                <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(34, 187, 234, 0.18); padding-top:8px; margin-top:8px;">
+                    <span style="color:rgba(64, 64, 64, 0.72);">Latest Update:</span>
                     <span style="font-weight:500;">${recorded}</span>
                 </div>
                 <div>${sosLabel}</div>
@@ -229,7 +229,7 @@
                     
                     if (isSOS) {
                         radius = 10;
-                        color = '#EF4444'; // Red border
+                        color = '#FF9933'; // Accent border for SOS
                         weight = 3;
                     }
 

@@ -7,14 +7,18 @@
 <style>
         /* ---- your existing styles remain unchanged ---- */
         :root {
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --line: #e5e7eb;
-            --text: #0f172a;
-            --muted: #64748b;
-            --blue: #2563eb;
-            --red: #dc2626;
-            --yellow: #f59e0b;
+            --bg: #F8FBFF;
+            --card: #FFFFFF;
+            --line: rgba(34, 187, 234, 0.18);
+            --text: #404040;
+            --muted: rgba(64, 64, 64, 0.68);
+            --primary: #22BBEA;
+            --primary-dark: #009DE1;
+            --blue: #22BBEA;
+            --blue-dark: #009DE1;
+            --accent: #FF9933;
+            --accent-dark: #FF9933;
+            --red: #FF9933;
         }
 
         * {
@@ -30,9 +34,9 @@
 
         .topbar {
             height: 64px;
-            background: #2563eb;
-            border-bottom: 1px solid rgba(0, 0, 0, .06);
-            box-shadow: var(--shadow);
+            background: linear-gradient(90deg, #009DE1 0%, #22BBEA 100%);
+            border-bottom: 1px solid rgba(34, 187, 234, 0.18);
+            box-shadow: var(--card-shadow);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -85,27 +89,27 @@
 
         .icon-btn {
             position: relative;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 153, 51, 0.12);
+            border: 1px solid rgba(255, 153, 51, 0.28);
             width: 34px;
             height: 34px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
+            color: #FFFFFF;
             text-decoration: none;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 153, 51, 0.2);
         }
 
         .logout {
-            background: none;
-            border: none;
-            color: #fff;
+            background: rgba(255, 255, 255, 0.13);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            color: #FFFFFF;
             font-weight: 700;
             font-size: 14px;
             display: flex;
@@ -114,11 +118,11 @@
             cursor: pointer;
             padding: 8px 12px;
             border-radius: 10px;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         .logout:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .page-title h1 {
@@ -130,7 +134,7 @@
 
         .page-title p {
             margin: 6px 0 18px 0;
-            color: #ff9900;
+            color: var(--accent);
             font-weight: 500;
         }
 
@@ -208,7 +212,7 @@
 
         .latest-date {
             font-size: 13px;
-            color: #64748b;
+            color: var(--muted);
             margin-top: 3px;
         }
 
@@ -244,7 +248,7 @@
             padding: 16px 18px;
             border-top: 1px solid var(--line);
             border-bottom: 1px solid var(--line);
-            background: #2563eb;
+            background: linear-gradient(90deg, #009DE1 0%, #22BBEA 100%);
             border-radius: 0 0 12px 12px;
         }
 
@@ -266,14 +270,14 @@
             padding: 9px 11px;
             font-size: 14px;
             background: #fff;
-            color: #0f172a;
+            color: #404040;
         }
 
         /* --- MAIN TAB UI (matches sub-tab pill style) --- */
         .tabs {
             display: flex;
             gap: 1px;
-            background: #e2e8f0;
+            background: rgba(34, 187, 234, 0.12);
             border: 1px solid var(--line);
             border-radius: 8px;
             padding: 3px;
@@ -288,7 +292,7 @@
             border-radius: 6px;
             font-size: 13px;
             font-weight: 700;
-            color: #64748b;
+            color: var(--muted);
             text-decoration: none;
             cursor: pointer;
             transition: all 0.2s;
@@ -334,7 +338,7 @@
         .badge-right {
             background: #fff;
             border: 1px solid var(--line);
-            color: #0f172a;
+            color: var(--text);
             padding: 5px 10px;
             border-radius: 999px;
             font-weight: 700;
@@ -372,13 +376,13 @@
         }
 
         .message-meta {
-            color: #64748b;
+            color: var(--muted);
             font-size: 12px;
         }
 
         .message-body {
             margin: 7px 0 0;
-            color: #334155;
+            color: var(--text);
             font-size: 13px;
         }
 
@@ -392,18 +396,18 @@
         }
 
         .ack-btn {
-            background: #059669;
+            background: var(--accent);
         }
 
         .read-btn {
-            background: #2563eb;
+            background: var(--primary-dark);
         }
 
         /* Sub Tabs */
         .sub-tabs {
             display: flex;
             gap: 1px;
-            background: #e2e8f0;
+            background: rgba(34, 187, 234, 0.12);
             border: 1px solid var(--line);
             border-radius: 8px;
             padding: 3px;
@@ -420,7 +424,7 @@
             font-weight: 700;
             cursor: pointer;
             text-decoration: none;
-            color: #64748b;
+            color: var(--muted);
             transition: all 0.2s;
         }
 
@@ -474,8 +478,8 @@
 
         .bubble-left {
             align-self: flex-start;
-            background: #f1f5f9;
-            color: #1e293b;
+            background: #F8FBFF;
+            color: var(--text);
             border-radius: 4px 18px 18px 18px;
         }
 
@@ -522,7 +526,7 @@
         }
 
         .chat-send-btn {
-            background: #6366f1;
+            background: var(--blue-dark);
             color: #fff;
             border: none;
             width: 34px;
@@ -536,14 +540,14 @@
         }
 
         .chat-send-btn:hover {
-            background: #4f46e5;
+            background: #009DE1;
         }
 
         /* --- MESSENGER UI INTEGRATION --- */
         .messenger-wrapper {
             display: flex;
             height: 650px;
-            background: #2563eb;
+            background: linear-gradient(90deg, #009DE1 0%, #22BBEA 100%);
             border: 1px solid var(--line);
             border-radius: 12px;
             overflow: hidden;
@@ -574,7 +578,7 @@
         .search-box {
             display: flex;
             align-items: center;
-            background: #f1f5f9;
+            background: #F8FBFF;
             border-radius: 20px;
             padding: 8px 14px;
             gap: 8px;
@@ -623,8 +627,8 @@
             letter-spacing: 1px;
             text-transform: uppercase;
             color: var(--blue);
-            background: #eff6ff;
-            border-bottom: 1px solid #dbeafe;
+            background: #F8FBFF;
+            border-bottom: 1px solid rgba(34, 187, 234, 0.18);
         }
 
         .student-row {
@@ -642,7 +646,7 @@
         }
 
         .student-row.active {
-            background: #eff6ff;
+            background: #F8FBFF;
             border-left: 3px solid var(--blue);
         }
 
@@ -650,8 +654,8 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: #dbeafe;
-            color: #1d4ed8;
+            background: rgba(34, 187, 234, 0.18);
+            color: var(--blue-dark);
             font-weight: 800;
             font-size: 14px;
             display: flex;
@@ -662,8 +666,8 @@
         }
 
         .avatar.female {
-            background: #fce7f3;
-            color: #be185d;
+            background: rgba(255, 153, 51, 0.16);
+            color: var(--accent);
         }
 
         .unread-badge {
@@ -750,8 +754,8 @@
         }
 
         .date-sep span {
-            background: #e2e8f0;
-            color: #64748b;
+            background: rgba(34, 187, 234, 0.08);
+            color: var(--muted);
             font-size: 10px;
             font-weight: 800;
             padding: 4px 12px;
@@ -790,7 +794,7 @@
         .bubble.student {
             background: #fff;
             color: var(--text);
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--line);
             border-bottom-left-radius: 4px;
         }
 
@@ -801,9 +805,9 @@
         }
 
         .bubble.sos-alert {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
+            background: rgba(255, 153, 51, 0.16);
+            color: var(--accent);
+            border: 1px solid rgba(255, 153, 51, 0.25);
         }
 
         .bubble-time {
@@ -815,7 +819,7 @@
         .sender-label {
             font-size: 11px;
             font-weight: 700;
-            color: #2563eb;
+            color: var(--blue-dark);
             margin-bottom: 6px;
             letter-spacing: 0.02em;
         }
@@ -831,7 +835,7 @@
 
         .input-wrap {
             flex: 1;
-            background: #f1f5f9;
+            background: #F8FBFF;
             border: 1px solid var(--line);
             border-radius: 20px;
             padding: 8px 16px;
@@ -864,7 +868,7 @@
         }
 
         .send-btn:disabled {
-            background: #cbd5e1;
+            background: rgba(34, 187, 234, 0.1);
         }
 
         /* --- MODAL STYLES --- */
@@ -922,7 +926,7 @@
         }
 
         .modal-close:hover {
-            background: #f1f5f9;
+            background: #F8FBFF;
             color: var(--text);
         }
 
@@ -956,11 +960,11 @@
         }
 
         .modal-scroll-area::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: #F8FBFF;
         }
 
         .modal-scroll-area::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: rgba(34, 187, 234, 0.18);
             border-radius: 10px;
         }
 
@@ -970,7 +974,7 @@
         }
 
         .broadcast-item-clickable:hover {
-            background: #fefce8;
+            background: rgba(255, 153, 51, 0.08);
             transform: translateY(-2px);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
@@ -1026,12 +1030,12 @@
                 <div class="card-head">
                     <div>
                         <div class="card-title">Broadcast History</div>
-                        <div class="stat-number" style="color: #f59e0b;">{{ $stats['broadcast'] }}</div>
+                        <div class="stat-number" style="color: var(--accent-dark);">{{ $stats['broadcast'] }}</div>
                         <div class="stat-sub">
                             Announcements sent
                         </div>
                     </div>
-                    <div class="status-dot" style="color: #f59e0b;">
+                    <div class="status-dot" style="color: var(--accent-dark);">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2Zm0 14H5.17L4 17.17V4h16v12Z"
@@ -1048,7 +1052,7 @@
             <div class='filter-block' style="border-radius: 12px; border: 1px solid var(--line);">
                 <span class='filter-label'>Filter by Class</span>
                 <div class='select-wrap'>
-                    <span style='color:#475569;font-size:15px;'>:</span>
+                    <span style='color:var(--muted);font-size:15px;'>:</span>
                     <select id='class-filter'
                         onchange="location.href='?class=' + encodeURIComponent(this.value) + '&tab={{ $tab }}'">
                         <option value='all' {{ $class === 'all' ? 'selected' : '' }}>All Classes</option>
@@ -1093,7 +1097,7 @@
                                     to students</p>
                             </div>
                             <button onclick="toggleBroadcastForm()"
-                                style="background: #f1f5f9; color: #64748b; border: none; padding: 8px; border-radius: 8px; cursor: pointer;">
+                                style="background: #F8FBFF; color: var(--muted); border: none; padding: 8px; border-radius: 8px; cursor: pointer;">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1139,7 +1143,7 @@
 
                             <div style="display: flex; justify-content: flex-end; gap: 12px;">
                                 <button type="button" onclick="toggleBroadcastForm()"
-                                    style="background: #f1f5f9; color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">
+                                    style="background: #F8FBFF; color: var(--muted); border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">
                                     Cancel
                                 </button>
                                 <button type="submit"
@@ -1191,11 +1195,11 @@
                                             ({{ optional($notification->student)->student_id ?? 'N/A' }})
                                             @if($notification->status === 'resolved')
                                                 <span class='badge-pill'
-                                                    style='background:#f1f5f9;color:#64748b;border-color:#e2e8f0;'>I am Safe
+                                                    style='background:rgba(34, 187, 234, 0.08);color:rgba(64, 64, 64, 0.68);border-color:rgba(34, 187, 234, 0.18);'>I am Safe
                                                     (Resolved)</span>
                                             @else
                                                 <span class='badge-pill'
-                                                    style='background:#fee2e2;color:#991b1b;border-color:#fecaca;'>Active Help
+                                                    style='background:rgba(255, 153, 51, 0.16);color:var(--accent);border-color:rgba(255, 153, 51, 0.25);'>Active Help
                                                     Needed</span>
                                             @endif
                                         </p>
@@ -1226,7 +1230,7 @@
                                             style="margin-bottom: 12px;">
                                             <!-- Video Feed Container -->
                                             <div
-                                                style="background: #0f172a; border-radius: 8px; padding: 12px; min-height: 160px; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;">
+                                                style="background: #404040; border-radius: 8px; padding: 12px; min-height: 160px; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;">
                                                 <div
                                                     style="position: absolute; top: 12px; left: 12px; background: rgba(220, 38, 38, 0.9); color: #fff; font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; z-index: 10; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                                                     <span
@@ -1274,23 +1278,23 @@
                                             style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05);">
                                             <div>
                                                 <div
-                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
                                                     Live Battery</div>
                                                 <div class="notification-battery-display-{{ $notification->id }}"
-                                                    style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? '#b91c1c' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
+                                                    style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? 'var(--accent)' : '#404040' }}; font-size: 14px; margin-top: 2px;">
                                                     🔋 {{ isset($currentBattery) ? $currentBattery . '%' : 'N/A' }}
                                                 </div>
                                             </div>
                                             <div>
                                                 <div
-                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
                                                     Live Signal</div>
                                                 @php
                                                     $sigLower = strtolower($currentSignal ?? '');
-                                                    $sigColor = '#ef4444'; // Default to red/warning
-                                                    if (Str::contains($sigLower, ['excellent', 'strong', 'good'])) $sigColor = '#16a34a';
-                                                    elseif (Str::contains($sigLower, 'fair')) $sigColor = '#f59e0b';
-                                                    elseif (empty($sigLower) || $sigLower === 'n/a') $sigColor = '#0f172a';
+                                                    $sigColor = '#FF9933'; // Default to warning accent
+                                                    if (Str::contains($sigLower, ['excellent', 'strong', 'good'])) $sigColor = '#009DE1';
+                                                    elseif (Str::contains($sigLower, 'fair')) $sigColor = '#FF9933';
+                                                    elseif (empty($sigLower) || $sigLower === 'n/a') $sigColor = '#404040';
                                                 @endphp
                                                 <div style="font-weight: 700; color: {{ $sigColor }}; font-size: 14px; margin-top: 2px;">
                                                     {!! Str::contains($sigLower, ['excellent', 'strong', 'good', 'fair']) ? '📶' : '⚠️' !!}
@@ -1299,7 +1303,7 @@
                                             </div>
                                             <div style="grid-column: span 2;">
                                                 <div
-                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
                                                     Last Known Location</div>
                                                 <div
                                                     style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
@@ -1329,7 +1333,7 @@
                                                             style='display:inline;'>
                                                             @csrf
                                                             <button class='action-btn'
-                                                                style="font-size:11px; padding:8px 16px; border-radius: 8px; background: #3b82f6; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
+                                                                style="font-size:11px; padding:8px 16px; border-radius: 8px; background: var(--blue); color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
                                                                 type='submit'>
                                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                                                                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
@@ -1401,23 +1405,23 @@
                                                     style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
                                                     <div>
                                                         <div
-                                                            style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                            style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
                                                             Live Battery</div>
                                                         <div class="notification-battery-display-{{ $notification->id }}"
-                                                            style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? 'var(--red)' : '#0f172a' }}; font-size: 14px; margin-top: 2px;">
+                                                            style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? 'var(--red)' : '#404040' }}; font-size: 14px; margin-top: 2px;">
                                                             🔋 {{ isset($currentBattery) ? $currentBattery . '%' : 'N/A' }}
                                                         </div>
                                                     </div>
                                                     <div>
                                                         <div
-                                                            style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                            style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
                                                             Live Signal</div>
                                                         @php
                                                             $sigLower = strtolower($currentSignal ?? '');
-                                                            $sigColor = '#ef4444'; // Default to red/warning
-                                                            if (Str::contains($sigLower, ['excellent', 'strong', 'good'])) $sigColor = '#16a34a';
-                                                            elseif (Str::contains($sigLower, 'fair')) $sigColor = '#f59e0b';
-                                                            elseif (empty($sigLower) || $sigLower === 'n/a') $sigColor = '#0f172a';
+                                                            $sigColor = '#FF9933'; // Default to warning accent
+                                                            if (Str::contains($sigLower, ['excellent', 'strong', 'good'])) $sigColor = '#009DE1';
+                                                            elseif (Str::contains($sigLower, 'fair')) $sigColor = '#FF9933';
+                                                            elseif (empty($sigLower) || $sigLower === 'n/a') $sigColor = '#404040';
                                                         @endphp
                                                         <div style="font-weight: 700; color: {{ $sigColor }}; font-size: 14px; margin-top: 2px;">
                                                             {!! Str::contains($sigLower, ['excellent', 'strong', 'good', 'fair']) ? '📶' : '⚠️' !!}
@@ -1426,7 +1430,7 @@
                                                     </div>
                                                     <div style="grid-column: span 2;">
                                                         <div
-                                                            style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">
+                                                            style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
                                                             Last Known Location</div>
                                                         <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
                                                             @if($currentLat)
@@ -1455,7 +1459,7 @@
                                                                 style='display:inline;'>
                                                                 @csrf
                                                                 <button class='action-btn'
-                                                                    style="font-size:11px; padding:8px 16px; border-radius: 8px; background: #3b82f6; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
+                                                                    style="font-size:11px; padding:8px 16px; border-radius: 8px; background: var(--blue); color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
                                                                     type='submit'>
                                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                                                                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
@@ -1504,13 +1508,13 @@
                                 <p class='message-title'>
                                     {{ $notification->subject ?? 'No Subject' }}
                                     <span class='badge-pill'
-                                        style='background:#fef3c7;color:#92400e;border-color:#fde68a;'>Outbound</span>
+                                        style='background:rgba(255, 153, 51, 0.16);color:var(--accent);border-color:rgba(255, 153, 51, 0.25);'>Outbound</span>
                                 </p>
                                 <span
                                     class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                             </div>
                             <div class='message-meta' style='margin-top:8px;'>
-                                <span style='font-weight:700;color:#475569;'>Sent by:</span> {{ $notification->sender_name ?? ($notification->sender_type === 'admin' ? 'Admin' : 'System') }}
+                                <span style='font-weight:700;color:var(--muted);'>Sent by:</span> {{ $notification->sender_name ?? ($notification->sender_type === 'admin' ? 'Admin' : 'System') }}
                             </div>
                             <div class='message-meta' style='margin-top:6px;'>
                                 @if($notification->class && $notification->class !== 'all') Class: {{ $notification->class }} |
@@ -1520,7 +1524,7 @@
                         </div>
                     @empty
                         <div class='message-item'
-                            style='background:#fff;border-color:#cbd5e1;text-align:center;padding:30px;color:var(--muted);'>No
+                            style='background:#fff;border-color:rgba(34, 187, 234, 0.18);text-align:center;padding:30px;color:var(--muted);'>No
                             broadcast history.</div>
                     @endforelse
                 @else
@@ -1531,18 +1535,18 @@
                             <div class="panel-header">
                                 <div class="panel-title" style="display: flex; align-items: center; gap: 10px;">
                                     Student Chats
-                                    <button id="view-students-btn" type="button" onclick="openStudentsModal()" style="margin-left: 50px; padding: 4px 12px; font-size: 12px; font-weight: 700; border-radius: 8px; border: 1px solid #2563eb; background: #fff; color: #2563eb; cursor: pointer; transition: background 0.2s;">
+                                    <button id="view-students-btn" type="button" onclick="openStudentsModal()" style="margin-left: 50px; padding: 4px 12px; font-size: 12px; font-weight: 700; border-radius: 8px; border: 1px solid #009DE1; background: #fff; color: #009DE1; cursor: pointer; transition: background 0.2s;">
                                         View students
                                     </button>
                                 </div>
                                     <!-- All Students Modal -->
                                     <div id="all-students-modal" onclick="closeStudentsModal(event)" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.18); align-items:center; justify-content:center;">
                                         <div onclick="event.stopPropagation()" style="background:#fff; border-radius:16px; max-width:480px; width:96vw; max-height:80vh; overflow:auto; box-shadow:0 8px 32px rgba(0,0,0,0.18); padding:28px 24px 18px 24px; position:relative;">
-                                            <button type="button" onclick="closeStudentsModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:20px; color:#64748b; cursor:pointer;">&times;</button>
+                                            <button type="button" onclick="closeStudentsModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:20px; color:var(--muted); cursor:pointer;">&times;</button>
                                             <h2 style="font-size:20px; font-weight:800; margin-bottom:12px;">All Students</h2>
                                             <div style="margin-bottom:12px; display:flex; gap:10px; align-items:center;">
                                                 <label for="modal-class-filter" style="font-weight:700; font-size:13px;">Class:</label>
-                                                <select id="modal-class-filter" style="padding:6px 12px; border-radius:8px; border:1px solid #e5e7eb; font-size:13px;">
+                                                <select id="modal-class-filter" style="padding:6px 12px; border-radius:8px; border:1px solid var(--line); font-size:13px;">
                                                     <option value="all">All</option>
                                                     <option value="2026">2026</option>
                                                     <option value="2027">2027</option>
@@ -1550,10 +1554,10 @@
                                                 </select>
                                             </div>
                                             <div style="margin-bottom:10px;">
-                                                <input id="modal-student-search" type="text" placeholder="Search students..." style="width:100%; padding:7px 12px; border-radius:8px; border:1px solid #e5e7eb; font-size:13px;">
+                                                <input id="modal-student-search" type="text" placeholder="Search students..." style="width:100%; padding:7px 12px; border-radius:8px; border:1px solid var(--line); font-size:13px;">
                                             </div>
                                             <div id="modal-student-list" style="max-height:48vh; overflow:auto;">
-                                                <div style="text-align:center; color:#64748b; font-size:13px; padding:30px 0;">Loading...</div>
+                                                <div style="text-align:center; color:var(--muted); font-size:13px; padding:30px 0;">Loading...</div>
                                             </div>
                                         </div>
                                     </div>
@@ -1625,7 +1629,7 @@
                                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                                     </svg>
                                 </div>
-                                <p style="font-weight: 800; color: #0f172a; font-size: 16px;">Select a student</p>
+                                <p style="font-weight: 800; color: #404040; font-size: 16px;">Select a student</p>
                                 <p style="font-size: 13px; color: var(--muted);">Click on a student to see message history
                                 </p>
                             </div>
@@ -1654,7 +1658,7 @@
                                         </svg>
                                     </button>
                                 @else
-                                    <div style="width:100%; padding:12px 14px; border-radius:12px; background:#fef2f2; color:#991b1b; font-size:13px; font-weight:600; text-align:center;">
+                                    <div style="width:100%; padding:12px 14px; border-radius:12px; background:rgba(255, 153, 51, 0.12); color:var(--accent); font-size:13px; font-weight:600; text-align:center;">
                                         Messaging is available for education staff only.
                                     </div>
                                 @endif
@@ -1690,10 +1694,10 @@
                                 const level = s.battery_level;
                                 if (level !== null && level !== undefined) {
                                     div.textContent = '🔋 ' + level + '%';
-                                    div.style.color = level < 20 ? '#ef4444' : '#0f172a';
+                                    div.style.color = level < 20 ? 'var(--accent)' : '#404040';
                                 } else {
                                     div.textContent = '🔋 N/A';
-                                    div.style.color = '#0f172a';
+                                    div.style.color = '#404040';
                                 }
                             });
                         });
@@ -1830,12 +1834,12 @@
             const listDiv = document.getElementById('modal-student-list');
             if (!listDiv) return;
 
-            listDiv.innerHTML = '<div style="text-align:center; color:#64748b; font-size:13px; padding:30px 0;">Loading...</div>';
+            listDiv.innerHTML = '<div style="text-align:center; color:var(--muted); font-size:13px; padding:30px 0;">Loading...</div>';
             fetch(`/students/all/json?class=${encodeURIComponent(classVal)}`)
                 .then(res => res.json())
                 .then(data => {
                     if (!data.students || data.students.length === 0) {
-                        listDiv.innerHTML = '<div style="text-align:center; color:#64748b; font-size:13px; padding:30px 0;">No students found.</div>';
+                        listDiv.innerHTML = '<div style="text-align:center; color:var(--muted); font-size:13px; padding:30px 0;">No students found.</div>';
                         return;
                     }
 
@@ -1845,7 +1849,7 @@
                         : data.students.filter(stu => ((stu['class'] || '').toString() === selectedClass));
 
                     if (students.length === 0) {
-                        listDiv.innerHTML = '<div style="text-align:center; color:#64748b; font-size:13px; padding:30px 0;">No students found.</div>';
+                        listDiv.innerHTML = '<div style="text-align:center; color:var(--muted); font-size:13px; padding:30px 0;">No students found.</div>';
                         return;
                     }
 
@@ -1854,20 +1858,20 @@
                         const online = Boolean(stu['status']);
                         const studentName = (stu['name'] || 'Student');
                         const studentClass = (stu['class'] || 'N/A');
-                        html += `<div class="student-row modal-student-row" data-id="${escHtml(stu['student_id'] || stu['id'])}" data-name="${(studentName).toLowerCase()}" data-class="${escHtml(studentClass)}" data-display-name="${escHtml(studentName)}" data-student-id="${escHtml(stu['student_id'] || '')}" data-gender="" onclick="openStudentFromModal(this)" style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f1f5f9;cursor:pointer;">
-                            <span style="width:28px;height:28px;border-radius:50%;background:${online ? '#d1fae5' : '#f3f4f6'};color:${online ? '#059669' : '#64748b'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;">${(studentName || 'S').charAt(0).toUpperCase()}</span>
+                        html += `<div class="student-row modal-student-row" data-id="${escHtml(stu['student_id'] || stu['id'])}" data-name="${(studentName).toLowerCase()}" data-class="${escHtml(studentClass)}" data-display-name="${escHtml(studentName)}" data-student-id="${escHtml(stu['student_id'] || '')}" data-gender="" onclick="openStudentFromModal(this)" style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(34, 187, 234, 0.08);cursor:pointer;">
+                            <span style="width:28px;height:28px;border-radius:50%;background:${online ? 'rgba(34, 187, 234, 0.12)' : '#F8FBFF'};color:${online ? '#009DE1' : 'var(--muted)'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;">${(studentName || 'S').charAt(0).toUpperCase()}</span>
                             <span style="flex:1;">
                                 <span style="font-weight:700;">${escHtml(studentName)}</span><br>
-                                <span style="font-size:12px;color:#64748b;">${escHtml(stu['student_id'] || '')} · ${escHtml(studentClass)}</span>
+                                <span style="font-size:12px;color:var(--muted);">${escHtml(stu['student_id'] || '')} · ${escHtml(studentClass)}</span>
                             </span>
-                            <span style="font-size:12px;font-weight:700;color:${online ? '#059669' : '#64748b'};">${online ? 'Online' : 'Offline'}</span>
+                            <span style="font-size:12px;font-weight:700;color:${online ? '#009DE1' : 'var(--muted)'};">${online ? 'Online' : 'Offline'}</span>
                         </div>`;
                     });
                     listDiv.innerHTML = html;
                     filterModalStudentList();
                 })
                 .catch(() => {
-                    listDiv.innerHTML = '<div style="text-align:center; color:#ef4444; font-size:13px; padding:30px 0;">Error loading students.</div>';
+                    listDiv.innerHTML = '<div style="text-align:center; color:var(--accent); font-size:13px; padding:30px 0;">Error loading students.</div>';
                 });
         }
 
@@ -2004,7 +2008,7 @@
             const msgsPanel = document.getElementById('chat-messages');
             if (msgsPanel) {
                 msgsPanel.style.display = 'flex';
-                msgsPanel.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b;font-size:13px;">Loading conversation...</div>';
+                msgsPanel.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">Loading conversation...</div>';
             }
 
             const inputPanel = document.getElementById('chat-input-area');
@@ -2046,7 +2050,7 @@
                 let prevDate = '';
 
                 if (!messages || !Array.isArray(messages) || messages.length === 0) {
-                    html = '<div style="text-align:center;color:#64748b;font-size:13px;margin-top:40px;">No messages yet. Say hello! 👋</div>';
+                    html = '<div style="text-align:center;color:var(--muted);font-size:13px;margin-top:40px;">No messages yet. Say hello! 👋</div>';
                 } else {
                     messages.forEach(msg => {
                         const d = new Date(msg.created_at);
@@ -2165,7 +2169,7 @@
             if (!toast) {
                 toast = document.createElement('div');
                 toast.id = 'send-error-toast';
-                toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2);';
+                toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2);';
                 document.body.appendChild(toast);
             }
             toast.textContent = '⚠️ ' + msg;
@@ -2209,7 +2213,7 @@
             <div id="modal-time"
                 style="font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
             </div>
-            <div id="modal-sender" style="font-size: 12px; font-weight: 700; color: #2563eb; margin-bottom: 8px;"></div>
+            <div id="modal-sender" style="font-size: 12px; font-weight: 700; color: var(--blue-dark); margin-bottom: 8px;"></div>
             <h2 id="modal-subject" class="modal-subject"></h2>
 
             <div class="modal-body-container">
@@ -2220,7 +2224,7 @@
 
             <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
                 <button onclick="document.getElementById('broadcast-modal').style.display='none'"
-                    style="background: #f1f5f9; color: #475569; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer;">
+                    style="background: #F8FBFF; color: var(--muted); border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer;">
                     Close
                 </button>
             </div>
