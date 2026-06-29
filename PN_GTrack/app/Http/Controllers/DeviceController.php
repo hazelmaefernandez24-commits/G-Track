@@ -73,7 +73,7 @@ public function index()
 /**
  * JSON stats endpoint polled by the dashboard every 10 seconds.
  */
-public function apiStats()
+public function apiStats(Request $request)
 {
     $students = \App\Models\Student::all();
 
@@ -93,6 +93,8 @@ public function apiStats()
     $offlineCount  = $students->where('status', false)->count();
     $broadcastCount = \DB::table('notifications')->where('type', 'broadcast')->where('read', false)->count();
     $sosCount       = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->count();
+    $unreadSosCount = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->count();
+    $blackoutCount  = \DB::table('notifications')->where('type', 'blackout')->where('read', false)->count();
     $sosStudents    = $students->where('sos_status', 'help')->pluck('student_id');
 
     // Use updated_at (real timestamp) for accurate latest update calculation
@@ -100,7 +102,23 @@ public function apiStats()
     $latestTime     = $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('h:i A') : null;
     $latestDate     = $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('M d, Y') : null;
 
+    $adminId = $request->query('admin_id');
+    $adminRole = $request->query('role');
+    
+    $studentMessagesQuery = \DB::table('notifications')
+        ->where('sender_type', 'student')
+        ->whereNotIn('type', ['sos', 'blackout', 'broadcast'])
+        ->where('read', false);
+
+    if ($adminId && in_array($adminRole, ['education', 'main'], true)) {
+        $studentMessagesQuery->where('admin_id', $adminId);
+    }
+    
+    $studentMessagesCount = $studentMessagesQuery->count();
+    $totalUnread = $unreadSosCount + $blackoutCount + $studentMessagesCount;
+
     return response()->json([
+        'totalUnread'    => $totalUnread,
         'onlineCount'    => $onlineCount,
         'offlineCount'   => $offlineCount,
         'broadcastCount' => $broadcastCount,

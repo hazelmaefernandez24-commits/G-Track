@@ -32,8 +32,9 @@ class StudentManagementController extends Controller
             'middle_initial.regex' => 'Middle initial must contain letters only.',
             'last_name.regex' => 'Last name must contain letters only.',
             'email.email' => 'Please enter a valid email address.',
-            'contact.digits' => 'Contact number must be exactly 11 digits.',
-            'contact.regex' => 'Contact number must start with 09 and contain 11 digits.',
+            'contact.digits' => 'Contact number must be valid',
+            'contact.regex' => 'Contact number must be valid',
+           
         ]);
 
         \DB::transaction(function () use ($request) {
@@ -79,8 +80,8 @@ class StudentManagementController extends Controller
             'middle_initial.regex' => 'Middle initial must contain letters only.',
             'last_name.regex' => 'Last name must contain letters only.',
             'email.email' => 'Please enter a valid email address.',
-            'contact.digits' => 'Contact number must be exactly 11 digits.',
-            'contact.regex' => 'Contact number must start with 09 and contain 11 digits.',
+           'contact.digits' => 'Contact number must be valid',
+           'contact.regex' => 'Contact number must be valid',
         ]);
 
         if ($request->filled('new_password')) {

@@ -137,7 +137,7 @@
         border-radius: 6px;
         border: 2px solid transparent;
         font-weight: 600;
-        color: #FF9933;
+        color: #f5f2f0ff;
         cursor: pointer;
         transition: all 0.2s;
         text-decoration: none;
@@ -148,12 +148,12 @@
     .btn-primary { 
         background: var(--sidebar-bg); 
         
-        background-color: #22bbea;
+        background-color: #FF9933;
 
 
     }
     .btn-primary:hover {
-        background: var(--sidebar-hover);
+        background-color: #d17314ff;
 
     }
 </style>

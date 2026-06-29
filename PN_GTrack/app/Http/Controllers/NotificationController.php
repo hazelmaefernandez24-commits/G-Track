@@ -311,6 +311,15 @@ class NotificationController extends Controller
         return redirect()->back()->with('success', 'Notification marked as read.');
     }
 
+    public function deleteAllSosArchives()
+    {
+        \App\Models\Notification::where('type', 'sos')
+            ->where('status', 'resolved')
+            ->delete();
+
+        return redirect()->back()->with('success', 'All SOS archives deleted successfully.');
+    }
+
     // --- MOBILE API METHODS ---
     public function apiGet($student_id)
     {
@@ -601,6 +610,40 @@ class NotificationController extends Controller
         return response()->json(['success' => true, 'id' => $id]);
     }
 
+    public function deleteConversation(Request $request, $student_id)
+    {
+        if (!$this->canSendMessages()) {
+            return response()->json(['success' => false, 'message' => 'Only education staff can delete student messages.'], 403);
+        }
+
+        $student = \App\Models\Student::where('id', $student_id)
+            ->orWhere('student_id', $student_id)
+            ->first();
+
+        if (!$student) {
+            return response()->json(['success' => false, 'message' => 'Student not found.'], 404);
+        }
+
+        $query = DB::table('notifications')
+            ->where('student_id', $student->id)
+            ->whereNotIn('type', ['sos', 'blackout', 'broadcast'])
+            ->where(function($q) {
+                $q->whereIn('type', ['student_message', 'admin_reply'])
+                  ->orWhereIn('sender_type', ['student', 'admin']);
+            });
+
+        if (Auth::guard('admin')->check()) {
+            $user = Auth::guard('admin')->user();
+            if (in_array($user->role, ['education', 'main'], true)) {
+                $query->where('admin_id', $user->getKey());
+            }
+        }
+
+        $query->delete();
+
+        return response()->json(['success' => true]);
+    }
+
     public function allStudentsJson(Request $request)
     {
         $class = $request->query('class');
@@ -636,5 +679,109 @@ class NotificationController extends Controller
             'success' => true,
             'admins' => $admins
         ]);
+    }
+
+    // --- ADMIN MOBILE API METHODS ---
+
+    public function apiAdminBroadcast(Request $request)
+    {
+        $request->validate([
+            'target' => 'required',
+            'subject' => 'required|max:255',
+            'message' => 'required',
+        ]);
+
+        $target = $request->target;
+        $studentClass = 'all';
+        $studentId = null;
+
+        if ($target === 'all') {
+            $studentClass = 'all';
+        } elseif (in_array($target, ['2026', '2027', '2028'])) {
+            $studentClass = $target;
+        } else {
+            $studentId = $target;
+            $student = \App\Models\Student::where('student_id', $target)->orWhere('id', $target)->first();
+            if ($student) {
+                $studentClass = $student->class;
+            }
+        }
+
+        DB::table('notifications')->insert([
+            'student_id' => $studentId,
+            'class' => $studentClass, 
+            'type' => 'broadcast',
+            'sender_type' => 'admin',
+            'sender_name' => $request->input('admin_name', 'Admin'),
+            'subject' => $request->subject,
+            'message' => $request->message,
+            'read' => true,
+            'status' => 'pending', 
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Broadcast sent successfully']);
+    }
+
+    public function apiAdminSendMessage(Request $request, $student_id)
+    {
+        $request->validate([
+            'message' => 'required',
+        ]);
+
+        $student = \App\Models\Student::where('id', $student_id)
+            ->orWhere('student_id', $student_id)
+            ->first();
+
+        if (!$student) {
+            return response()->json(['success' => false, 'message' => 'Student not found'], 404);
+        }
+
+        $latestStudentMessage = DB::table('notifications')
+            ->where('student_id', $student->id)
+            ->where('sender_type', 'student')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $id = DB::table('notifications')->insertGetId([
+            'student_id'  => $student->id,
+            'admin_id'    => $request->input('admin_id'), // Send admin_id from mobile
+            'class'       => $student->class,
+            'type'        => 'admin_reply',
+            'sender_type' => 'admin',
+            'sender_name' => $request->input('admin_name', 'Admin'), // Send admin name from mobile
+            'reply_to_id' => $latestStudentMessage ? $latestStudentMessage->id : null,
+            'message'     => $request->message,
+            'read'        => false,
+            'status'      => 'replied',
+            'created_at'  => now(),
+            'updated_at'  => now()
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Message sent successfully', 'id' => $id]);
+    }
+    
+    public function apiAdminResolve($id)
+    {
+        $notification = \App\Models\Notification::find($id);
+        if ($notification) {
+            $notification->update([
+                'status' => 'resolved',
+                'read' => true
+            ]);
+
+            if ($notification->student_id) {
+                $student = \App\Models\Student::where('student_id', $notification->student_id)
+                    ->orWhere('id', $notification->student_id)
+                    ->first();
+                if ($student) {
+                    $student->sos_status = 'safe';
+                    $student->save();
+                }
+            }
+            return response()->json(['success' => true, 'message' => 'Alert marked as Resolved (Safe).']);
+        }
+        return response()->json(['success' => false, 'message' => 'Notification not found'], 404);
     }
 }

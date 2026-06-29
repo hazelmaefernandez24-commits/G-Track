@@ -31,6 +31,7 @@ Route::middleware(['auth:admin'])->group(function () {
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/send', [NotificationController::class, 'send']);
+    Route::post('/notifications/delete-all-sos-archives', [NotificationController::class, 'deleteAllSosArchives'])->name('notifications.delete-all-sos');
     Route::post('/notifications/{id}/acknowledge', [NotificationController::class, 'acknowledge']);
     Route::post('/notifications/{id}/resolve', [NotificationController::class, 'resolve']);
     Route::get('/notifications/{id}/read', [NotificationController::class, 'read']);
@@ -39,6 +40,7 @@ Route::middleware(['auth:admin'])->group(function () {
     // Messenger
     Route::get('/messages/{student_id}/json', [NotificationController::class, 'getMessagesJson']);
     Route::post('/messages/new/{student_id}', [NotificationController::class, 'sendMessageAjax']);
+    Route::delete('/messages/{student_id}', [NotificationController::class, 'deleteConversation']);
 
     // All students JSON for modal
     Route::get('/students/all/json', [NotificationController::class, 'allStudentsJson']);

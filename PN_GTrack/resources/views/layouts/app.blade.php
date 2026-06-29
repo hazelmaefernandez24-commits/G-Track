@@ -379,10 +379,31 @@
             </div>
             
             <div class="header-actions">
+                @php
+                    $currentUser = Auth::guard('admin')->check() ? Auth::guard('admin')->user() : Auth::user();
+                    $currentAdminId = $currentUser ? $currentUser->getKey() : null;
+                    $currentAdminRole = $currentUser->role ?? null;
+
+                    $broadcastCountHeader = \DB::table('notifications')->where('type', 'broadcast')->where('read', false)->count();
+                    $sosCountHeader = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->count();
+                    $blackoutCountHeader = \DB::table('notifications')->where('type', 'blackout')->where('read', false)->count();
+                    
+                    $studentMessagesQueryHeader = \DB::table('notifications')
+                        ->where('sender_type', 'student')
+                        ->whereNotIn('type', ['sos', 'blackout', 'broadcast'])
+                        ->where('read', false);
+                        
+                    if ($currentAdminId && in_array($currentAdminRole, ['education', 'main'], true)) {
+                        $studentMessagesQueryHeader->where('admin_id', $currentAdminId);
+                    }
+                    
+                    $studentMessagesCountHeader = $studentMessagesQueryHeader->count();
+                    $totalUnreadHeader = $sosCountHeader + $blackoutCountHeader + $studentMessagesCountHeader;
+                @endphp
                 <a href="/notifications" class="notification-btn">
                     <i data-lucide="bell"></i>
-                    @if(isset($sosCount) && $sosCount > 0)
-                        <span class="notification-badge">{{ $sosCount }}</span>
+                    @if($totalUnreadHeader > 0)
+                        <span class="notification-badge">{{ $totalUnreadHeader }}</span>
                     @endif
                 </a>
 
@@ -443,9 +464,11 @@
         // Initialize Lucide icons
         lucide.createIcons();
 
-        // Global polling for SOS
+        // Global polling for SOS and Notifications
         function pollGlobalStats() {
-            fetch('/api/dashboard/stats')
+            const adminId = "{{ $currentAdminId ?? '' }}";
+            const adminRole = "{{ $currentAdminRole ?? '' }}";
+            fetch(`/api/dashboard/stats?admin_id=${adminId}&role=${adminRole}`)
                 .then(res => res.json())
                 .then(data => {
                     const sosBanner = document.getElementById('sos-banner');
@@ -454,13 +477,13 @@
                     }
                     
                     const badge = document.querySelector('.notification-badge');
-                    if (data.sosCount > 0) {
+                    if (data.totalUnread > 0) {
                         if (badge) {
-                            badge.textContent = data.sosCount;
+                            badge.textContent = data.totalUnread;
                         } else {
                             const btn = document.querySelector('.notification-btn');
                             if(btn) {
-                                btn.innerHTML += `<span class="notification-badge">${data.sosCount}</span>`;
+                                btn.innerHTML += `<span class="notification-badge">${data.totalUnread}</span>`;
                             }
                         }
                     } else if (badge) {

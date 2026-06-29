@@ -23,7 +23,7 @@
         text-decoration: none;
         font-size: 14px;
     }
-    .btn-primary { background: var(--sidebar-active); color: #fff; }
+    .btn-primary { background: var(--sidebar-active); background-color: #22bbea; color: #fff; }
     .btn-success { background: var(--online); color: #fff; }
     .btn-danger { background: var(--offline); color: #fff; }
     .table-container { overflow-x: auto; }
@@ -141,11 +141,7 @@
                                 <button class="btn btn-success" style="padding:4px 8px; font-size:12px;" 
                                     onclick="editAdmin({{ json_encode($admin) }})">Edit</button>
                                 @if($admin->id !== Auth::guard('admin')->id())
-                                <form action="/admin/admins/{{ $admin->id }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;">Delete</button>
-                                </form>
+                                <button type="button" class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="confirmDelete('{{ $admin->id }}')">Delete</button>
                                 @endif
                             </td>
                         </tr>
@@ -278,6 +274,22 @@
         </div>
     </div>
 
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="custom-modal">
+        <div class="custom-modal-content" style="width: 350px; text-align: center;">
+            <h3 style="color: #dc2626; margin-top: 0;">Confirm Delete</h3>
+            <p style="margin: 20px 0; font-size: 15px; color: #4b5563;">Are you sure you want to delete this admin?</p>
+            <form id="deleteForm" method="POST" action="">
+                @csrf
+                @method('DELETE')
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button type="submit" class="btn btn-danger" style="flex:1;">Yes, Delete</button>
+                    <button type="button" class="btn btn-primary" style="flex:1; background-color: #6b7280; border: none;" onclick="closeModal('deleteModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function openModal(id) { 
             const modal = document.getElementById(id);
@@ -295,6 +307,11 @@
             }
         }
         
+        function confirmDelete(id) {
+            document.getElementById('deleteForm').action = '/admin/admins/' + id;
+            openModal('deleteModal');
+        }
+
         function editAdmin(admin) {
             clearEditErrors();
             document.getElementById('editForm').action = '/admin/admins/' + admin.id;
