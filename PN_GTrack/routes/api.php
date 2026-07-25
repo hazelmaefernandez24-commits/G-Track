@@ -19,6 +19,7 @@ Route::middleware('api')->group(function () {
     Route::post('/student/heartbeat', [\App\Http\Controllers\StudentController::class, 'heartbeat']); // Keep-alive ping
     Route::post('/student/sos',       [\App\Http\Controllers\StudentController::class, 'sendSOS']);   // SOS alert
     Route::post('/student/offline',   [\App\Http\Controllers\StudentController::class, 'goOffline']); // Mark offline on logout
+    Route::post('/student/upload-profile-picture', [\App\Http\Controllers\StudentController::class, 'uploadProfilePicture']); // Profile picture
 
     // 📊 DASHBOARD STATS (polled every 10s by admin dashboard)
     Route::get('/dashboard/stats', [\App\Http\Controllers\DeviceController::class, 'apiStats']);
@@ -33,6 +34,8 @@ Route::middleware('api')->group(function () {
     Route::post('/notifications/send', [NotificationController::class, 'apiSend']);
     Route::post('/upload-video', [NotificationController::class, 'apiSend']); // Mobile app endpoint
     Route::get('/notifications/{student_id}', [NotificationController::class, 'apiGet']);
+    Route::get('/notification/{id}/video', [NotificationController::class, 'apiGetVideo']);
+    Route::get('/student/{student_id}/latest-video', [NotificationController::class, 'apiGetLatestVideo']);
 
     // 👨‍💼 ADMIN MOBILE ACTIONS
     Route::get('/admins', [NotificationController::class, 'getAdmins']);

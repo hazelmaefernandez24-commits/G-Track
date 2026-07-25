@@ -32,6 +32,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/send', [NotificationController::class, 'send']);
     Route::post('/notifications/delete-all-sos-archives', [NotificationController::class, 'deleteAllSosArchives'])->name('notifications.delete-all-sos');
+    Route::post('/notifications/delete-all-blackout-archives', [NotificationController::class, 'deleteAllBlackoutArchives'])->name('notifications.delete-all-blackout');
     Route::post('/notifications/{id}/acknowledge', [NotificationController::class, 'acknowledge']);
     Route::post('/notifications/{id}/resolve', [NotificationController::class, 'resolve']);
     Route::get('/notifications/{id}/read', [NotificationController::class, 'read']);

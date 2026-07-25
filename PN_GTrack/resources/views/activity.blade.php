@@ -17,7 +17,13 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
         margin-bottom: 24px;
+    }
+
+    .activity-title {
+        min-width: 0;
     }
 
     .activity-title h2 {
@@ -27,6 +33,7 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        min-width: 0;
     }
 
     .activity-title p {
@@ -39,6 +46,11 @@
         display: flex;
         align-items: center;
         gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .student-count-badge {
+        white-space: nowrap;
     }
 
     .filter-select {

@@ -155,4 +155,51 @@ class StudentController extends Controller
 
         return response()->json(['message' => 'Student marked as offline']);
     }
+
+    /**
+     * Upload or update student profile picture.
+     * Called by mobile app when a student changes their profile picture.
+     */
+    public function uploadProfilePicture(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required',
+            'profile_picture' => 'required|file|mimes:jpg,jpeg,png,webp|max:5120', // 5MB max
+        ]);
+
+        $student = Student::where('student_id', $request->student_id)
+            ->orWhere('id', $request->student_id)
+            ->first();
+
+        if (!$student) {
+            return response()->json(['success' => false, 'message' => 'Student not found'], 404);
+        }
+
+        // Delete old profile picture if it exists
+        if ($student->profile_picture) {
+            $oldPath = str_replace(asset('storage/'), '', $student->profile_picture);
+            $oldPath = str_replace(asset('storage') . '/', '', $oldPath);
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($oldPath)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+        }
+
+        try {
+            $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+            $student->profile_picture = asset('storage/' . $path);
+            $student->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile picture updated successfully',
+                'profile_picture_url' => $student->profile_picture
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to upload profile picture: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload profile picture: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -26,7 +26,8 @@ class Student extends Model
     'contact',
     'sos_status',
     'latitude',
-    'longitude'
+    'longitude',
+    'profile_picture'
 ];
 
     public function locations()

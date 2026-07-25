@@ -140,11 +140,11 @@ class NotificationController extends Controller
 
         $stats = [
             'unread' => \App\Models\Notification::where('read', false)->count(),
-            'sos' => \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->count(),
+            'sos' => \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->count(),
             'broadcast' => \App\Models\Notification::where('type', 'broadcast')->count(),
             'onlineCount' => $students->where('status', true)->count(),
             'offlineCount' => $students->where('status', false)->count(),
-            'blackout' => \App\Models\Notification::where('type', 'blackout')->count(),
+            'blackout' => \App\Models\Notification::where('type', 'blackout')->where('status', '!=', 'resolved')->where('read', false)->count(),
             'latestTime' => $latestTime,
             'latestDate' => $latestDate
         ];
@@ -318,6 +318,15 @@ class NotificationController extends Controller
             ->delete();
 
         return redirect()->back()->with('success', 'All SOS archives deleted successfully.');
+    }
+
+    public function deleteAllBlackoutArchives()
+    {
+        \App\Models\Notification::where('type', 'blackout')
+            ->where('status', 'resolved')
+            ->delete();
+
+        return redirect()->back()->with('success', 'All Blackout archives deleted successfully.');
     }
 
     // --- MOBILE API METHODS ---
@@ -783,5 +792,72 @@ class NotificationController extends Controller
             return response()->json(['success' => true, 'message' => 'Alert marked as Resolved (Safe).']);
         }
         return response()->json(['success' => false, 'message' => 'Notification not found'], 404);
+    }
+
+    /**
+     * Get the video for a specific notification ID
+     */
+    public function apiGetVideo($id)
+    {
+        $notification = \App\Models\Notification::find($id);
+
+        if (!$notification) {
+            return response()->json(['success' => false, 'message' => 'Notification not found'], 404);
+        }
+
+        $videoUrl = $this->extractVideoUrl($notification);
+
+        if ($videoUrl) {
+            return response()->json(['success' => true, 'video_url' => $videoUrl]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'No video feed available for this alert.']);
+    }
+
+    /**
+     * Get the latest SOS/Blackout video for a specific student ID
+     */
+    public function apiGetLatestVideo($student_id)
+    {
+        $student = \App\Models\Student::where('id', $student_id)
+            ->orWhere('student_id', $student_id)
+            ->first();
+
+        if (!$student) {
+            return response()->json(['success' => false, 'message' => 'Student not found'], 404);
+        }
+
+        $notification = \App\Models\Notification::where('student_id', $student->id)
+            ->whereIn('type', ['sos', 'blackout'])
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if (!$notification) {
+            return response()->json(['success' => false, 'message' => 'No alerts found for this student.'], 404);
+        }
+
+        $videoUrl = $this->extractVideoUrl($notification);
+
+        if ($videoUrl) {
+            return response()->json(['success' => true, 'video_url' => $videoUrl, 'notification_id' => $notification->id]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'No video feed available in the latest alert.']);
+    }
+
+    /**
+     * Helper method to correctly extract the video URL from a notification object
+     */
+    private function extractVideoUrl($notification)
+    {
+        if (!empty($notification->video_url)) {
+            return $notification->video_url;
+        }
+
+        if (!empty($notification->media_url) && !\Illuminate\Support\Str::endsWith($notification->media_url, ['.mp3', '.wav'])) {
+            return $notification->media_url;
+        }
+
+        return null;
     }
 }

@@ -287,6 +287,7 @@
 
         .tab {
             flex: 1;
+            min-width: 110px;
             text-align: center;
             padding: 8px 16px;
             border-radius: 6px;
@@ -296,6 +297,22 @@
             text-decoration: none;
             cursor: pointer;
             transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab .tab-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            padding: 3px 7px;
+            margin-left: 6px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            background: #ef4444;
+            color: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .tab:hover {
@@ -663,6 +680,7 @@
             justify-content: center;
             flex-shrink: 0;
             position: relative;
+            overflow: visible;
         }
 
         .avatar.female {
@@ -670,23 +688,31 @@
             color: var(--accent);
         }
 
+        .avatar img.profile-pic {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
         .unread-badge {
             position: absolute;
-            top: -4px;
-            right: -4px;
-            min-width: 18px;
-            height: 18px;
-            padding: 0 5px;
+            top: -5px;
+            right: -5px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 12px;
+            font-weight: 800;
             color: #fff;
-            background: var(--blue);
+            background: #ef4444;
             border-radius: 999px;
             border: 2px solid #fff;
             line-height: 1;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
         }
 
         .student-name {
@@ -724,14 +750,30 @@
             border-bottom: 1px solid var(--line);
             padding: 10px 20px;
             display: flex;
+            flex-shrink: 0;
+        }
+
+        .chat-header-profile {
+            display: flex;
             align-items: center;
             gap: 12px;
-            flex-shrink: 0;
+            width: 100%;
+        }
+
+        .chat-header .student-info {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
         .chat-header-name {
             font-weight: 800;
             font-size: 14px;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .chat-header-sub {
@@ -1067,11 +1109,25 @@
         <div class='section'>
             <div class='tabs'>
                 <a class='tab {{ $tab === "student" ? "active" : "" }}'
-                    href='?class={{ urlencode($class) }}&tab=student'>Student Messages</a>
+                    href='?class={{ urlencode($class) }}&tab=student'>
+                    Student Messages
+                    @php $studentUnread = $unreadCounts->sum(); @endphp
+                    @if($studentUnread > 0)
+                        <span class="tab-count">{{ $studentUnread }}</span>
+                    @endif
+                </a>
                 <a class='tab {{ $tab === "sos" ? "active" : "" }}'
-                    href='?class={{ urlencode($class) }}&tab=sos'>Emergency Alerts</a>
+                    href='?class={{ urlencode($class) }}&tab=sos'>
+                    Emergency Alerts
+                    @php $emergencyCount = $stats['sos'] + $stats['blackout']; @endphp
+                    @if($emergencyCount > 0)
+                        <span style="background: var(--red); color: white; padding: 2px 6px; border-radius: 12px; font-size: 11px; margin-left: 6px; font-weight: bold;">{{ $emergencyCount }}</span>
+                    @endif
+                </a>
                 <a class='tab {{ $tab === "broadcast" ? "active" : "" }}'
-                    href='?class={{ urlencode($class) }}&tab=broadcast'>Broadcast Notifications</a>
+                    href='?class={{ urlencode($class) }}&tab=broadcast'>
+                    Broadcast Notifications
+                </a>
             </div>
 
             <div class='card-panel'>
@@ -1619,9 +1675,14 @@
                                     <div class="student-row" data-id="{{ $student->id }}"
                                         data-name="{{ strtolower($student->name) }}" data-class="{{ $student->class }}"
                                         data-display-name="{{ $student->name }}" data-student-id="{{ $student->student_id }}"
-                                        data-gender="{{ strtolower($student->gender ?? '') }}">
+                                        data-gender="{{ strtolower($student->gender ?? '') }}"
+                                        data-profile-picture="{{ $student->profile_picture ?? '' }}">
                                         <div class="avatar {{ $isFemale ? 'female' : '' }}">
-                                            {{ strtoupper(substr($student->name, 0, 1)) }}
+                                            @if($student->profile_picture)
+                                                <img src="{{ $student->profile_picture }}" alt="{{ $student->name }}" class="profile-pic">
+                                            @else
+                                                {{ strtoupper(substr($student->name, 0, 1)) }}
+                                            @endif
                                             @if($unread > 0)
                                             <div class="unread-badge">{{ $unread > 99 ? '99+' : $unread }}</div>@endif
                                         </div>
@@ -1667,10 +1728,12 @@
                             </div>
 
                             <div class="chat-header" id="chat-header" style="display:none;">
-                                <div class="avatar" id="chat-header-avatar"></div>
-                                <div class="student-info">
-                                    <div class="chat-header-name" id="chat-header-name">Student Name</div>
-                                    <div class="chat-header-sub" id="chat-header-sub">ID · Class</div>
+                                <div class="chat-header-profile">
+                                    <div class="avatar" id="chat-header-avatar"></div>
+                                    <div class="student-info">
+                                        <div class="chat-header-name" id="chat-header-name">Student Name</div>
+                                        <div class="chat-header-sub" id="chat-header-sub">ID · Class</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1754,6 +1817,11 @@
                         const newCards = doc.querySelector('.cards');
                         const cardsEl = document.querySelector('.cards');
                         if (newCards && cardsEl) cardsEl.innerHTML = newCards.innerHTML;
+
+                        // Always refresh the tabs (notification counts)
+                        const newTabs = doc.querySelector('.tabs');
+                        const tabsEl = document.querySelector('.tabs');
+                        if (newTabs && tabsEl) tabsEl.innerHTML = newTabs.innerHTML;
 
                         // If a student convo is currently open, only refresh the student list (so active chat isn't removed)
                         const studentListEl = document.getElementById('student-list-container');
@@ -2019,9 +2087,15 @@
 
             // Header Updates
             const avatarEl = document.getElementById('chat-header-avatar');
+            const profilePic = row.getAttribute('data-profile-picture');
             if (avatarEl) {
-                avatarEl.textContent = name.charAt(0).toUpperCase();
-                avatarEl.className = 'avatar' + (activeIsFemale ? ' female' : '');
+                if (profilePic) {
+                    avatarEl.innerHTML = '<img src="' + profilePic + '" alt="' + name + '" class="profile-pic">';
+                    avatarEl.className = 'avatar';
+                } else {
+                    avatarEl.textContent = name.charAt(0).toUpperCase();
+                    avatarEl.className = 'avatar' + (activeIsFemale ? ' female' : '');
+                }
             }
 
             const nameEl = document.getElementById('chat-header-name');
@@ -2445,8 +2519,19 @@
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
-            <h2 class="modal-subject">Blackout Alerts History</h2>
-            <p style="font-size: 13px; color: var(--muted); margin-top: 4px; margin-bottom: 16px;">Resolved blackout alerts.</p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-right: 40px;">
+                <div>
+                    <h2 class="modal-subject">Blackout Alerts History</h2>
+                    <p style="font-size: 13px; color: var(--muted); margin-top: 4px; margin-bottom: 0;">Resolved blackout alerts.</p>
+                </div>
+                <button type="button" onclick="document.getElementById('deleteBlackoutArchiveModal').style.display='flex'" style="background: rgba(220, 38, 38, 0.1); color: var(--red); border: 1px solid rgba(220, 38, 38, 0.2); padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='rgba(220, 38, 38, 0.2)'" onmouseout="this.style.background='rgba(220, 38, 38, 0.1)'">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Delete all Archive
+                </button>
+            </div>
 
             <div class="modal-body-container" style="background: transparent; border: none; padding: 0;">
                 <div class="modal-scroll-area" style="padding: 0;">
@@ -2500,6 +2585,21 @@
                 <div style="display:flex; gap:10px; margin-top:20px;">
                     <button type="submit" style="flex:1; background: #f97316; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#ea580c'" onmouseout="this.style.background='#f97316'">Yes, Delete</button>
                     <button type="button" style="flex:1; background-color: #6b7280; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'" onclick="document.getElementById('deleteArchiveModal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete All Blackout Archive Modal -->
+    <div id="deleteBlackoutArchiveModal" style="display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center;" onclick="if(event.target === this) this.style.display='none'">
+        <div style="background-color: #fff; padding: 24px; border-radius: 16px; width: 350px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+            <h3 style="color: #dc2626; margin-top: 0; font-size: 18px; font-weight: 700;">Confirm Delete</h3>
+            <p style="margin: 20px 0; font-size: 14px; color: #4b5563;">Are you sure you want to delete all Blackout archives?</p>
+            <form method="POST" action="{{ route('notifications.delete-all-blackout') }}">
+                @csrf
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button type="submit" style="flex:1; background: #f97316; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#ea580c'" onmouseout="this.style.background='#f97316'">Yes, Delete</button>
+                    <button type="button" style="flex:1; background-color: #6b7280; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'" onclick="document.getElementById('deleteBlackoutArchiveModal').style.display='none'">Cancel</button>
                 </div>
             </form>
         </div>
