@@ -1676,10 +1676,25 @@
                                         data-name="{{ strtolower($student->name) }}" data-class="{{ $student->class }}"
                                         data-display-name="{{ $student->name }}" data-student-id="{{ $student->student_id }}"
                                         data-gender="{{ strtolower($student->gender ?? '') }}"
-                                        data-profile-picture="{{ $student->profile_picture ?? '' }}">
+                                        @php
+                                            // Resolve profile picture URL — handle both old full-URL and new relative-path formats
+                                            $profilePicUrl = '';
+                                            if ($student->profile_picture) {
+                                                if (str_starts_with($student->profile_picture, 'http')) {
+                                                    // Old format: full URL (may have wrong IP) — rewrite using current asset() base
+                                                    $picPath = ltrim(parse_url($student->profile_picture, PHP_URL_PATH), '/');
+                                                    // $picPath is like: storage/profile_pictures/xxx.jpg
+                                                    $profilePicUrl = asset($picPath);
+                                                } else {
+                                                    // New format: relative path like profile_pictures/xxx.jpg
+                                                    $profilePicUrl = asset('storage/' . $student->profile_picture);
+                                                }
+                                            }
+                                        @endphp
+                                        data-profile-picture="{{ $profilePicUrl }}">
                                         <div class="avatar {{ $isFemale ? 'female' : '' }}">
-                                            @if($student->profile_picture)
-                                                <img src="{{ $student->profile_picture }}" alt="{{ $student->name }}" class="profile-pic">
+                                            @if($profilePicUrl)
+                                                <img src="{{ $profilePicUrl }}" alt="{{ $student->name }}" class="profile-pic" onerror="this.style.display='none';this.parentElement.textContent='{{ strtoupper(substr($student->name, 0, 1)) }}'">
                                             @else
                                                 {{ strtoupper(substr($student->name, 0, 1)) }}
                                             @endif
@@ -1859,6 +1874,7 @@
         let activeStudentId = null;
         let activeStudentName = '';
         let activeIsFemale = false;
+        let activeStudentProfilePic = ''; // Store active student's profile picture URL
         let msgPollTimer = null;
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -1958,8 +1974,13 @@
                         const online = Boolean(stu['status']);
                         const studentName = (stu['name'] || 'Student');
                         const studentClass = (stu['class'] || 'N/A');
-                        html += `<div class="student-row modal-student-row" data-id="${escHtml(stu['student_id'] || stu['id'])}" data-name="${(studentName).toLowerCase()}" data-class="${escHtml(studentClass)}" data-display-name="${escHtml(studentName)}" data-student-id="${escHtml(stu['student_id'] || '')}" data-gender="" onclick="openStudentFromModal(this)" style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(34, 187, 234, 0.08);cursor:pointer;">
-                            <span style="width:28px;height:28px;border-radius:50%;background:${online ? 'rgba(34, 187, 234, 0.12)' : '#F8FBFF'};color:${online ? '#009DE1' : 'var(--muted)'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;">${(studentName || 'S').charAt(0).toUpperCase()}</span>
+                        const profilePic = stu['profile_picture'] || '';
+                        // Build avatar: show profile image if available, otherwise show initial
+                        const avatarHtml = profilePic
+                            ? `<img src="${profilePic}" alt="${escHtml(studentName)}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;display:block;">`
+                            : `<span style="width:28px;height:28px;border-radius:50%;background:${online ? 'rgba(34, 187, 234, 0.12)' : '#F8FBFF'};color:${online ? '#009DE1' : 'var(--muted)'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;">${(studentName || 'S').charAt(0).toUpperCase()}</span>`;
+                        html += `<div class="student-row modal-student-row" data-id="${escHtml(stu['student_id'] || stu['id'])}" data-name="${(studentName).toLowerCase()}" data-class="${escHtml(studentClass)}" data-display-name="${escHtml(studentName)}" data-student-id="${escHtml(stu['student_id'] || '')}" data-gender="" data-profile-picture="${escHtml(profilePic)}" onclick="openStudentFromModal(this)" style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(34, 187, 234, 0.08);cursor:pointer;">
+                            ${avatarHtml}
                             <span style="flex:1;">
                                 <span style="font-weight:700;">${escHtml(studentName)}</span><br>
                                 <span style="font-size:12px;color:var(--muted);">${escHtml(stu['student_id'] || '')} · ${escHtml(studentClass)}</span>
@@ -2084,13 +2105,13 @@
             activeStudentId = id;
             activeStudentName = name;
             activeIsFemale = (gender === 'female');
+            activeStudentProfilePic = row.getAttribute('data-profile-picture') || '';
 
             // Header Updates
             const avatarEl = document.getElementById('chat-header-avatar');
-            const profilePic = row.getAttribute('data-profile-picture');
             if (avatarEl) {
-                if (profilePic) {
-                    avatarEl.innerHTML = '<img src="' + profilePic + '" alt="' + name + '" class="profile-pic">';
+                if (activeStudentProfilePic) {
+                    avatarEl.innerHTML = '<img src="' + activeStudentProfilePic + '" alt="' + name + '" class="profile-pic">';
                     avatarEl.className = 'avatar';
                 } else {
                     avatarEl.textContent = name.charAt(0).toUpperCase();
@@ -2175,13 +2196,26 @@
                         const prefix = isEmergency ? '<b>🚨 ALERT:</b> ' : '';
                         const senderLabel = isAdmin && msg.sender_name ? `<div class="sender-label">${escHtml(msg.sender_name)}</div>` : '';
 
+                        // Build avatar for student messages using profile picture
+                        let avatarHtml = '';
+                        if (!isAdmin) {
+                            if (activeStudentProfilePic) {
+                                avatarHtml = `<img src="${activeStudentProfilePic}" alt="${escHtml(activeStudentName)}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;align-self:flex-end;" onerror="this.style.display='none'">` ;
+                            } else {
+                                const initial = (activeStudentName || 'S').charAt(0).toUpperCase();
+                                avatarHtml = `<div style="width:28px;height:28px;border-radius:50%;background:rgba(34,187,234,0.18);color:#009DE1;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;align-self:flex-end;">${initial}</div>`;
+                            }
+                        }
+
                         html += `
                         <div class="bubble-wrap ${bubClass}">
+                            ${!isAdmin ? avatarHtml : ''}
                             <div class="bubble-content">
                                 ${senderLabel}
                                 <div class="bubble ${bubClass}${sosClass}">${prefix}${escHtml(msg.message)}</div>
                                 <div class="bubble-time">${timeStr}</div>
                             </div>
+                            ${isAdmin ? avatarHtml : ''}
                         </div>`;
                     });
                 }

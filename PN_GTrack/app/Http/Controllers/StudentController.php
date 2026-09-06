@@ -177,8 +177,14 @@ class StudentController extends Controller
 
         // Delete old profile picture if it exists
         if ($student->profile_picture) {
-            $oldPath = str_replace(asset('storage/'), '', $student->profile_picture);
-            $oldPath = str_replace(asset('storage') . '/', '', $oldPath);
+            // Support both old full-URL format and new relative-path format
+            $oldPath = $student->profile_picture;
+            // Strip any leading domain/URL to get relative path
+            if (str_starts_with($oldPath, 'http')) {
+                // Extract just the path after /storage/
+                $parsed = parse_url($oldPath, PHP_URL_PATH); // e.g. /storage/profile_pictures/xxx.jpg
+                $oldPath = ltrim(str_replace('/storage/', '', $parsed), '/');
+            }
             if (\Illuminate\Support\Facades\Storage::disk('public')->exists($oldPath)) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
             }
@@ -186,13 +192,14 @@ class StudentController extends Controller
 
         try {
             $path = $request->file('profile_picture')->store('profile_pictures', 'public');
-            $student->profile_picture = asset('storage/' . $path);
+            // Store only the relative path so the URL works regardless of host/port
+            $student->profile_picture = $path;
             $student->save();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Profile picture updated successfully',
-                'profile_picture_url' => $student->profile_picture
+                'profile_picture_url' => asset('storage/' . $path)
             ]);
         } catch (\Exception $e) {
             \Log::error('Failed to upload profile picture: ' . $e->getMessage());

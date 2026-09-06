@@ -660,7 +660,28 @@ class NotificationController extends Controller
         if ($class && $class !== 'all') {
             $query->where('class', $class);
         }
-        $students = $query->orderBy('name', 'asc')->get(['id', 'name', 'student_id', 'class', 'status']);
+        $students = $query->orderBy('name', 'asc')->get(['id', 'name', 'student_id', 'class', 'status', 'profile_picture'])
+            ->map(function ($student) {
+                $pic = $student->profile_picture;
+                if ($pic) {
+                    if (str_starts_with($pic, 'http')) {
+                        // Old format: full URL with potentially wrong IP — rewrite with current app URL
+                        $parsedPath = ltrim(parse_url($pic, PHP_URL_PATH), '/');
+                        $pic = asset($parsedPath);
+                    } else {
+                        // New format: relative path
+                        $pic = asset('storage/' . $pic);
+                    }
+                }
+                return [
+                    'id'              => $student->id,
+                    'name'            => $student->name,
+                    'student_id'      => $student->student_id,
+                    'class'           => $student->class,
+                    'status'          => $student->status,
+                    'profile_picture' => $pic,
+                ];
+            });
         return response()->json(['students' => $students]);
     }
 

@@ -15,6 +15,8 @@ class LocationController extends Controller
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'sos_status' => 'nullable|in:safe,help',
+            'battery_level' => 'nullable|integer',
+            'battery' => 'nullable|integer',
         ]);
 
         $student = Student::where('id', $validated['student_id'])
@@ -38,6 +40,11 @@ class LocationController extends Controller
             $student->status = true; // Mark as online when sending GPS
             $student->last_update = now()->format('M d, Y h:i A');
             
+            $battery = $request->input('battery_level', $request->input('battery'));
+            if (isset($battery)) {
+                $student->battery_level = $battery;
+            }
+            
             // Handle SOS status changes
             if (!empty($validated['sos_status'])) {
                 $oldStatus = $student->sos_status;
@@ -60,6 +67,7 @@ class LocationController extends Controller
                             'class'         => $student->class,
                             'latitude'      => $validated['latitude'],
                             'longitude'     => $validated['longitude'],
+                            'battery_level' => $student->battery_level,
                             'read'          => false,
                             'status'        => 'pending',
                         ]);
