@@ -100,33 +100,15 @@ class StudentController extends Controller
         $student->status = true;
         $student->save();
 
-        if ($request->sos_status === 'help') {
-            $activeAlert = \App\Models\Notification::where('student_id', $student->id)
-                ->where('type', 'sos')
-                ->where('status', '!=', 'resolved')
-                ->first();
-
-            if (!$activeAlert) {
-                \App\Models\Notification::create([
-                    'type' => 'sos',
-                    'sender_type' => 'student',
-                    'message' => $student->name . ' (' . $student->student_id . ') sent an SOS alert.',
-                    'student_id' => $student->id,
-                    'class' => $student->class,
-                    'latitude' => $student->latitude,
-                    'longitude' => $student->longitude,
-                    'battery_level' => $student->battery_level,
-                    'signal_status' => $student->signal_status,
-                    'read' => false,
-                    'status' => 'pending',
-                ]);
-            }
-        } else {
+        if ($request->sos_status === 'safe') {
+            // When student cancels SOS, resolve any open SOS alerts
             \App\Models\Notification::where('student_id', $student->id)
                 ->where('type', 'sos')
                 ->where('status', '!=', 'resolved')
                 ->update(['status' => 'resolved', 'read' => true]);
         }
+        // NOTE: SOS notification creation (with video) is handled exclusively by
+        // NotificationController@apiSend via POST /upload-video or /notifications/send
 
         return response()->json([
             'message'    => 'SOS status updated',

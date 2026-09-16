@@ -50,35 +50,15 @@ class LocationController extends Controller
                 $oldStatus = $student->sos_status;
                 $student->sos_status = $validated['sos_status'];
 
-                // If moving to SOS 'help', ensure a notification exists
-                if ($validated['sos_status'] === 'help') {
-                    // Check if there's already an active (unresolved) SOS alert to avoid duplication
-                    $activeAlert = \App\Models\Notification::where('student_id', $student->id)
-                        ->where('type', 'sos')
-                        ->where('status', '!=', 'resolved')
-                        ->first();
-
-                    if (!$activeAlert) {
-                        \App\Models\Notification::create([
-                            'type'          => 'sos',
-                            'sender_type'   => 'student',
-                            'message'       => $student->name . ' (' . $student->student_id . ') triggered an SOS alert via Location Update!',
-                            'student_id'    => $student->id,
-                            'class'         => $student->class,
-                            'latitude'      => $validated['latitude'],
-                            'longitude'     => $validated['longitude'],
-                            'battery_level' => $student->battery_level,
-                            'read'          => false,
-                            'status'        => 'pending',
-                        ]);
-                    }
-                } elseif ($validated['sos_status'] === 'safe' && $oldStatus === 'help') {
+                if ($validated['sos_status'] === 'safe' && $oldStatus === 'help') {
                     // If moving from help to safe, resolve any active alerts
                     \App\Models\Notification::where('student_id', $student->id)
                         ->where('type', 'sos')
                         ->where('status', '!=', 'resolved')
                         ->update(['status' => 'resolved', 'read' => true]);
                 }
+                // NOTE: SOS notification creation (with video) is handled exclusively by
+                // NotificationController@apiSend via POST /upload-video or /notifications/send
             }
             $student->save();
         }
@@ -117,22 +97,9 @@ class LocationController extends Controller
         $student->last_update = now()->format('M d, Y h:i A');
         $student->save();
 
-        // Create the notification record so it appears in the Admin Dashboard
-        if ($request->sos_status === 'help') {
-            \App\Models\Notification::create([
-                'type'          => 'sos',
-                'sender_type'   => 'student',
-                'message'       => $student->name . ' (' . $student->student_id . ') sent an SOS alert!',
-                'student_id'    => $student->id, // Use numeric ID for the relationship
-                'class'         => $student->class,
-                'latitude'      => $request->latitude,
-                'longitude'     => $request->longitude,
-                'battery_level' => $battery,
-                'signal_status' => $request->signal,
-                'read'          => false,
-                'status'        => 'pending',
-            ]);
-        } else {
+        // NOTE: SOS notification creation (with video) is handled exclusively by
+        // NotificationController@apiSend via POST /upload-video or /notifications/send
+        if ($request->sos_status === 'safe') {
             // Mark as resolved if student is safe
             \App\Models\Notification::where('student_id', $student->id)
                 ->where('type', 'sos')

@@ -385,7 +385,7 @@
                     $currentAdminRole = $currentUser->role ?? null;
 
                     $broadcastCountHeader = \DB::table('notifications')->where('type', 'broadcast')->where('read', false)->count();
-                    $sosCountHeader = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->count();
+                    $sosCountHeader = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->withValidVideo()->count();
                     $blackoutCountHeader = \DB::table('notifications')->where('type', 'blackout')->where('read', false)->count();
                     
                     $studentMessagesQueryHeader = \DB::table('notifications')

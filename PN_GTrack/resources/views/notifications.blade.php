@@ -1251,7 +1251,12 @@
                                     Archives
                                 </button>
                             </div>
-                            @forelse($notifications->where('type', 'sos')->where('status', '!=', 'resolved') as $notification)
+                            @php
+                                $activeSosList = $notifications->where('type', 'sos')->where('status', '!=', 'resolved')->filter(function ($item) {
+                                    return !empty($item->video_url) || (!empty($item->media_url) && !\Illuminate\Support\Str::endsWith($item->media_url, ['.mp3', '.wav']));
+                                });
+                            @endphp
+                            @forelse($activeSosList as $notification)
                                 <div class='message-item'
                                     style="{{ $notification->status === 'resolved' ? 'opacity: 0.7; border-left: 4px solid var(--muted);' : 'border-left: 4px solid var(--red);' }}">
                                     <div class='message-head'>
@@ -2398,7 +2403,12 @@
 
             <div class="modal-body-container" style="background: transparent; border: none; padding: 0;">
                 <div class="modal-scroll-area" style="padding: 0;">
-                    @forelse($notifications->where('type', 'sos')->where('status', 'resolved') as $notification)
+                    @php
+                        $resolvedSosList = $notifications->where('type', 'sos')->where('status', 'resolved')->filter(function ($item) {
+                            return !empty($item->video_url) || (!empty($item->media_url) && !\Illuminate\Support\Str::endsWith($item->media_url, ['.mp3', '.wav']));
+                        });
+                    @endphp
+                    @forelse($resolvedSosList as $notification)
                         <div class='message-item' style="border-left: 4px solid var(--muted); opacity: 0.8; margin-bottom: 12px; background: #fff;">
                             <div class='message-head'>
                                 <p class='message-title'>

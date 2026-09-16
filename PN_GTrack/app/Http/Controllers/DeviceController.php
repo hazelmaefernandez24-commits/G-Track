@@ -52,7 +52,7 @@ public function index()
     $offlineCount  = $students->where('status', false)->count();
 
     $broadcastCount = \DB::table('notifications')->where('type', 'broadcast')->where('read', false)->count();
-    $sosCount       = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->count();
+    $sosCount       = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->withValidVideo()->count();
 
     // Latest overall system update
     $latestUpdate = \App\Models\Student::max('updated_at');
@@ -92,8 +92,8 @@ public function apiStats(Request $request)
     $onlineCount   = $students->where('status', true)->count();
     $offlineCount  = $students->where('status', false)->count();
     $broadcastCount = \DB::table('notifications')->where('type', 'broadcast')->where('read', false)->count();
-    $sosCount       = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->count();
-    $unreadSosCount = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->count();
+    $sosCount       = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->withValidVideo()->count();
+    $unreadSosCount = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->withValidVideo()->count();
     $blackoutCount  = \DB::table('notifications')->where('type', 'blackout')->where('read', false)->count();
     $sosStudents    = $students->where('sos_status', 'help')->pluck('student_id');
 
@@ -146,13 +146,13 @@ public function apiStats(Request $request)
 
 public function tracking()
 {
-    $sosCount = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->count();
+    $sosCount = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->withValidVideo()->count();
     return view('tracking', compact('sosCount'));
 }
 
 public function activity()
 {
-    $sosCount = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->count();
+    $sosCount = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->withValidVideo()->count();
     return view('activity', compact('sosCount'));
 }
 

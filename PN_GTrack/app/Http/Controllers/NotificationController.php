@@ -93,7 +93,8 @@ class NotificationController extends Controller
 
         // --- FILTER BY TYPE (TAB) ---
         if ($tab === 'sos') {
-            $query->whereIn('type', ['sos', 'blackout']);
+            $query->whereIn('type', ['sos', 'blackout'])
+                  ->excludeIncompleteSos();
         } elseif ($tab === 'broadcast') {
             $query->where('type', 'broadcast');
         } else {
@@ -139,8 +140,8 @@ class NotificationController extends Controller
         $latestDate     = $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('M d, Y') : null;
 
         $stats = [
-            'unread' => \App\Models\Notification::where('read', false)->count(),
-            'sos' => \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->count(),
+            'unread' => \App\Models\Notification::where('read', false)->excludeIncompleteSos()->count(),
+            'sos' => \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->withValidVideo()->count(),
             'broadcast' => \App\Models\Notification::where('type', 'broadcast')->count(),
             'onlineCount' => $students->where('status', true)->count(),
             'offlineCount' => $students->where('status', false)->count(),
@@ -454,31 +455,57 @@ class NotificationController extends Controller
         $recipientAdminId = $request->input('admin_id', $request->input('recipient_admin_id', $request->input('target_admin_id', $request->input('to_admin_id'))));
 
         try {
-            $id = DB::table('notifications')->insertGetId([
-                'student_id' => $student->id, // Use numeric ID for the relationship
-                'admin_id' => $recipientAdminId,
-                'class' => $student->class, 
-                'type' => $type,
-                'sender_type' => 'student',
-                'message' => $request->message,
-                'latitude' => $request->latitude,
-                'longitude' => $request->longitude,
-                'battery_level' => $request->input('battery_level', $request->input('battery')),
-                'signal_status' => $request->signal,
-                'location' => $request->location,
-                'media_url' => $mediaUrl,
-                'video_url' => $videoUrl,
-                'audio_url' => null,
-                'read' => false,
-                'status' => 'pending', 
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
+            $existingAlert = null;
+            if ($type === 'sos' || $type === 'blackout') {
+                $existingAlert = DB::table('notifications')
+                    ->where('student_id', $student->id)
+                    ->where('type', $type)
+                    ->where('status', '!=', 'resolved')
+                    ->first();
+            }
+
+            if ($existingAlert) {
+                DB::table('notifications')
+                    ->where('id', $existingAlert->id)
+                    ->update([
+                        'video_url' => $videoUrl ?? $existingAlert->video_url,
+                        'media_url' => $mediaUrl ?? $existingAlert->media_url,
+                        'message' => $request->message ?: $existingAlert->message,
+                        'latitude' => $request->latitude ?? $existingAlert->latitude,
+                        'longitude' => $request->longitude ?? $existingAlert->longitude,
+                        'battery_level' => $request->input('battery_level', $request->input('battery')) ?? $existingAlert->battery_level,
+                        'signal_status' => $request->signal ?? $existingAlert->signal_status,
+                        'location' => $request->location ?? $existingAlert->location,
+                        'updated_at' => now()
+                    ]);
+                $id = $existingAlert->id;
+            } else {
+                $id = DB::table('notifications')->insertGetId([
+                    'student_id' => $student->id, // Use numeric ID for the relationship
+                    'admin_id' => $recipientAdminId,
+                    'class' => $student->class, 
+                    'type' => $type,
+                    'sender_type' => 'student',
+                    'message' => $request->message,
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                    'battery_level' => $request->input('battery_level', $request->input('battery')),
+                    'signal_status' => $request->signal,
+                    'location' => $request->location,
+                    'media_url' => $mediaUrl,
+                    'video_url' => $videoUrl,
+                    'audio_url' => null,
+                    'read' => false,
+                    'status' => 'pending', 
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
         } catch (\Exception $e) {
-            \Log::error('Failed to create notification: ' . $e->getMessage());
+            \Log::error('Failed to create/update notification: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create notification: ' . $e->getMessage()
+                'message' => 'Failed to create/update notification: ' . $e->getMessage()
             ], 500);
         }
 

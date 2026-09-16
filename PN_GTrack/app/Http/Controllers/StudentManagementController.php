@@ -144,7 +144,7 @@ class StudentManagementController extends Controller
     {
         $student = Student::findOrFail($id);
         $locations = $student->locations()->orderBy('recorded_at', 'desc')->get();
-        $sosCount = \DB::table('notifications')->where('type', 'sos')->where('status', '!=', 'resolved')->count();
+        $sosCount = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->withValidVideo()->count();
         
         return view('history', compact('student', 'locations', 'sosCount'));
     }
