@@ -123,7 +123,7 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Role</th>
-                            <th>Actions</th>
+                            <th style="text-align:right;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -137,11 +137,17 @@
                                     {{ $admin->role }}
                                 </span>
                             </td>
-                            <td>
-                                <button class="btn btn-success" style="padding:4px 8px; font-size:12px;" 
-                                    onclick="editAdmin({{ json_encode($admin) }})">Edit</button>
+                            <td style="text-align:right; white-space:nowrap;">
+                                <button class="btn btn-success" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" 
+                                    onclick="editAdmin({{ json_encode($admin) }})">
+                                    <i data-lucide="edit-3" style="width:13px; height:13px;"></i>
+                                    Edit
+                                </button>
                                 @if($admin->id !== Auth::guard('admin')->id())
-                                <button type="button" class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="confirmDelete('{{ $admin->id }}')">Delete</button>
+                                <button type="button" class="btn btn-danger" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" onclick="confirmDelete('{{ $admin->id }}')">
+                                    <i data-lucide="trash-2" style="width:13px; height:13px;"></i>
+                                    Delete
+                                </button>
                                 @endif
                             </td>
                         </tr>

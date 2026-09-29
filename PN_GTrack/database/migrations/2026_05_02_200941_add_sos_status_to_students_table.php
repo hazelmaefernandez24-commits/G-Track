@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('students', function (Blueprint $table) {
-            $table->enum('sos_status', ['safe', 'help'])->default('safe')->after('signal_status');
+            if (!Schema::hasColumn('students', 'sos_status')) {
+                $table->enum('sos_status', ['safe', 'help'])->default('safe')->after('signal_status');
+            }
         });
     }
 

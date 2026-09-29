@@ -135,10 +135,10 @@
         <div class="filter-group">
             <i data-lucide="filter" class="filter-icon" style="width: 18px; height: 18px;"></i>
             <select id="class-filter" class="filter-select">
-                <option>All Classes</option>
-                <option>2026</option>
-                <option>2027</option>
-                <option>2028</option>
+                <option value="All Classes">All Classes</option>
+                @foreach($classes as $c)
+                    <option value="{{ $c->name }}">{{ $c->name }}</option>
+                @endforeach
             </select>
         </div>
     </div>

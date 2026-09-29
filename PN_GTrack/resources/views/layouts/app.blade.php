@@ -348,6 +348,10 @@
                 <i data-lucide="users-round"></i>
                 Manage Students
             </a>
+            <a href="/admin/classes" class="nav-item {{ request()->is('admin/classes*') ? 'active' : '' }}">
+                <i data-lucide="graduation-cap"></i>
+                Manage Classes
+            </a>
             <a href="/admin/admins" class="nav-item {{ request()->is('admin/admins*') ? 'active' : '' }}">
                 <i data-lucide="shield"></i>
                 Manage Admins

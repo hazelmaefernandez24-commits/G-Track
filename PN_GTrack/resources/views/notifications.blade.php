@@ -1098,9 +1098,9 @@
                     <select id='class-filter'
                         onchange="location.href='?class=' + encodeURIComponent(this.value) + '&tab={{ $tab }}'">
                         <option value='all' {{ $class === 'all' ? 'selected' : '' }}>All Classes</option>
-                        <option value='2026' {{ $dbClass === '2026' ? 'selected' : '' }}>Class 2026</option>
-                        <option value='2027' {{ $dbClass === '2027' ? 'selected' : '' }}>Class 2027</option>
-                        <option value='2028' {{ $dbClass === '2028' ? 'selected' : '' }}>Class 2028</option>
+                        @foreach($classes as $c)
+                            <option value='{{ $c->name }}' {{ $dbClass === $c->name ? 'selected' : '' }}>Class {{ $c->name }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
@@ -1173,9 +1173,9 @@
                                     <select name="target" required
                                         style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
                                         <option value="all">All Students</option>
-                                        <option value="2026">Class 2026</option>
-                                        <option value="2027">Class 2027</option>
-                                        <option value="2028">Class 2028</option>
+                                        @foreach($classes as $c)
+                                            <option value="{{ $c->name }}">Class {{ $c->name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div>
@@ -1627,9 +1627,9 @@
                                                 <label for="modal-class-filter" style="font-weight:700; font-size:13px;">Class:</label>
                                                 <select id="modal-class-filter" style="padding:6px 12px; border-radius:8px; border:1px solid var(--line); font-size:13px;">
                                                     <option value="all">All</option>
-                                                    <option value="2026">2026</option>
-                                                    <option value="2027">2027</option>
-                                                    <option value="2028">2028</option>
+                                                    @foreach($classes as $c)
+                                                        <option value="{{ $c->name }}">{{ $c->name }}</option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                             <div style="margin-bottom:10px;">

@@ -188,9 +188,9 @@
                 <i data-lucide="filter" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
                 <select id="activity-class-filter" class="filter-select">
                     <option value="all">All Classes</option>
-                    <option value="2026">2026</option>
-                    <option value="2027">2027</option>
-                    <option value="2028">2028</option>
+                    @foreach($classes as $c)
+                        <option value="{{ $c->name }}">{{ $c->name }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="student-count-badge" id="student-count-display">

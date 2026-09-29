@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\StudentAuth;
+use App\Models\BatchClass;
 use Illuminate\Support\Facades\Hash;
 
 class StudentManagementController extends Controller
@@ -12,7 +13,8 @@ class StudentManagementController extends Controller
     public function index()
     {
         $students = Student::all();
-        return view('admin.students.index', compact('students'));
+        $classes = BatchClass::orderBy('name', 'asc')->get();
+        return view('admin.students.index', compact('students', 'classes'));
     }
 
     public function store(Request $request)
@@ -23,7 +25,7 @@ class StudentManagementController extends Controller
             'middle_initial' => ['nullable', 'regex:/^[A-Za-z]+$/u', 'max:1'],
             'last_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
             'email' => 'required|email:rfc|unique:students,email',
-            'class' => 'required',
+            'class' => 'required|exists:student_classes,name',
             'gender' => 'required',
             'contact' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
             'password' => 'required|min:6|confirmed',
@@ -70,7 +72,7 @@ class StudentManagementController extends Controller
             'middle_initial' => ['nullable', 'regex:/^[A-Za-z]+$/u', 'max:1'],
             'last_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
             'email' => 'required|email:rfc|unique:students,email,' . $id,
-            'class' => 'required',
+            'class' => 'required|exists:student_classes,name',
             'gender' => 'required',
             'contact' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
             'current_password' => 'nullable|required_with:new_password|min:6',

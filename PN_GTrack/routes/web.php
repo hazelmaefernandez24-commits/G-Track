@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\StudentManagementController;
+use App\Http\Controllers\ClassManagementController;
 use App\Http\Controllers\AdminManagementController;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -49,6 +50,7 @@ Route::middleware(['auth:admin'])->group(function () {
     // --- MANAGEMENT ROUTES (Main Admin Only) ---
     Route::middleware(['admin.role:main'])->prefix('admin')->group(function () {
         Route::resource('students', StudentManagementController::class);
+        Route::resource('classes', ClassManagementController::class);
         Route::resource('admins', AdminManagementController::class);
     });
 });

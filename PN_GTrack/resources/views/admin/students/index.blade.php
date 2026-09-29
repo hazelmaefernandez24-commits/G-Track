@@ -110,7 +110,7 @@
                             <th>Class</th>
                             <th>Gender</th>
                             <th>Contact</th>
-                            <th>Actions</th>
+                            <th style="text-align:right;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -121,10 +121,16 @@
                             <td>{{ $student->class }}</td>
                             <td>{{ $student->gender }}</td>
                             <td>{{ $student->contact }}</td>
-                            <td>
-                                <button class="btn btn-success" style="padding:4px 8px; font-size:12px;" 
-                                    onclick="editStudent({{ json_encode($student) }})">Edit</button>
-                                <button type="button" class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="confirmDelete('{{ $student->id }}')">Delete</button>
+                            <td style="text-align:right; white-space:nowrap;">
+                                <button class="btn btn-success" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" 
+                                    onclick="editStudent({{ json_encode($student) }})">
+                                    <i data-lucide="edit-3" style="width:13px; height:13px;"></i>
+                                    Edit
+                                </button>
+                                <button type="button" class="btn btn-danger" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" onclick="confirmDelete('{{ $student->id }}')">
+                                    <i data-lucide="trash-2" style="width:13px; height:13px;"></i>
+                                    Delete
+                                </button>
                             </td>
                         </tr>
                         @endforeach
@@ -172,10 +178,11 @@
                 </div>
                 <div class="form-group">
                     <label>Class</label>
-                    <select name="class" class="form-control">
-                        <option value="2026"{{ old('_method') !== 'PUT' && old('class') === '2026' ? ' selected' : '' }}>2026</option>
-                        <option value="2027"{{ old('_method') !== 'PUT' && old('class') === '2027' ? ' selected' : '' }}>2027</option>
-                        <option value="2028"{{ old('_method') !== 'PUT' && old('class') === '2028' ? ' selected' : '' }}>2028</option>
+                    <select name="class" class="form-control" required>
+                        <option value="" disabled {{ old('_method') !== 'PUT' && !old('class') ? 'selected' : '' }}>Select Class</option>
+                        @foreach($classes as $c)
+                            <option value="{{ $c->name }}"{{ old('_method') !== 'PUT' && old('class') === $c->name ? ' selected' : '' }}>{{ $c->name }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="form-group">
@@ -246,9 +253,10 @@
                 <div class="form-group">
                     <label>Class</label>
                     <select name="class" id="edit_class" class="form-control" required>
-                        <option value="2026"{{ old('_method') === 'PUT' && old('class') === '2026' ? ' selected' : '' }}>2026</option>
-                        <option value="2027"{{ old('_method') === 'PUT' && old('class') === '2027' ? ' selected' : '' }}>2027</option>
-                        <option value="2028"{{ old('_method') === 'PUT' && old('class') === '2028' ? ' selected' : '' }}>2028</option>
+                        <option value="" disabled>Select Class</option>
+                        @foreach($classes as $c)
+                            <option value="{{ $c->name }}"{{ old('_method') === 'PUT' && old('class') === $c->name ? ' selected' : '' }}>{{ $c->name }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="form-group">

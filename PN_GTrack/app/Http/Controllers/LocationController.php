@@ -156,7 +156,7 @@ class LocationController extends Controller
                     'student_id' => $student->student_id,
                     'name' => $student->name ?? 'Unknown',
                     'gender' => $student->gender ?? 'male',
-                    'class' => $student->class ?? '2026',
+                    'class' => $student->class ?? 'N/A',
                     'email' => $student->email ?? 'N/A',
                     'phone' => $student->phone ?? null,
                     'sos_status' => $student->sos_status ?? 'safe',

@@ -34,4 +34,9 @@ class Student extends Model
     {
         return $this->hasMany(Location::class);
     }
+
+    public function batchClass()
+    {
+        return $this->belongsTo(BatchClass::class, 'class', 'name');
+    }
 }

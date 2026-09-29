@@ -146,14 +146,16 @@ public function apiStats(Request $request)
 
 public function tracking()
 {
+    $classes = \App\Models\BatchClass::orderBy('name')->get();
     $sosCount = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->withValidVideo()->count();
-    return view('tracking', compact('sosCount'));
+    return view('tracking', compact('sosCount', 'classes'));
 }
 
 public function activity()
 {
+    $classes = \App\Models\BatchClass::orderBy('name')->get();
     $sosCount = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->withValidVideo()->count();
-    return view('activity', compact('sosCount'));
+    return view('activity', compact('sosCount', 'classes'));
 }
 
 }

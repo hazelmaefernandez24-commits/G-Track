@@ -183,6 +183,7 @@ class NotificationController extends Controller
             'subtab' => $subtab,
             'class' => $class,
             'dbClass' => $dbClass,
+            'classes' => \App\Models\BatchClass::orderBy('name')->get(),
             'canMessage' => $this->canSendMessages(),
             'unreadCounts' => $unreadCounts,
             'currentAdminId' => $user ? $user->getKey() : null,
@@ -204,9 +205,10 @@ class NotificationController extends Controller
         $studentId = null;
 
         // Determine if target is a class or a specific student (future proofing)
+        $knownClasses = \App\Models\BatchClass::pluck('name')->toArray();
         if ($target === 'all') {
             $studentClass = 'all';
-        } elseif (in_array($target, ['2026', '2027', '2028'])) {
+        } elseif (in_array($target, $knownClasses)) {
             $studentClass = $target;
         } else {
             // Assume it might be a student_id if it's not a known class
@@ -752,9 +754,10 @@ class NotificationController extends Controller
         $studentClass = 'all';
         $studentId = null;
 
+        $knownClasses = \App\Models\BatchClass::pluck('name')->toArray();
         if ($target === 'all') {
             $studentClass = 'all';
-        } elseif (in_array($target, ['2026', '2027', '2028'])) {
+        } elseif (in_array($target, $knownClasses)) {
             $studentClass = $target;
         } else {
             $studentId = $target;

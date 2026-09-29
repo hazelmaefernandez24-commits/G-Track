@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('students', function (Blueprint $table) {
-            $table->integer('battery_level')->default(100);
-            $table->string('signal_status')->default('Good');
-            $table->string('location')->nullable();
+            if (!Schema::hasColumn('students', 'battery_level')) {
+                $table->integer('battery_level')->default(100);
+            }
+            if (!Schema::hasColumn('students', 'signal_status')) {
+                $table->string('signal_status')->default('Good');
+            }
+            if (!Schema::hasColumn('students', 'location')) {
+                $table->string('location')->nullable();
+            }
         });
     }
 
