@@ -157,7 +157,7 @@
                 @csrf
                 <div class="form-group">
                     <label>Student ID</label>
-                    <input type="text" name="student_id" class="form-control" value="{{ old('_method') !== 'PUT' ? old('student_id') : '' }}">
+                    <small>Generated automatically from the selected class when the student is saved.</small>
                 </div>
                 <div class="form-group">
                     <label>First Name</label>
@@ -231,7 +231,7 @@
                 <input type="hidden" name="edit_record_id" id="edit_record_id" value="{{ old('edit_record_id') }}">
                 <div class="form-group">
                     <label>Student ID</label>
-                    <input type="text" name="student_id" id="edit_student_id" class="form-control" required value="{{ old('_method') === 'PUT' ? old('student_id') : '' }}">
+                    <input type="text" id="edit_student_id" class="form-control" readonly value="{{ old('_method') === 'PUT' ? old('student_id') : '' }}">
                 </div>
                 <div class="form-group">
                     <label>First Name</label>

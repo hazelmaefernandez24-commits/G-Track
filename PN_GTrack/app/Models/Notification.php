@@ -29,6 +29,17 @@ class Notification extends Model
         'reply_to_id',
         'class',
         'status',
+        'acknowledged_by_admin_id',
+        'acknowledged_by_name',
+        'acknowledged_at',
+        'resolved_by_admin_id',
+        'resolved_by_name',
+        'resolved_at',
+    ];
+
+    protected $casts = [
+        'acknowledged_at' => 'datetime',
+        'resolved_at' => 'datetime',
     ];
 
     // The original notification this reply is responding to

@@ -1,6 +1,6 @@
-# GTrack Entity Relationship Diagram
+# GTRACK Entity Relationship Diagram
 
-This ERD reflects the application tables created by the current Laravel migrations. `created_at` and `updated_at` are omitted from the diagram where they do not affect relationships.
+This ERD reflects the GTRACK application tables created by the current Laravel migrations. `created_at` and `updated_at` are omitted from the diagram where they do not affect relationships.
 
 ```mermaid
 erDiagram
@@ -105,3 +105,7 @@ The default Laravel tables also exist in the project: `users`, `password_reset_t
 ## Source of Truth
 
 The diagram is based on the migrations in `database/migrations`, especially the student, location, notification, authentication, admin, and student class migrations. The SQL schema dump contains additional legacy tables that are not included because they are not created by the current migration set shown above.
+
+## Generated Account IDs
+
+Student IDs are generated when an account is created in the compact format `STU{CLASS}{NUMBER}` (for example, `STU2026009`), where the class portion is derived from the selected class and the zero-padded number is based on the student's unique database record ID. Admin staff IDs use the role prefix followed directly by the zero-padded unique record ID (for example, `EDU009` for Education). Database unique constraints remain in place for both identifiers.

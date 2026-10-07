@@ -1394,11 +1394,18 @@
                                                 </div>
                                             </div>
 
+                                            @if($notification->acknowledged_at)
+                                                <div class='message-meta' style='margin-top: 10px; color: var(--blue); font-weight: 700;'>
+                                                    Already acknowledged by {{ $notification->acknowledged_by_name ?? 'Admin' }}
+                                                    at {{ $notification->acknowledged_at->format('n/j/Y, h:i A') }}
+                                                </div>
+                                            @endif
+
                                             @if($notification->status !== 'resolved')
                                                 <div
                                                     style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
                                                     {{-- Acknowledged (Mark as Seen) --}}
-                                                    @if(!$notification->read)
+                                                    @if(!$notification->acknowledged_at)
                                                         <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge'
                                                             style='display:inline;'>
                                                             @csrf
@@ -1411,7 +1418,7 @@
                                                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                                                     <circle cx="12" cy="12" r="3"></circle>
                                                                 </svg>
-                                                                Acknowledged
+                                                                Acknowledge
                                                             </button>
                                                         </form>
                                                     @endif
@@ -1529,11 +1536,18 @@
                                                         </div>
                                                     </div>
 
+                                                    @if($notification->acknowledged_at)
+                                                        <div class='message-meta' style='grid-column: span 4; color: var(--blue); font-weight: 700;'>
+                                                            Already acknowledged by {{ $notification->acknowledged_by_name ?? 'Admin' }}
+                                                            at {{ $notification->acknowledged_at->format('n/j/Y, h:i A') }}
+                                                        </div>
+                                                    @endif
+
                                                     @if($notification->status !== 'resolved')
                                                         <div
                                                             style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
                                                         {{-- Acknowledged (Mark as Seen) --}}
-                                                        @if(!$notification->read)
+                                                        @if(!$notification->acknowledged_at)
                                                             <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge'
                                                                 style='display:inline;'>
                                                                 @csrf
@@ -1546,7 +1560,7 @@
                                                                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                                                         <circle cx="12" cy="12" r="3"></circle>
                                                                     </svg>
-                                                                    Acknowledged
+                                                                    Acknowledge
                                                                 </button>
                                                             </form>
                                                         @endif
@@ -2420,6 +2434,16 @@
                                 </p>
                                 <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                             </div>
+                            @if($notification->acknowledged_at || $notification->resolved_at)
+                                <div class='message-meta' style='margin-top: 8px; color: var(--muted);'>
+                                    @if($notification->acknowledged_at)
+                                        Acknowledged by {{ $notification->acknowledged_by_name ?? 'Admin' }} at {{ $notification->acknowledged_at->format('n/j/Y, h:i A') }}.
+                                    @endif
+                                    @if($notification->resolved_at)
+                                        Resolved by {{ $notification->resolved_by_name ?? 'Admin' }} at {{ $notification->resolved_at->format('n/j/Y, h:i A') }}.
+                                    @endif
+                                </div>
+                            @endif
                                     @php
                                         // Get the student's latest GPS record from the locations table
                                         $latestLocation = $notification->student
@@ -2587,6 +2611,16 @@
                                 </p>
                                 <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                             </div>
+                            @if($notification->acknowledged_at || $notification->resolved_at)
+                                <div class='message-meta' style='margin-top: 8px; color: var(--muted);'>
+                                    @if($notification->acknowledged_at)
+                                        Acknowledged by {{ $notification->acknowledged_by_name ?? 'Admin' }} at {{ $notification->acknowledged_at->format('n/j/Y, h:i A') }}.
+                                    @endif
+                                    @if($notification->resolved_at)
+                                        Resolved by {{ $notification->resolved_by_name ?? 'Admin' }} at {{ $notification->resolved_at->format('n/j/Y, h:i A') }}.
+                                    @endif
+                                </div>
+                            @endif
                             <div class='message-meta' style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);'>
                                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
                                     <div>

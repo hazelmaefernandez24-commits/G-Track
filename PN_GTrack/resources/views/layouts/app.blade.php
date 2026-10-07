@@ -291,22 +291,6 @@
             box-shadow: var(--card-shadow);
         }
 
-        /* SOS Banner */
-        #sos-banner {
-            display: none;
-            background: var(--accent);
-            color: var(--text-main);
-            padding: 14px 24px;
-            font-size: 14px;
-            font-weight: 700;
-            text-align: center;
-            animation: sosPulse 2s infinite;
-        }
-        @keyframes sosPulse {
-            0%, 100% { background: var(--accent); }
-            50% { background: var(--accent-dark); }
-        }
-
     </style>
 </head>
 <body>
@@ -372,10 +356,6 @@
 
     <!-- Main Content -->
     <main class="main-wrapper">
-        <div id="sos-banner">
-            🚨 SOS ALERT — A student is in danger! Check the system immediately.
-        </div>
-        
         <header class="top-header">
             <div class="page-title">
                 <h1>@yield('title', 'Overview')</h1>
@@ -468,18 +448,13 @@
         // Initialize Lucide icons
         lucide.createIcons();
 
-        // Global polling for SOS and Notifications
+        // Global polling for Notifications
         function pollGlobalStats() {
             const adminId = "{{ $currentAdminId ?? '' }}";
             const adminRole = "{{ $currentAdminRole ?? '' }}";
             fetch(`/api/dashboard/stats?admin_id=${adminId}&role=${adminRole}`)
                 .then(res => res.json())
                 .then(data => {
-                    const sosBanner = document.getElementById('sos-banner');
-                    if (sosBanner) {
-                        sosBanner.style.display = (data.sosStudents && data.sosStudents.length > 0) ? 'block' : 'none';
-                    }
-                    
                     const badge = document.querySelector('.notification-badge');
                     if (data.totalUnread > 0) {
                         if (badge) {

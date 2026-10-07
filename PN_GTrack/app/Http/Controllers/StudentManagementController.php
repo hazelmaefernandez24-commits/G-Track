@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\StudentAuth;
 use App\Models\BatchClass;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class StudentManagementController extends Controller
 {
@@ -20,7 +21,6 @@ class StudentManagementController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'student_id' => 'required|unique:students,student_id',
             'first_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
             'middle_initial' => ['nullable', 'regex:/^[A-Za-z]+$/u', 'max:1'],
             'last_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
@@ -43,14 +43,25 @@ class StudentManagementController extends Controller
             $fullName = trim($request->first_name . ($request->middle_initial ? ' ' . $request->middle_initial . '.' : '') . ' ' . $request->last_name);
 
             $student = Student::create(array_merge(
-                $request->only(['student_id', 'email', 'class', 'gender', 'contact']),
+                $request->only(['email', 'class', 'gender', 'contact']),
                 [
+                    'student_id' => 'PENDING-' . Str::uuid(),
                     'first_name' => $request->first_name,
                     'middle_initial' => $request->middle_initial,
                     'last_name' => $request->last_name,
                     'name' => $fullName,
                 ]
             ));
+
+            $classCode = Str::upper(preg_replace('/[^A-Za-z0-9]/', '', $student->class) ?? '') ?: 'CLASS';
+            $sequence = $student->id;
+            $studentId = 'STU' . $classCode . str_pad((string) $sequence, 3, '0', STR_PAD_LEFT);
+
+            while (Student::where('student_id', $studentId)->exists()) {
+                $studentId = 'STU' . $classCode . str_pad((string) ++$sequence, 3, '0', STR_PAD_LEFT);
+            }
+
+            $student->update(['student_id' => $studentId]);
 
             StudentAuth::create([
                 'student_id' => $student->student_id,
@@ -67,7 +78,6 @@ class StudentManagementController extends Controller
         $student = Student::findOrFail($id);
 
         $request->validate([
-            'student_id' => 'required|unique:students,student_id,' . $id,
             'first_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
             'middle_initial' => ['nullable', 'regex:/^[A-Za-z]+$/u', 'max:1'],
             'last_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
@@ -101,7 +111,7 @@ class StudentManagementController extends Controller
             $fullName = trim($request->first_name . ($request->middle_initial ? ' ' . $request->middle_initial . '.' : '') . ' ' . $request->last_name);
 
             $student->update(array_merge(
-                $request->only(['student_id', 'email', 'class', 'gender', 'contact']),
+                $request->only(['email', 'class', 'gender', 'contact']),
                 [
                     'first_name' => $request->first_name,
                     'middle_initial' => $request->middle_initial,

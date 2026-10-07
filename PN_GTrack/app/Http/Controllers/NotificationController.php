@@ -276,23 +276,48 @@ class NotificationController extends Controller
 
     public function acknowledge($id)
     {
-        $notification = \App\Models\Notification::findOrFail($id);
-        $notification->update(['read' => true]);
+        $admin = Auth::guard('admin')->user();
+        $now = now();
+
+        DB::table('notifications')
+            ->where('id', $id)
+            ->whereIn('type', ['sos', 'blackout'])
+            ->where('status', '!=', 'resolved')
+            ->whereNull('acknowledged_at')
+            ->update([
+                'acknowledged_by_admin_id' => $admin->getKey(),
+                'acknowledged_by_name' => $this->currentAdminName(),
+                'acknowledged_at' => $now,
+                'read' => true,
+                'updated_at' => $now,
+            ]);
 
         return redirect()->back()->with('success', 'Alert acknowledged.');
     }
 
     public function resolve($id)
     {
-        $notification = \App\Models\Notification::find($id);
-        if ($notification) {
-            $notification->update([
+        $admin = Auth::guard('admin')->user();
+        $now = now();
+        $resolved = DB::table('notifications')
+            ->where('id', $id)
+            ->whereIn('type', ['sos', 'blackout'])
+            ->where('status', '!=', 'resolved')
+            ->whereNull('resolved_at')
+            ->update([
                 'status' => 'resolved',
-                'read' => true
+                'read' => true,
+                'resolved_by_admin_id' => $admin->getKey(),
+                'resolved_by_name' => $this->currentAdminName(),
+                'resolved_at' => $now,
+                'updated_at' => $now,
             ]);
 
+        if ($resolved) {
+            $notification = \App\Models\Notification::find($id);
+
             // If it's a student SOS, mark the student as safe
-            if ($notification->student_id) {
+            if ($notification && $notification->student_id) {
                 $student = \App\Models\Student::where('student_id', $notification->student_id)
                     ->orWhere('id', $notification->student_id)
                     ->first();

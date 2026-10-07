@@ -18,7 +18,6 @@ class AdminManagementController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'staff_id' => 'required|unique:admins,staff_id',
             'first_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
             'middle_initial' => ['nullable', 'regex:/^[A-Za-z]+$/u', 'max:1'],
             'last_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
@@ -32,15 +31,26 @@ class AdminManagementController extends Controller
             'email.email' => 'Please enter a valid email address.',
         ]);
 
-        Admin::create([
-            'staff_id' => $request->staff_id,
-            'first_name' => $request->first_name,
-            'middle_initial' => $request->middle_initial,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-        ]);
+        \DB::transaction(function () use ($request) {
+            $admin = Admin::create([
+                'first_name' => $request->first_name,
+                'middle_initial' => $request->middle_initial,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => $request->role,
+            ]);
+
+            $rolePrefix = $admin->role === 'education' ? 'EDU' : 'MAIN';
+            $sequence = $admin->id;
+            $staffId = $rolePrefix . str_pad((string) $sequence, 3, '0', STR_PAD_LEFT);
+
+            while (Admin::where('staff_id', $staffId)->exists()) {
+                $staffId = $rolePrefix . str_pad((string) ++$sequence, 3, '0', STR_PAD_LEFT);
+            }
+
+            $admin->update(['staff_id' => $staffId]);
+        });
 
         return redirect()->back()->with('success', 'Admin added successfully.');
     }
@@ -50,7 +60,6 @@ class AdminManagementController extends Controller
         $admin = Admin::findOrFail($id);
 
         $request->validate([
-            'staff_id' => 'required|unique:admins,staff_id,' . $id,
             'first_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
             'middle_initial' => ['nullable', 'regex:/^[A-Za-z]+$/u', 'max:1'],
             'last_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
@@ -75,7 +84,7 @@ class AdminManagementController extends Controller
             }
         }
 
-        $admin->update($request->only(['staff_id', 'first_name', 'middle_initial', 'last_name', 'email', 'role']));
+        $admin->update($request->only(['first_name', 'middle_initial', 'last_name', 'email', 'role']));
 
         if ($request->filled('new_password')) {
             $admin->update(['password' => Hash::make($request->new_password)]);
