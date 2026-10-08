@@ -7,11 +7,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
-class AdminPasswordLockTest extends TestCase
+class AdminAccountManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_main_admin_cannot_edit_another_account_after_its_password_was_changed(): void
+    public function test_main_admin_can_edit_an_account_after_its_password_was_changed(): void
     {
         $mainAdmin = $this->createAdmin('main');
         $target = $this->createAdmin('education', [
@@ -31,16 +31,16 @@ class AdminPasswordLockTest extends TestCase
                 'role' => 'education',
             ])
             ->assertRedirect('/admin/admins')
-            ->assertSessionHas('error');
+            ->assertSessionHas('success');
 
         $this->assertDatabaseHas('admins', [
             'id' => $target->id,
-            'first_name' => 'Education',
+            'first_name' => 'Changed',
             'email' => 'education@example.com',
         ]);
     }
 
-    public function test_password_reset_locks_account_from_edits_by_other_main_admins(): void
+    public function test_main_admin_can_reset_the_password_of_an_account_that_changed_its_password(): void
     {
         $mainAdmin = $this->createAdmin('main');
         $target = $this->createAdmin('education', [
@@ -51,25 +51,31 @@ class AdminPasswordLockTest extends TestCase
         $this->post(route('reset-password.store'), [
             'staff_id' => 'EDU001',
             'email' => 'education@example.com',
-            'password' => 'newpass1',
-            'password_confirmation' => 'newpass1',
+            'password' => 'selfpass1',
+            'password_confirmation' => 'selfpass1',
         ])->assertRedirect(route('login'));
 
-        $this->assertNotNull($target->fresh()->password_changed_at);
+        $target->refresh();
+        $this->assertNotNull($target->password_changed_at);
 
         $this->actingAs($mainAdmin, 'admin')
             ->from('/admin/admins')
             ->put(route('admins.update', $target), [
-                'first_name' => 'Changed',
+                'first_name' => 'Education',
                 'middle_initial' => '',
-                'last_name' => 'Account',
+                'last_name' => 'Staff',
                 'email' => 'education@example.com',
                 'role' => 'education',
+                'new_password' => 'adminpass1',
+                'new_password_confirmation' => 'adminpass1',
             ])
-            ->assertSessionHas('error');
+            ->assertRedirect('/admin/admins')
+            ->assertSessionHas('success');
+
+        $this->assertTrue(Hash::check('adminpass1', $target->fresh()->password));
     }
 
-    public function test_main_admin_can_still_delete_an_account_after_its_password_was_changed(): void
+    public function test_main_admin_can_still_delete_another_account(): void
     {
         $mainAdmin = $this->createAdmin('main');
         $target = $this->createAdmin('education', [
@@ -81,6 +87,20 @@ class AdminPasswordLockTest extends TestCase
             ->assertRedirect();
 
         $this->assertDatabaseMissing('admins', ['id' => $target->id]);
+    }
+
+    public function test_admin_management_page_keeps_edit_control_available_after_password_change(): void
+    {
+        $mainAdmin = $this->createAdmin('main');
+        $this->createAdmin('education', [
+            'password_changed_at' => now(),
+        ]);
+
+        $this->actingAs($mainAdmin, 'admin')
+            ->get(route('admins.index'))
+            ->assertOk()
+            ->assertSee('Edit')
+            ->assertDontSee('Locked after password change');
     }
 
     private function createAdmin(string $role, array $attributes = []): Admin

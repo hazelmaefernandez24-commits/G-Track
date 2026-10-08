@@ -59,23 +59,12 @@ class AdminManagementController extends Controller
     {
         $admin = Admin::findOrFail($id);
 
-        if (
-            $admin->password_changed_at &&
-            $admin->id !== Auth::guard('admin')->id()
-        ) {
-            return redirect()->back()->with(
-                'error',
-                'This account cannot be edited because its owner has changed their password.'
-            );
-        }
-
         $request->validate([
             'first_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
             'middle_initial' => ['nullable', 'regex:/^[A-Za-z]+$/u', 'max:1'],
             'last_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
             'email' => 'required|email:rfc|unique:admins,email,' . $id,
             'role' => 'required|in:education,main',
-            'current_password' => 'nullable|required_with:new_password|min:6',
             'new_password' => 'nullable|min:6|confirmed',
         ], [
             'first_name.regex' => 'First name must contain letters only.',
@@ -83,16 +72,6 @@ class AdminManagementController extends Controller
             'last_name.regex' => 'Last name must contain letters only.',
             'email.email' => 'Please enter a valid email address.',
         ]);
-
-        if ($request->filled('new_password')) {
-            if (! $request->filled('current_password')) {
-                return redirect()->back()->withErrors(['current_password' => 'Current password is required to change password.'])->withInput();
-            }
-
-            if (! Hash::check($request->current_password, $admin->password)) {
-                return redirect()->back()->withErrors(['current_password' => 'Current password is incorrect.'])->withInput();
-            }
-        }
 
         $admin->update($request->only(['first_name', 'middle_initial', 'last_name', 'email', 'role']));
 

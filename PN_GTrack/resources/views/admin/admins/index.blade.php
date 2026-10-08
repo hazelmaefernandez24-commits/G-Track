@@ -138,15 +138,11 @@
                                 </span>
                             </td>
                             <td style="text-align:right; white-space:nowrap;">
-                                @if(! $admin->password_changed_at || $admin->id === Auth::guard('admin')->id())
                                 <button class="btn btn-success" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" 
                                     onclick="editAdmin({{ json_encode($admin) }})">
                                     <i data-lucide="edit-3" style="width:13px; height:13px;"></i>
                                     Edit
                                 </button>
-                                @else
-                                <span style="font-size:12px; color:#6b7280;">Locked after password change</span>
-                                @endif
                                 @if($admin->id !== Auth::guard('admin')->id())
                                 <button type="button" class="btn btn-danger" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" onclick="confirmDelete('{{ $admin->id }}')">
                                     <i data-lucide="trash-2" style="width:13px; height:13px;"></i>
@@ -265,16 +261,12 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Current Password</label>
-                    <input type="password" name="current_password" id="edit_current_password" class="form-control" autocomplete="current-password">
-                </div>
-                <div class="form-group">
-                    <label>New Password</label>
-                    <input type="password" name="new_password" id="edit_new_password" class="form-control" autocomplete="new-password">
+                    <label>Set New Password <small>(leave blank to keep the current password)</small></label>
+                    <input type="password" name="new_password" id="edit_new_password" class="form-control" autocomplete="new-password" minlength="6">
                 </div>
                 <div class="form-group">
                     <label>Confirm New Password</label>
-                    <input type="password" name="new_password_confirmation" id="edit_new_password_confirmation" class="form-control" autocomplete="new-password">
+                    <input type="password" name="new_password_confirmation" id="edit_new_password_confirmation" class="form-control" autocomplete="new-password" minlength="6">
                 </div>
                 <div style="display:flex; gap:10px; margin-top:20px;">
                     <button type="submit" class="btn btn-primary" style="flex:1;">Update Admin</button>

@@ -67,15 +67,34 @@ class ChangeAdminPasswordTest extends TestCase
         $this->assertTrue(Hash::check('oldpass1', $staff->fresh()->password));
     }
 
-    private function createStaff(): Admin
+    public function test_main_admin_does_not_see_or_use_self_service_password_change(): void
+    {
+        $mainAdmin = $this->createStaff('main');
+
+        $this->actingAs($mainAdmin, 'admin')
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertDontSee('id="changePasswordBtn"')
+            ->assertDontSee('id="passwordDialogBackdrop"');
+
+        $this->put(route('account.password.update'), [
+            'current_password' => 'oldpass1',
+            'new_password' => 'newpass1',
+            'new_password_confirmation' => 'newpass1',
+        ])->assertForbidden();
+
+        $this->assertTrue(Hash::check('oldpass1', $mainAdmin->fresh()->password));
+    }
+
+    private function createStaff(string $role = 'education'): Admin
     {
         return Admin::create([
-            'staff_id' => 'EDU001',
+            'staff_id' => $role === 'main' ? 'MAIN001' : 'EDU001',
             'first_name' => 'Education',
             'last_name' => 'Staff',
             'email' => 'education@example.com',
             'password' => Hash::make('oldpass1'),
-            'role' => 'education',
+            'role' => $role,
         ]);
     }
 }
