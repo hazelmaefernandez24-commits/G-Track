@@ -1394,51 +1394,52 @@
                                                 </div>
                                             </div>
 
-                                            @if($notification->acknowledged_at)
-                                                <div class='message-meta' style='margin-top: 10px; color: var(--blue); font-weight: 700;'>
-                                                    Already acknowledged by {{ $notification->acknowledged_by_name ?? 'Admin' }}
-                                                    at {{ $notification->acknowledged_at->format('n/j/Y, h:i A') }}
-                                                </div>
-                                            @endif
-
                                             @if($notification->status !== 'resolved')
                                                 <div
-                                                    style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
-                                                    {{-- Acknowledged (Mark as Seen) --}}
-                                                    @if(!$notification->acknowledged_at)
-                                                        <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge'
+                                                    style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                                                    @if($notification->acknowledged_at)
+                                                        <div class='message-meta' style='width: 100%; color: var(--blue); font-weight: 700; text-align: left;'>
+                                                            Already acknowledged by {{ $notification->acknowledged_by_name ?? 'Admin' }}
+                                                            at {{ $notification->acknowledged_at->format('n/j/Y, h:i A') }}
+                                                        </div>
+                                                    @endif
+                                                    <div style="display: flex; justify-content: flex-end; gap: 10px; width: 100%;">
+                                                        {{-- Acknowledged (Mark as Seen) --}}
+                                                        @if(!$notification->acknowledged_at)
+                                                            <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge'
+                                                                style='display:inline;'>
+                                                                @csrf
+                                                                <button class='action-btn'
+                                                                    style="font-size:11px; padding:8px 16px; border-radius: 8px; background: var(--blue); color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
+                                                                    type='submit'>
+                                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                                        stroke-linejoin="round">
+                                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                                    </svg>
+                                                                    Acknowledge
+                                                                </button>
+                                                            </form>
+                                                        @endif
+
+                                                        {{-- Mark as Resolved (Safe) --}}
+                                                        <form method='POST' action='/notifications/{{ $notification->id }}/resolve'
                                                             style='display:inline;'>
                                                             @csrf
-                                                            <button class='action-btn'
-                                                                style="font-size:11px; padding:8px 16px; border-radius: 8px; background: var(--blue); color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
+                                                            <button class='action-btn ack-btn'
+                                                                style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;"
                                                                 type='submit'>
                                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                                                                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                                                                     stroke-linejoin="round">
-                                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                                                 </svg>
-                                                                Acknowledge
+                                                                Mark as Resolved
                                                             </button>
                                                         </form>
-                                                    @endif
-
-                                                    {{-- Mark as Resolved (Safe) --}}
-                                                    <form method='POST' action='/notifications/{{ $notification->id }}/resolve'
-                                                        style='display:inline;'>
-                                                        @csrf
-                                                        <button class='action-btn ack-btn'
-                                                            style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;"
-                                                            type='submit'>
-                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                                stroke-linejoin="round">
-                                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                                            </svg>
-                                                            Mark as Resolved
-                                                        </button>
-                                                    </form>
+                                                    </div>
                                                 </div>
                                             @endif
                                         </div>
@@ -1536,53 +1537,54 @@
                                                         </div>
                                                     </div>
 
-                                                    @if($notification->acknowledged_at)
-                                                        <div class='message-meta' style='grid-column: span 4; color: var(--blue); font-weight: 700;'>
-                                                            Already acknowledged by {{ $notification->acknowledged_by_name ?? 'Admin' }}
-                                                            at {{ $notification->acknowledged_at->format('n/j/Y, h:i A') }}
-                                                        </div>
-                                                    @endif
-
                                                     @if($notification->status !== 'resolved')
                                                         <div
-                                                            style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: flex-end; gap: 10px;">
-                                                        {{-- Acknowledged (Mark as Seen) --}}
-                                                        @if(!$notification->acknowledged_at)
-                                                            <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge'
-                                                                style='display:inline;'>
-                                                                @csrf
-                                                                <button class='action-btn'
-                                                                    style="font-size:11px; padding:8px 16px; border-radius: 8px; background: var(--blue); color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
-                                                                    type='submit'>
-                                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                                        stroke-linejoin="round">
-                                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                                                        <circle cx="12" cy="12" r="3"></circle>
-                                                                    </svg>
-                                                                    Acknowledge
-                                                                </button>
-                                                            </form>
-                                                        @endif
+                                                            style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                                                            @if($notification->acknowledged_at)
+                                                                <div class='message-meta' style='width: 100%; color: var(--blue); font-weight: 700; text-align: left;'>
+                                                                    Already acknowledged by {{ $notification->acknowledged_by_name ?? 'Admin' }}
+                                                                    at {{ $notification->acknowledged_at->format('n/j/Y, h:i A') }}
+                                                                </div>
+                                                            @endif
+                                                            <div style="display: flex; justify-content: flex-end; gap: 10px; width: 100%;">
+                                                                {{-- Acknowledged (Mark as Seen) --}}
+                                                                @if(!$notification->acknowledged_at)
+                                                                    <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge'
+                                                                        style='display:inline;'>
+                                                                        @csrf
+                                                                        <button class='action-btn'
+                                                                            style="font-size:11px; padding:8px 16px; border-radius: 8px; background: var(--blue); color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
+                                                                            type='submit'>
+                                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                                                stroke-linejoin="round">
+                                                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                                                <circle cx="12" cy="12" r="3"></circle>
+                                                                            </svg>
+                                                                            Acknowledge
+                                                                        </button>
+                                                                    </form>
+                                                                @endif
 
-                                                        {{-- Mark as Resolved (Safe) --}}
-                                                        <form method='POST' action='/notifications/{{ $notification->id }}/resolve'
-                                                            style='display:inline;'>
-                                                            @csrf
-                                                            <button class='action-btn ack-btn'
-                                                                style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;"
-                                                                type='submit'>
-                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                                    stroke-linejoin="round">
-                                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                                                </svg>
-                                                                Mark as Resolved
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                @endif
+                                                                {{-- Mark as Resolved (Safe) --}}
+                                                                <form method='POST' action='/notifications/{{ $notification->id }}/resolve'
+                                                                    style='display:inline;'>
+                                                                    @csrf
+                                                                    <button class='action-btn ack-btn'
+                                                                        style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;"
+                                                                        type='submit'>
+                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                                                        </svg>
+                                                                        Mark as Resolved
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    @endif
                                             </div>
                                         </div>
                                     </div>
