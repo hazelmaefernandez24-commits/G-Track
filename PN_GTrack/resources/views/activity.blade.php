@@ -262,13 +262,17 @@
     function buildSignalIcon(signal) {
         if (!signal) return '<span style="color: #94A3B8;">—</span>';
         
+        const maskedSignal = signal.replace(/(?<![\d.])(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?![\d.])/g, (ip, first, second, third, fourth) => {
+            if ([first, second, third, fourth].some(octet => Number(octet) > 255)) return ip;
+            return `${first}.***.*.*${fourth.slice(-2)}`;
+        });
         const sig = signal.toLowerCase();
         if (sig.includes('excellent') || sig.includes('strong') || sig.includes('good')) {
-            return `<span style="color: #16A34A;">📶 ${signal}</span>`;
+            return `<span style="color: #16A34A;">📶 ${maskedSignal}</span>`;
         } else if (sig.includes('fair')) {
-            return `<span style="color: #F59E0B;">📶 ${signal}</span>`;
+            return `<span style="color: #F59E0B;">📶 ${maskedSignal}</span>`;
         } else {
-            return `<span style="color: #EF4444;">⚠️ ${signal}</span>`;
+            return `<span style="color: #EF4444;">⚠️ ${maskedSignal}</span>`;
         }
     }
 

@@ -69,7 +69,7 @@
                     @endif
                 </td>
                 <td>{{ isset($student->battery_level) ? $student->battery_level . '%' : 'N/A' }}</td>   
-                <td>{{ $student->signal_status }}</td>   
+                <td>{{ \App\Support\IpAddressMasker::maskInText($student->signal_status) }}</td>
                 <td>{{ $student->last_update }}</td>
                 <td>{{ $student->contact }}</td>
             </tr>

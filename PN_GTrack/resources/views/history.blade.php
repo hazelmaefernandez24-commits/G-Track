@@ -186,7 +186,7 @@
                 </div>
                 <div>
                     <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Signal Status</div>
-                    <div style="font-weight: 600; font-size: 14px; margin-top: 4px;">{{ $student->signal_status ?? 'N/A' }}</div>
+                    <div style="font-weight: 600; font-size: 14px; margin-top: 4px;">{{ \App\Support\IpAddressMasker::maskInText($student->signal_status) ?? 'N/A' }}</div>
                 </div>
             </div>
         </div>
@@ -205,7 +205,6 @@
                             <th>Recorded At</th>
                             <th>Location</th>
                             <th>Status</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>

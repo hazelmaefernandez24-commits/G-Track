@@ -146,11 +146,11 @@
     <div class="map-legend">
         <div class="legend-item">
             <span class="legend-marker marker-boy"></span>
-            <span>Boys (Blue)</span>
+            <span>Boys</span>
         </div>
         <div class="legend-item">
             <span class="legend-marker marker-girl"></span>
-            <span>Girls (Red)</span>
+            <span>Girls</span>
         </div>
     </div>
 

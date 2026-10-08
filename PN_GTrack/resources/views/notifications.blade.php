@@ -1375,7 +1375,7 @@
                                                 @endphp
                                                 <div style="font-weight: 700; color: {{ $sigColor }}; font-size: 14px; margin-top: 2px;">
                                                     {!! Str::contains($sigLower, ['excellent', 'strong', 'good', 'fair']) ? '📶' : '⚠️' !!}
-                                                    {{ $currentSignal ?? 'N/A' }}
+                                                    {{ \App\Support\IpAddressMasker::maskInText($currentSignal) ?? 'N/A' }}
                                                 </div>
                                             </div>
                                             <div style="grid-column: span 2;">
@@ -1519,7 +1519,7 @@
                                                         @endphp
                                                         <div style="font-weight: 700; color: {{ $sigColor }}; font-size: 14px; margin-top: 2px;">
                                                             {!! Str::contains($sigLower, ['excellent', 'strong', 'good', 'fair']) ? '📶' : '⚠️' !!}
-                                                            {{ $currentSignal ?? 'N/A' }}
+                                                            {{ \App\Support\IpAddressMasker::maskInText($currentSignal) ?? 'N/A' }}
                                                         </div>
                                                     </div>
                                                     <div style="grid-column: span 2;">
@@ -2543,7 +2543,7 @@
                                                 @endphp
                                                 <div style="font-weight: 700; color: {{ $sigColor }}; font-size: 14px; margin-top: 2px;">
                                                     {!! Str::contains($sigLower, ['excellent', 'strong', 'good', 'fair']) ? '📶' : '⚠️' !!}
-                                                    {{ $currentSignal ?? 'N/A' }}
+                                                    {{ \App\Support\IpAddressMasker::maskInText($currentSignal) ?? 'N/A' }}
                                                 </div>
                                             </div>
                                             <div style="grid-column: span 2;">
@@ -2638,7 +2638,7 @@
                                     </div>
                                     <div>
                                         <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted);">Signal</div>
-                                        <div style="font-weight: 700; color: #404040; font-size: 14px; margin-top: 2px;">📶 {{ $notification->signal_status ?? 'N/A' }}</div>
+                                        <div style="font-weight: 700; color: #404040; font-size: 14px; margin-top: 2px;">📶 {{ \App\Support\IpAddressMasker::maskInText($notification->signal_status) ?? 'N/A' }}</div>
                                     </div>
                                     <div style="grid-column: span 2;">
                                         <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted);">Location</div>
