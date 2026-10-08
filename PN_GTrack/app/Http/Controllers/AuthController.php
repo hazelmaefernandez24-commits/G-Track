@@ -34,6 +34,31 @@ class AuthController extends Controller
         return view('reset-password');
     }
 
+    public function changePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'string'],
+            'new_password' => ['required', 'string', 'min:6', 'confirmed', 'different:current_password'],
+        ]);
+
+        $admin = Auth::guard('admin')->user();
+
+        if (! Hash::check($validated['current_password'], $admin->password)) {
+            return back()
+                ->withErrors(['current_password' => 'The current password is incorrect.'])
+                ->withInput();
+        }
+
+        $admin->password = Hash::make($validated['new_password']);
+        $admin->password_changed_at = now();
+        $admin->save();
+
+        return back()->with(
+            'password_change_status',
+            'Your password has been changed successfully.'
+        );
+    }
+
     public function resetPassword(Request $request)
     {
         $request->validate([

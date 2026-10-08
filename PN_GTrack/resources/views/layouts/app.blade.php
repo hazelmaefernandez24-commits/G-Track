@@ -253,6 +253,115 @@
 
         .profile-dropdown .name { font-weight: 700; color: var(--text-main); }
         .profile-dropdown .meta { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+        .profile-password-link {
+            width: 100%;
+            display: block;
+            margin-top: 12px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            background: rgba(34, 187, 234, 0.1);
+            color: var(--primary-dark);
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            border: 0;
+            cursor: pointer;
+        }
+        .profile-password-link:hover {
+            background: rgba(34, 187, 234, 0.18);
+        }
+        .password-dialog-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.28);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        .password-dialog-backdrop.show {
+            display: flex;
+        }
+        .password-dialog {
+            width: min(100%, 460px);
+            padding: 28px;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+        }
+        .password-dialog h2 {
+            margin: 0 0 8px;
+            color: var(--text-main);
+            font-size: 22px;
+        }
+        .password-dialog-description {
+            margin: 0 0 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .password-dialog .form-group {
+            margin-bottom: 16px;
+        }
+        .password-dialog label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .password-dialog input {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font: inherit;
+        }
+        .password-dialog input:focus {
+            outline: none;
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 0 3px rgba(34, 187, 234, 0.14);
+        }
+        .password-dialog-hint {
+            display: block;
+            margin-top: 5px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        .password-dialog-error,
+        .password-dialog-success {
+            margin-bottom: 16px;
+            padding: 11px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .password-dialog-error {
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+        .password-dialog-success {
+            border: 1px solid #a7f3d0;
+            background: #ecfdf5;
+            color: #065f46;
+        }
+        .password-dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px;
+        }
+        .password-dialog-cancel {
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: #fff;
+            color: #374151;
+            font-weight: 700;
+            cursor: pointer;
+        }
 
         .notification-btn:hover {
             background-color: rgba(34, 187, 234, 0.08);
@@ -431,6 +540,9 @@
                                     <div style="font-size:13px; color:var(--text-muted);"><strong>Role:</strong> {{ $user->role ?? 'N/A' }}</div>
                                 </div>
                             </div>
+                            @if(Auth::guard('admin')->check())
+                                <button type="button" id="changePasswordBtn" class="profile-password-link" role="menuitem">Change Password</button>
+                            @endif
                         @else
                             <div class="meta">Not signed in</div>
                         @endif
@@ -443,6 +555,59 @@
             @yield('content')
         </div>
     </main>
+
+    @if(Auth::guard('admin')->check())
+        <div id="passwordDialogBackdrop" class="password-dialog-backdrop" aria-hidden="true">
+            <section class="password-dialog" role="dialog" aria-modal="true" aria-labelledby="passwordDialogTitle">
+                <h2 id="passwordDialogTitle">Change Password</h2>
+                <p class="password-dialog-description">Enter your current password and choose a new one.</p>
+
+                @if($errors->has('current_password') || $errors->has('new_password'))
+                    <div class="password-dialog-error" role="alert">
+                        @foreach($errors->get('current_password') as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
+                        @foreach($errors->get('new_password') as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if(session('password_change_status'))
+                    <div class="password-dialog-success" role="status">{{ session('password_change_status') }}</div>
+                @endif
+
+                <form action="{{ route('account.password.update') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="form-group">
+                        <label for="current_password">Current Password</label>
+                        <input id="current_password" type="password" name="current_password"
+                               autocomplete="current-password" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new_password">New Password</label>
+                        <input id="new_password" type="password" name="new_password"
+                               autocomplete="new-password" minlength="6" required>
+                        <small class="password-dialog-hint">Use at least 6 characters.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new_password_confirmation">Confirm New Password</label>
+                        <input id="new_password_confirmation" type="password" name="new_password_confirmation"
+                               autocomplete="new-password" minlength="6" required>
+                    </div>
+
+                    <div class="password-dialog-actions">
+                        <button type="button" id="closePasswordDialog" class="password-dialog-cancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    @endif
 
     <script>
         // Initialize Lucide icons
@@ -480,6 +645,25 @@
         document.addEventListener('DOMContentLoaded', function() {
             const profileBtn = document.getElementById('profileBtn');
             const profileDropdown = document.getElementById('profileDropdown');
+            const changePasswordBtn = document.getElementById('changePasswordBtn');
+            const passwordDialogBackdrop = document.getElementById('passwordDialogBackdrop');
+            const closePasswordDialog = document.getElementById('closePasswordDialog');
+            const currentPasswordInput = document.getElementById('current_password');
+
+            function openPasswordDialog() {
+                if (!passwordDialogBackdrop) return;
+                passwordDialogBackdrop.classList.add('show');
+                passwordDialogBackdrop.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                currentPasswordInput?.focus();
+            }
+
+            function closePasswordDialogOverlay() {
+                if (!passwordDialogBackdrop) return;
+                passwordDialogBackdrop.classList.remove('show');
+                passwordDialogBackdrop.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
 
             if (profileBtn && profileDropdown) {
                 profileBtn.addEventListener('click', function(e) {
@@ -495,6 +679,32 @@
                         profileBtn.setAttribute('aria-expanded', 'false');
                     }
                 });
+            }
+
+            if (changePasswordBtn && passwordDialogBackdrop) {
+                changePasswordBtn.addEventListener('click', function() {
+                    profileDropdown?.classList.remove('show');
+                    profileBtn?.setAttribute('aria-expanded', 'false');
+                    openPasswordDialog();
+                });
+
+                closePasswordDialog?.addEventListener('click', closePasswordDialogOverlay);
+
+                passwordDialogBackdrop.addEventListener('click', function(event) {
+                    if (event.target === passwordDialogBackdrop) {
+                        closePasswordDialogOverlay();
+                    }
+                });
+
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape' && passwordDialogBackdrop.classList.contains('show')) {
+                        closePasswordDialogOverlay();
+                    }
+                });
+
+                @if($errors->has('current_password') || $errors->has('new_password') || session('password_change_status'))
+                    openPasswordDialog();
+                @endif
             }
         });
     </script>

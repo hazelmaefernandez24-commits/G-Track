@@ -28,6 +28,9 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])
 
 // --- PROTECTED ROUTES (Requires Login) ---
 Route::middleware(['auth:admin'])->group(function () {
+    Route::put('/account/change-password', [AuthController::class, 'changePassword'])
+        ->middleware('throttle:5,1')
+        ->name('account.password.update');
     
     Route::get('/dashboard', [DeviceController::class, 'index'])->name('dashboard');
     Route::get('/tracking', [DeviceController::class, 'tracking']);
