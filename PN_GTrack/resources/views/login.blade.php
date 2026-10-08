@@ -149,6 +149,16 @@
             margin-bottom:20px;
             border-left:4px solid #EF4444;
         }
+        .success-message{
+            background:#ecfdf5;
+            color:#065f46;
+            padding:12px 14px;
+            border:1px solid #a7f3d0;
+            border-left:4px solid #16a34a;
+            border-radius:8px;
+            font-size:13px;
+            margin-bottom:20px;
+        }
         @media (max-width: 480px){
             .login-card{
                 padding:24px;
@@ -170,7 +180,12 @@
                 <p class="logo-subtitle">Authentication Portal</p>
             </div>
 
-            
+            @if (session('status'))
+                <div class="success-message" role="status">
+                    {{ session('status') }}
+                </div>
+            @endif
+
             @if ($errors->any())
                 <div class="error-message">
                     <strong>Login Failed</strong><br>
@@ -220,7 +235,7 @@
 
                 
                 <div style="text-align:center;">
-                    <a href="#" class="forgot-password">Forgot Password?</a>
+                    <a href="{{ route('reset-password') }}" class="forgot-password">Forgot Password?</a>
                 </div>
             </form>
         </div>

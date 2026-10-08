@@ -21,6 +21,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/logout', [AuthController::class, 'logout']); // Added GET for convenience if needed
 
+Route::get('/reset-password', [AuthController::class, 'showResetPasswordForm'])->name('reset-password');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+    ->middleware('throttle:5,1')
+    ->name('reset-password.store');
+
 // --- PROTECTED ROUTES (Requires Login) ---
 Route::middleware(['auth:admin'])->group(function () {
     

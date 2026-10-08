@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Admin;
 
 
 class AuthController extends Controller
@@ -27,7 +29,38 @@ class AuthController extends Controller
         'staff_id' => 'Invalid Staff ID or password',
     ]);
 }
-    
+    public function showResetPasswordForm()
+    {
+        return view('reset-password');
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'staff_id' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        $admin = Admin::where('staff_id', $request->staff_id)
+            ->where('email', $request->email)
+            ->first();
+
+        if (! $admin) {
+            return back()
+                ->withErrors(['email' => 'The Staff ID and email do not match an account.'])
+                ->withInput($request->only('staff_id', 'email'));
+        }
+
+        $admin->password = Hash::make($request->password);
+        $admin->save();
+
+        return redirect()->route('login')->with(
+            'status',
+            'Your password was reset successfully. Please log in with your new password.'
+        );
+    }
+
     public function logout(Request $request)
     {
         Auth::guard('admin')->logout();
