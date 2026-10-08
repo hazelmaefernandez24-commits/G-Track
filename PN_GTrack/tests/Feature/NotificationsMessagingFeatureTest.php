@@ -59,6 +59,15 @@ class NotificationsMessagingFeatureTest extends TestCase
             'acknowledged_by_admin_id' => $admin->id,
             'read' => true,
         ]);
+        $this->assertDatabaseHas('notifications', [
+            'student_id' => $student->id,
+            'admin_id' => $admin->id,
+            'type' => 'admin_reply',
+            'sender_type' => 'admin',
+            'reply_to_id' => $alert->id,
+            'message' => 'Your SOS alert has been acknowledged.',
+            'read' => false,
+        ]);
 
         $this->post("/notifications/{$alert->id}/resolve")
             ->assertSessionHas('success');
@@ -69,6 +78,45 @@ class NotificationsMessagingFeatureTest extends TestCase
             'resolved_by_admin_id' => $admin->id,
         ]);
         $this->assertSame('safe', $student->fresh()->sos_status);
+    }
+
+    public function test_admin_can_acknowledge_a_blackout_alert_and_message_the_student_once(): void
+    {
+        $admin = $this->createAdmin('main');
+        $student = $this->createStudent();
+        $alert = Notification::create([
+            'student_id' => $student->id,
+            'admin_id' => $admin->id,
+            'type' => 'blackout',
+            'sender_type' => 'student',
+            'message' => 'Blackout alert',
+            'read' => false,
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->post("/notifications/{$alert->id}/acknowledge")
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('notifications', [
+            'student_id' => $student->id,
+            'admin_id' => $admin->id,
+            'type' => 'admin_reply',
+            'sender_type' => 'admin',
+            'reply_to_id' => $alert->id,
+            'message' => 'Your blackout alert has been acknowledged.',
+            'read' => false,
+        ]);
+
+        $this->post("/notifications/{$alert->id}/acknowledge")
+            ->assertSessionHas('info', 'This alert has already been acknowledged; no additional message was sent.');
+
+        $this->assertSame(
+            1,
+            Notification::where('reply_to_id', $alert->id)
+                ->where('type', 'admin_reply')
+                ->count()
+        );
     }
 
     public function test_staff_can_load_conversation_messages_and_mark_student_messages_read(): void

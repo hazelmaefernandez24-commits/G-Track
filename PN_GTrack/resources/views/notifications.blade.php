@@ -1041,6 +1041,13 @@
 
 @section('content')
 
+        @if(session('info'))
+            <div role="status"
+                style="margin: 0 24px 16px; padding: 12px 16px; border: 1px solid rgba(34, 187, 234, 0.35); border-radius: 10px; background: #EAF9FE; color: #075985; font-weight: 600;">
+                {{ session('info') }}
+            </div>
+        @endif
+
 {{--
     <div class="page-title" style="margin-bottom: 24px;">
             

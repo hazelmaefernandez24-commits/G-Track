@@ -277,22 +277,75 @@ class NotificationController extends Controller
     public function acknowledge($id)
     {
         $admin = Auth::guard('admin')->user();
-        $now = now();
+        $result = DB::transaction(function () use ($id, $admin) {
+            $alert = DB::table('notifications')
+                ->where('id', $id)
+                ->whereIn('type', ['sos', 'blackout'])
+                ->lockForUpdate()
+                ->first();
 
-        DB::table('notifications')
-            ->where('id', $id)
-            ->whereIn('type', ['sos', 'blackout'])
-            ->where('status', '!=', 'resolved')
-            ->whereNull('acknowledged_at')
-            ->update([
-                'acknowledged_by_admin_id' => $admin->getKey(),
-                'acknowledged_by_name' => $this->currentAdminName(),
-                'acknowledged_at' => $now,
-                'read' => true,
+            if (!$alert || $alert->status === 'resolved') {
+                return 'unavailable';
+            }
+
+            if ($alert->acknowledged_at !== null) {
+                return 'already_acknowledged';
+            }
+
+            $now = now();
+            $updated = DB::table('notifications')
+                ->where('id', $alert->id)
+                ->where('status', '!=', 'resolved')
+                ->whereNull('acknowledged_at')
+                ->update([
+                    'acknowledged_by_admin_id' => $admin->getKey(),
+                    'acknowledged_by_name' => $this->currentAdminName(),
+                    'acknowledged_at' => $now,
+                    'read' => true,
+                    'updated_at' => $now,
+                ]);
+
+            if ($updated !== 1) {
+                return 'already_acknowledged';
+            }
+
+            if (!$alert->student_id) {
+                return 'missing_student';
+            }
+
+            DB::table('notifications')->insert([
+                'student_id' => $alert->student_id,
+                'admin_id' => $admin->getKey(),
+                'class' => $alert->class,
+                'type' => 'admin_reply',
+                'sender_type' => 'admin',
+                'sender_name' => $this->currentAdminName(),
+                'reply_to_id' => $alert->id,
+                'message' => $alert->type === 'sos'
+                    ? 'Your SOS alert has been acknowledged.'
+                    : 'Your blackout alert has been acknowledged.',
+                'read' => false,
+                'status' => 'replied',
+                'created_at' => $now,
                 'updated_at' => $now,
             ]);
 
-        return redirect()->back()->with('success', 'Alert acknowledged.');
+            return 'acknowledged';
+        });
+
+        if ($result === 'unavailable') {
+            return redirect()->back()->with('error', 'Alert could not be found or has already been resolved.');
+        }
+
+        if ($result === 'missing_student') {
+            return redirect()->back()->with('error', 'Alert acknowledged, but no student is linked to receive a message.');
+        }
+
+        if ($result === 'already_acknowledged') {
+            return redirect()->back()->with('info', 'This alert has already been acknowledged; no additional message was sent.');
+        }
+
+        return redirect()->back()->with('success', 'Alert acknowledged and message sent to the student.');
     }
 
     public function resolve($id)
