@@ -53,6 +53,7 @@ class AuthController extends Controller
         }
 
         $admin->password = Hash::make($request->password);
+        $admin->password_changed_at = now();
         $admin->save();
 
         return redirect()->route('login')->with(

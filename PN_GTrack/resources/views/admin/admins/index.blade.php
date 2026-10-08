@@ -138,11 +138,15 @@
                                 </span>
                             </td>
                             <td style="text-align:right; white-space:nowrap;">
+                                @if(! $admin->password_changed_at || $admin->id === Auth::guard('admin')->id())
                                 <button class="btn btn-success" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" 
                                     onclick="editAdmin({{ json_encode($admin) }})">
                                     <i data-lucide="edit-3" style="width:13px; height:13px;"></i>
                                     Edit
                                 </button>
+                                @else
+                                <span style="font-size:12px; color:#6b7280;">Locked after password change</span>
+                                @endif
                                 @if($admin->id !== Auth::guard('admin')->id())
                                 <button type="button" class="btn btn-danger" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" onclick="confirmDelete('{{ $admin->id }}')">
                                     <i data-lucide="trash-2" style="width:13px; height:13px;"></i>

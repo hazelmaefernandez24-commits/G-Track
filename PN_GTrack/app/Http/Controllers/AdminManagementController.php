@@ -59,6 +59,16 @@ class AdminManagementController extends Controller
     {
         $admin = Admin::findOrFail($id);
 
+        if (
+            $admin->password_changed_at &&
+            $admin->id !== Auth::guard('admin')->id()
+        ) {
+            return redirect()->back()->with(
+                'error',
+                'This account cannot be edited because its owner has changed their password.'
+            );
+        }
+
         $request->validate([
             'first_name' => ['required', 'regex:/^[A-Za-z .\'-]+$/u'],
             'middle_initial' => ['nullable', 'regex:/^[A-Za-z]+$/u', 'max:1'],
@@ -87,7 +97,9 @@ class AdminManagementController extends Controller
         $admin->update($request->only(['first_name', 'middle_initial', 'last_name', 'email', 'role']));
 
         if ($request->filled('new_password')) {
-            $admin->update(['password' => Hash::make($request->new_password)]);
+            $admin->password = Hash::make($request->new_password);
+            $admin->password_changed_at = now();
+            $admin->save();
         }
 
         return redirect()->back()->with('success', 'Admin updated successfully.');
