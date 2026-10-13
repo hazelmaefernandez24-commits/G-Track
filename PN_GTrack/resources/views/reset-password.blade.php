@@ -4,11 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Reset Password</title>
+    <link rel="stylesheet" href="{{ asset('css/global-font.css') }}">
     <style>
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+            font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f0f0f3 0%, #f4f3f5 100%);
             color: #0f172a;
             min-height: 100vh;

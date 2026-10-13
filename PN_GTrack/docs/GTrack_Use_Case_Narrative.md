@@ -331,8 +331,8 @@
 
 | Condition | Flow |
 |-----------|------|
-| **A1 – No Video Attached** | If `target = 'sos'` but no video file is included, the system returns a 422 error: *"SOS alerts require a video feed before they are accepted."* |
-| **A2 – Upload Failure** | If the file upload fails (storage error), the system returns a 500 error and logs the failure. |
+| **A1 – No Video Attached** | The system creates the SOS notification immediately without a video, so admins can respond. A later video upload updates the same unresolved alert. |
+| **A2 – SOS Video Upload Failure** | The system logs the storage error and still creates or updates the SOS notification without a video. Other media upload failures return a 500 error. |
 | **A3 – Media Upload (Non-SOS)** | For `student_message` type notifications, media files (images, videos) up to 25 MB can also be attached. |
 
 ### Postconditions

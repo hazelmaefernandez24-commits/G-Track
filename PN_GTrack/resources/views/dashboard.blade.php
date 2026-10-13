@@ -169,56 +169,6 @@
     </div>
 </div>
 
-<!-- System Overview -->
-<div class="system-overview">
-    <div class="system-header">
-        <h2>System Overview</h2>
-        <p>Quick access to key features</p>
-    </div>
-
-    <div class="quick-access-grid">
-        <a href="/tracking" class="qa-card">
-            <div class="qa-icon qa-blue">
-                <i data-lucide="map-pin"></i>
-            </div>
-            <div class="qa-content">
-                <h3>Real-Time Tracking</h3>
-                <p>Monitor student locations on interactive map</p>
-            </div>
-        </a>
-
-        <a href="/activity" class="qa-card">
-            <div class="qa-icon qa-green">
-                <i data-lucide="grid"></i>
-            </div>
-            <div class="qa-content">
-                <h3>Student Activity</h3>
-                <p>View detailed student status and information</p>
-            </div>
-        </a>
-
-        <a href="/notifications" class="qa-card">
-            <div class="qa-icon qa-purple">
-                <i data-lucide="bell"></i>
-            </div>
-            <div class="qa-content">
-                <h3>Notifications</h3>
-                <p>Send announcements and emergency alerts</p>
-            </div>
-        </a>
-
-        <a href="/notifications?tab=messages" class="qa-card">
-            <div class="qa-icon qa-orange">
-                <i data-lucide="message-square"></i>
-            </div>
-            <div class="qa-content">
-                <h3>Messages Dashboard</h3>
-                <p>View all student messages and communications</p>
-            </div>
-        </a>
-    </div>
-</div>
-
 @endsection
 
 @push('scripts')

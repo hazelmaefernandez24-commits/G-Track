@@ -27,7 +27,7 @@
 
         body {
             margin: 0;
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, Noto Sans, Liberation Sans, sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--text);
         }
@@ -1126,9 +1126,8 @@
                 <a class='tab {{ $tab === "sos" ? "active" : "" }}'
                     href='?class={{ urlencode($class) }}&tab=sos'>
                     Emergency Alerts
-                    @php $emergencyCount = $stats['sos'] + $stats['blackout']; @endphp
-                    @if($emergencyCount > 0)
-                        <span style="background: var(--red); color: white; padding: 2px 6px; border-radius: 12px; font-size: 11px; margin-left: 6px; font-weight: bold;">{{ $emergencyCount }}</span>
+                    @if($stats['sos'] > 0)
+                        <span style="background: var(--red); color: white; padding: 2px 6px; border-radius: 12px; font-size: 11px; margin-left: 6px; font-weight: bold;">{{ $stats['sos'] }}</span>
                     @endif
                 </a>
                 <a class='tab {{ $tab === "broadcast" ? "active" : "" }}'
@@ -1237,18 +1236,7 @@
 
                 <div class='messages'>
                     @if($tab === 'sos')
-                        <div class="sub-tabs">
-                            <a href="?class={{ urlencode($class) }}&tab=sos&subtab=sos"
-                                class="sub-tab {{ $subtab === 'sos' ? 'active' : '' }}">
-                                SOS Alerts
-                            </a>
-                            <a href="?class={{ urlencode($class) }}&tab=sos&subtab=blackout"
-                                class="sub-tab {{ $subtab === 'blackout' ? 'active' : '' }}">
-                                Blackout Alerts
-                            </a>
-                        </div>
-
-                        @if($subtab === 'sos')
+                        @if($tab === 'sos')
                             <div style="margin-bottom: 16px; display: flex; justify-content: flex-end;">
                                 <button type="button" class="action-btn" onclick="openSOSHistoryModal()" style="background: var(--blue); display: flex; align-items: center; gap: 6px;">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1259,9 +1247,7 @@
                                 </button>
                             </div>
                             @php
-                                $activeSosList = $notifications->where('type', 'sos')->where('status', '!=', 'resolved')->filter(function ($item) {
-                                    return !empty($item->video_url) || (!empty($item->media_url) && !\Illuminate\Support\Str::endsWith($item->media_url, ['.mp3', '.wav']));
-                                });
+                                $activeSosList = $notifications->where('type', 'sos')->where('status', '!=', 'resolved');
                             @endphp
                             @forelse($activeSosList as $notification)
                                 <div class='message-item'
@@ -1293,9 +1279,6 @@
                                                 ->first()
                                             : null;
 
-                                        // Prefer the notification snapshot first, then live student data
-                                        $currentBattery = $notification->battery_level ?? optional($notification->student)->battery_level;
-                                        $currentSignal = $notification->signal_status ?? optional($notification->student)->signal_status;
                                         $currentLat = $latestLocation->latitude ?? optional($notification->student)->latitude ?? $notification->latitude;
                                         $currentLng = $latestLocation->longitude ?? optional($notification->student)->longitude ?? $notification->longitude;
                                     @endphp
@@ -1350,35 +1333,10 @@
                                             </div>
                                         </div>
 
-                                        <!-- TELEMETRY SECTION (Restored Original Style) -->
+                                        <!-- Location -->
                                         <div
-                                            style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05);">
+                                            style="display: grid; grid-template-columns: 1fr; gap: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05);">
                                             <div>
-                                                <div
-                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
-                                                    Live Battery</div>
-                                                <div class="notification-battery-display-{{ $notification->id }}"
-                                                    style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? 'var(--accent)' : '#404040' }}; font-size: 14px; margin-top: 2px;">
-                                                    🔋 {{ isset($currentBattery) ? $currentBattery . '%' : 'N/A' }}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div
-                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
-                                                    Live Signal</div>
-                                                @php
-                                                    $sigLower = strtolower($currentSignal ?? '');
-                                                    $sigColor = '#FF9933'; // Default to warning accent
-                                                    if (Str::contains($sigLower, ['excellent', 'strong', 'good'])) $sigColor = '#009DE1';
-                                                    elseif (Str::contains($sigLower, 'fair')) $sigColor = '#FF9933';
-                                                    elseif (empty($sigLower) || $sigLower === 'n/a') $sigColor = '#404040';
-                                                @endphp
-                                                <div style="font-weight: 700; color: {{ $sigColor }}; font-size: 14px; margin-top: 2px;">
-                                                    {!! Str::contains($sigLower, ['excellent', 'strong', 'good', 'fair']) ? '📶' : '⚠️' !!}
-                                                    {{ \App\Support\IpAddressMasker::maskInText($currentSignal) ?? 'N/A' }}
-                                                </div>
-                                            </div>
-                                            <div style="grid-column: span 2;">
                                                 <div
                                                     style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
                                                     Last Known Location</div>
@@ -1477,7 +1435,6 @@
                                                 <span
                                                     class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                                             </div>
-                                            {{-- Message from student removed: only battery, signal, and location are displayed --}}
                                             @php
                                                 // Get the student's latest GPS record from the locations table
                                                 $latestLocation = $notification->student
@@ -1486,9 +1443,6 @@
                                                         ->first()
                                                     : null;
 
-                                                // Prefer the notification snapshot first, then live student data
-                                                $currentBattery = $notification->battery_level ?? optional($notification->student)->battery_level;
-                                                $currentSignal = $notification->signal_status ?? optional($notification->student)->signal_status;
                                                 $currentLat = $latestLocation->latitude ?? optional($notification->student)->latitude ?? $notification->latitude;
                                                 $currentLng = $latestLocation->longitude ?? optional($notification->student)->longitude ?? $notification->longitude;
                                             @endphp
@@ -1496,33 +1450,8 @@
                                             <div class='message-meta'
                                                 style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);'>
                                                 <div
-                                                    style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                                                    style="display: grid; grid-template-columns: 1fr; gap: 12px;">
                                                     <div>
-                                                        <div
-                                                            style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
-                                                            Live Battery</div>
-                                                        <div class="notification-battery-display-{{ $notification->id }}"
-                                                            style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? 'var(--red)' : '#404040' }}; font-size: 14px; margin-top: 2px;">
-                                                            🔋 {{ isset($currentBattery) ? $currentBattery . '%' : 'N/A' }}
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <div
-                                                            style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
-                                                            Live Signal</div>
-                                                        @php
-                                                            $sigLower = strtolower($currentSignal ?? '');
-                                                            $sigColor = '#FF9933'; // Default to warning accent
-                                                            if (Str::contains($sigLower, ['excellent', 'strong', 'good'])) $sigColor = '#009DE1';
-                                                            elseif (Str::contains($sigLower, 'fair')) $sigColor = '#FF9933';
-                                                            elseif (empty($sigLower) || $sigLower === 'n/a') $sigColor = '#404040';
-                                                        @endphp
-                                                        <div style="font-weight: 700; color: {{ $sigColor }}; font-size: 14px; margin-top: 2px;">
-                                                            {!! Str::contains($sigLower, ['excellent', 'strong', 'good', 'fair']) ? '📶' : '⚠️' !!}
-                                                            {{ \App\Support\IpAddressMasker::maskInText($currentSignal) ?? 'N/A' }}
-                                                        </div>
-                                                    </div>
-                                                    <div style="grid-column: span 2;">
                                                         <div
                                                             style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
                                                             Last Known Location</div>
@@ -1824,23 +1753,6 @@
                     if (timeEl) timeEl.textContent = data.latestTime ?? '—';
                     if (dateEl) dateEl.textContent = data.latestDate ?? '—';
 
-                    // LIVE TELEMETRY UPDATE for Notifications
-                    if (data.students) {
-                        data.students.forEach(s => {
-                            const batteryDivs = document.querySelectorAll('.battery-display-' + s.id);
-                            batteryDivs.forEach(div => {
-                                const level = s.battery_level;
-                                if (level !== null && level !== undefined) {
-                                    div.textContent = '🔋 ' + level + '%';
-                                    div.style.color = level < 20 ? 'var(--accent)' : '#404040';
-                                } else {
-                                    div.textContent = '🔋 N/A';
-                                    div.style.color = '#404040';
-                                }
-                            });
-                        });
-                    }
-                    // Do not update notification snapshot batteries; these should remain the battery level captured when the alert was created.
                 })
                 .catch(err => console.error('Dashboard poll error:', err));
         }
@@ -2427,9 +2339,7 @@
             <div class="modal-body-container" style="background: transparent; border: none; padding: 0;">
                 <div class="modal-scroll-area" style="padding: 0;">
                     @php
-                        $resolvedSosList = $notifications->where('type', 'sos')->where('status', 'resolved')->filter(function ($item) {
-                            return !empty($item->video_url) || (!empty($item->media_url) && !\Illuminate\Support\Str::endsWith($item->media_url, ['.mp3', '.wav']));
-                        });
+                        $resolvedSosList = $notifications->where('type', 'sos')->where('status', 'resolved');
                     @endphp
                     @forelse($resolvedSosList as $notification)
                         <div class='message-item' style="border-left: 4px solid var(--muted); opacity: 0.8; margin-bottom: 12px; background: #fff;">
@@ -2461,9 +2371,6 @@
                                                 ->first()
                                             : null;
 
-                                        // Prefer the notification snapshot first, then live student data
-                                        $currentBattery = $notification->battery_level ?? optional($notification->student)->battery_level;
-                                        $currentSignal = $notification->signal_status ?? optional($notification->student)->signal_status;
                                         $currentLat = $latestLocation->latitude ?? optional($notification->student)->latitude ?? $notification->latitude;
                                         $currentLng = $latestLocation->longitude ?? optional($notification->student)->longitude ?? $notification->longitude;
                                     @endphp
@@ -2518,35 +2425,10 @@
                                             </div>
                                         </div>
 
-                                        <!-- TELEMETRY SECTION (Restored Original Style) -->
+                                        <!-- Location -->
                                         <div
-                                            style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05);">
+                                            style="display: grid; grid-template-columns: 1fr; gap: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05);">
                                             <div>
-                                                <div
-                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
-                                                    Live Battery</div>
-                                                <div class="notification-battery-display-{{ $notification->id }}"
-                                                    style="font-weight: 700; color: {{ ($currentBattery ?? 0) < 20 ? 'var(--accent)' : '#404040' }}; font-size: 14px; margin-top: 2px;">
-                                                    🔋 {{ isset($currentBattery) ? $currentBattery . '%' : 'N/A' }}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div
-                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
-                                                    Live Signal</div>
-                                                @php
-                                                    $sigLower = strtolower($currentSignal ?? '');
-                                                    $sigColor = '#FF9933'; // Default to warning accent
-                                                    if (Str::contains($sigLower, ['excellent', 'strong', 'good'])) $sigColor = '#009DE1';
-                                                    elseif (Str::contains($sigLower, 'fair')) $sigColor = '#FF9933';
-                                                    elseif (empty($sigLower) || $sigLower === 'n/a') $sigColor = '#404040';
-                                                @endphp
-                                                <div style="font-weight: 700; color: {{ $sigColor }}; font-size: 14px; margin-top: 2px;">
-                                                    {!! Str::contains($sigLower, ['excellent', 'strong', 'good', 'fair']) ? '📶' : '⚠️' !!}
-                                                    {{ \App\Support\IpAddressMasker::maskInText($currentSignal) ?? 'N/A' }}
-                                                </div>
-                                            </div>
-                                            <div style="grid-column: span 2;">
                                                 <div
                                                     style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
                                                     Last Known Location</div>
@@ -2631,16 +2513,8 @@
                                 </div>
                             @endif
                             <div class='message-meta' style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);'>
-                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
                                     <div>
-                                        <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted);">Battery</div>
-                                        <div style="font-weight: 700; color: #404040; font-size: 14px; margin-top: 2px;">🔋 {{ $notification->battery_level ?? 'N/A' }}%</div>
-                                    </div>
-                                    <div>
-                                        <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted);">Signal</div>
-                                        <div style="font-weight: 700; color: #404040; font-size: 14px; margin-top: 2px;">📶 {{ \App\Support\IpAddressMasker::maskInText($notification->signal_status) ?? 'N/A' }}</div>
-                                    </div>
-                                    <div style="grid-column: span 2;">
                                         <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted);">Location</div>
                                         <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">{{ $notification->location ?? 'Location Unavailable' }}</div>
                                     </div>
@@ -2710,14 +2584,6 @@
         function closeSOSHistoryModal(event) {
             if (event.target.id === 'sos-history-modal') {
                 document.getElementById('sos-history-modal').style.display = 'none';
-            }
-        }
-        function openBlackoutHistoryModal() {
-            document.getElementById('blackout-history-modal').style.display = 'flex';
-        }
-        function closeBlackoutHistoryModal(event) {
-            if (event.target.id === 'blackout-history-modal') {
-                document.getElementById('blackout-history-modal').style.display = 'none';
             }
         }
         function toggleStudentMenu(event, studentId) {

@@ -93,8 +93,7 @@ class NotificationController extends Controller
 
         // --- FILTER BY TYPE (TAB) ---
         if ($tab === 'sos') {
-            $query->whereIn('type', ['sos', 'blackout'])
-                  ->excludeIncompleteSos();
+            $query->whereIn('type', ['sos', 'blackout']);
         } elseif ($tab === 'broadcast') {
             $query->where('type', 'broadcast');
         } else {
@@ -140,8 +139,8 @@ class NotificationController extends Controller
         $latestDate     = $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('M d, Y') : null;
 
         $stats = [
-            'unread' => \App\Models\Notification::where('read', false)->excludeIncompleteSos()->count(),
-            'sos' => \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->withValidVideo()->count(),
+            'unread' => \App\Models\Notification::where('read', false)->count(),
+            'sos' => \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->count(),
             'broadcast' => \App\Models\Notification::where('type', 'broadcast')->count(),
             'onlineCount' => $students->where('status', true)->count(),
             'offlineCount' => $students->where('status', false)->count(),
@@ -494,13 +493,6 @@ class NotificationController extends Controller
             'video' => 'nullable|file|mimes:mp4,mov,avi|max:25600', // 25MB max
         ]);
 
-        if ($request->target === 'sos' && !$request->hasFile('video')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'SOS alerts require a video feed before they are accepted.'
-            ], 422);
-        }
-
         $student = \App\Models\Student::where('student_id', $request->student_id)
             ->orWhere('id', $request->student_id)
             ->first();
@@ -521,15 +513,22 @@ class NotificationController extends Controller
             }
         }
 
+        $videoUploadFailed = false;
         try {
             $mediaUrl = $request->hasFile('media') ? asset('storage/' . $request->file('media')->store('recordings/media', 'public')) : null;
             $videoUrl = $request->hasFile('video') ? asset('storage/' . $request->file('video')->store('recordings/videos', 'public')) : null;
         } catch (\Exception $e) {
             \Log::error('Failed to upload media/video files: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to upload media files: ' . $e->getMessage()
-            ], 500);
+            if ($type !== 'sos') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to upload media files: ' . $e->getMessage()
+                ], 500);
+            }
+
+            $mediaUrl = null;
+            $videoUrl = null;
+            $videoUploadFailed = true;
         }
 
         $recipientAdminId = $request->input('admin_id', $request->input('recipient_admin_id', $request->input('target_admin_id', $request->input('to_admin_id'))));
@@ -545,6 +544,7 @@ class NotificationController extends Controller
             }
 
             if ($existingAlert) {
+                $now = now();
                 DB::table('notifications')
                     ->where('id', $existingAlert->id)
                     ->update([
@@ -556,7 +556,8 @@ class NotificationController extends Controller
                         'battery_level' => $request->input('battery_level', $request->input('battery')) ?? $existingAlert->battery_level,
                         'signal_status' => $request->signal ?? $existingAlert->signal_status,
                         'location' => $request->location ?? $existingAlert->location,
-                        'updated_at' => now()
+                        'created_at' => $type === 'blackout' ? $now : $existingAlert->created_at,
+                        'updated_at' => $now,
                     ]);
                 $id = $existingAlert->id;
             } else {
@@ -612,7 +613,10 @@ class NotificationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Emergency alert received by Admin!',
+            'message' => $videoUploadFailed
+                ? 'Emergency alert received by Admin, but the video could not be uploaded.'
+                : 'Emergency alert received by Admin!',
+            'video_uploaded' => !$videoUploadFailed && !empty($videoUrl),
             'notification_id' => $id
         ]);
     }

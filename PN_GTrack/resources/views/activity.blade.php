@@ -208,8 +208,6 @@
                     <th>Class</th>
                     <th>Gender</th>
                     <th>Status</th>
-                    <th>Battery</th>
-                    <th>Signal</th>
                     <th>Last Update</th>
                     <th>Contact</th>
                     <th>Timeline</th>
@@ -218,7 +216,7 @@
             <tbody id="student-table-body">
                 <!-- Data populated by JS -->
                 <tr>
-                    <td colspan="10" style="text-align: center; color: var(--text-muted);">Loading student data...</td>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted);">Loading student data...</td>
                 </tr>
             </tbody>
         </table>
@@ -246,36 +244,6 @@
         }
     }
 
-    function buildBatteryCell(level) {
-        if (level === null || level === undefined) return '<span style="color: #94A3B8;">N/A</span>';
-        const color = level < 20 ? '#EF4444' : '#22C55E';
-        return `
-            <div style="display:flex;align-items:center;gap:6px;">
-                <div style="width:24px;height:12px;border:1px solid #CBD5E1;border-radius:2px;position:relative;padding:1px;">
-                    <div style="width:${level}%;height:100%;background:${color};border-radius:1px;"></div>
-                </div>
-                <span style="font-weight:600;font-size:12px;">${level}%</span>
-            </div>
-        `;
-    }
-
-    function buildSignalIcon(signal) {
-        if (!signal) return '<span style="color: #94A3B8;">—</span>';
-        
-        const maskedSignal = signal.replace(/(?<![\d.])(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?![\d.])/g, (ip, first, second, third, fourth) => {
-            if ([first, second, third, fourth].some(octet => Number(octet) > 255)) return ip;
-            return `${first}.***.*.*${fourth.slice(-2)}`;
-        });
-        const sig = signal.toLowerCase();
-        if (sig.includes('excellent') || sig.includes('strong') || sig.includes('good')) {
-            return `<span style="color: #16A34A;">📶 ${maskedSignal}</span>`;
-        } else if (sig.includes('fair')) {
-            return `<span style="color: #F59E0B;">📶 ${maskedSignal}</span>`;
-        } else {
-            return `<span style="color: #EF4444;">⚠️ ${maskedSignal}</span>`;
-        }
-    }
-
     function pollActivityData() {
         fetch('/api/dashboard/stats')
             .then(res => res.json())
@@ -283,7 +251,7 @@
                 const tbody = document.getElementById('student-table-body');
                 
                 if (!data.students || data.students.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:#64748B;">No student data available.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:#64748B;">No student data available.</td></tr>';
                     document.getElementById('student-count-display').textContent = '0 Students';
                     return;
                 }
@@ -297,7 +265,7 @@
                 document.getElementById('student-count-display').textContent = `${filteredStudents.length} Students`;
 
                 if (filteredStudents.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:#64748B;">No students found for this class.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:#64748B;">No students found for this class.</td></tr>';
                     return;
                 }
 
@@ -308,8 +276,6 @@
                         <td><span class="class-badge">${s.class || '—'}</span></td>
                         <td>${s.gender || '—'}</td>
                         <td>${buildStatusPill(s)}</td>
-                        <td>${buildBatteryCell(s.battery_level)}</td>
-                        <td>${buildSignalIcon(s.signal_status)}</td>
                         <td style="color:var(--text-muted); font-size:12px;">${s.last_update || '—'}</td>
                         <td>
                             ${s.contact ? `<a href="tel:${s.contact}" style="color:var(--sidebar-active);text-decoration:none;font-weight:500;">${s.contact}</a>` : '<span style="color:#94A3B8;">—</span>'}

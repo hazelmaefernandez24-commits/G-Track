@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Student Activity</title>
+    <link rel="stylesheet" href="{{ asset('css/global-font.css') }}">
     <style>
         body { margin: 0; font-family: 'Inter', sans-serif; background: #F8FBFF; color: #404040; }
         h2 { margin: 0 0 14px; color: #404040; }

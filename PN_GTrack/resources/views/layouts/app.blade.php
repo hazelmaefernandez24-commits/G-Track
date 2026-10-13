@@ -7,9 +7,7 @@
 
     <title>G!Track - @yield('title', 'Admin Dashboard')</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/global-font.css') }}">
     <script src="https://unpkg.com/lucide@latest"></script>
 
     @stack('styles')
@@ -494,8 +492,7 @@
                     $currentAdminRole = $currentUser->role ?? null;
 
                     $broadcastCountHeader = \DB::table('notifications')->where('type', 'broadcast')->where('read', false)->count();
-                    $sosCountHeader = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->withValidVideo()->count();
-                    $blackoutCountHeader = \DB::table('notifications')->where('type', 'blackout')->where('read', false)->count();
+                    $sosCountHeader = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->count();
                     
                     $studentMessagesQueryHeader = \DB::table('notifications')
                         ->where('sender_type', 'student')
@@ -507,7 +504,7 @@
                     }
                     
                     $studentMessagesCountHeader = $studentMessagesQueryHeader->count();
-                    $totalUnreadHeader = $sosCountHeader + $blackoutCountHeader + $studentMessagesCountHeader;
+                    $totalUnreadHeader = $sosCountHeader + $studentMessagesCountHeader;
                 @endphp
                 <a href="/notifications" class="notification-btn">
                     <i data-lucide="bell"></i>

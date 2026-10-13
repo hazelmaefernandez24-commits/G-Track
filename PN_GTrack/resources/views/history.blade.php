@@ -337,7 +337,7 @@
         const lng = parseFloat(loc.longitude);
         const locationText = address
             ? `<div style="color: #0F172A; font-weight:600; margin-top: 6px;">${address}</div>`
-            : `<div style="color: #64748B; font-family: monospace; font-size:11px; margin-top: 6px;">Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}</div>`;
+            : `<div style="color: #64748B; font-family: 'Inter', sans-serif; font-size:11px; margin-top: 6px;">Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}</div>`;
 
         const title = loc.sos_status === 'help'
             ? 'SOS Location'

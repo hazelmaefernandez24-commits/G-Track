@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'PN_GTrack') }} - G!Track</title> 
+    <link rel="stylesheet" href="{{ asset('css/global-font.css') }}">
     <style>
         :root{
             --bg:#f6f7fb;
@@ -19,7 +20,7 @@
             margin:0;
             background: linear-gradient(135deg, #f0f0f3 0%, #f4f3f5 100%);
             color:var(--text);
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+            font-family: 'Inter', sans-serif;
             min-height:100vh;
             display:flex;
             align-items:center;

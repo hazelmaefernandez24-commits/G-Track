@@ -216,6 +216,34 @@ class MobileApiFeatureCoverageTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_sos_is_received_without_video_and_later_video_updates_same_alert(): void
+    {
+        Storage::fake('public');
+        $student = $this->createStudent();
+
+        $initialResponse = $this->postJson('/api/notifications/send', [
+            'student_id' => $student->student_id,
+            'target' => 'sos',
+            'message' => 'Emergency - video unavailable',
+        ])->assertOk()
+            ->assertJsonPath('success', true);
+
+        $alert = Notification::where('student_id', $student->id)->where('type', 'sos')->firstOrFail();
+        $this->assertNull($alert->video_url);
+
+        $this->post('/api/upload-video', [
+            'student_id' => $student->student_id,
+            'target' => 'sos',
+            'message' => 'Emergency video ready',
+            'video' => UploadedFile::fake()->create('incident.mp4', 100, 'video/mp4'),
+        ])->assertOk()
+            ->assertJsonPath('notification_id', $initialResponse->json('notification_id'));
+
+        $alert->refresh();
+        $this->assertNotEmpty($alert->video_url);
+        $this->assertSame(1, Notification::where('student_id', $student->id)->where('type', 'sos')->count());
+    }
+
     public function test_admin_mobile_directory_broadcast_reply_and_alert_resolution(): void
     {
         $admin = $this->createAdmin();
