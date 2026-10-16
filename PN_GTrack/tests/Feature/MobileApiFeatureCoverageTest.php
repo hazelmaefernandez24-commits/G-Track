@@ -175,6 +175,13 @@ class MobileApiFeatureCoverageTest extends TestCase
             'message' => 'I need help finding the pickup point.',
         ]);
 
+        $this->postJson('/api/notifications/send', [
+            'student_id' => $student->student_id,
+            'target' => 'blackout',
+            'message' => 'This alert type is no longer supported.',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('target');
+
         $this->getJson('/api/notifications/'.$student->student_id)
             ->assertOk()
             ->assertJsonPath('success', true)
@@ -224,7 +231,7 @@ class MobileApiFeatureCoverageTest extends TestCase
         $initialResponse = $this->postJson('/api/notifications/send', [
             'student_id' => $student->student_id,
             'target' => 'sos',
-            'message' => 'Emergency - video unavailable',
+            'message' => 'Emergency - battery is low and video unavailable',
         ])->assertOk()
             ->assertJsonPath('success', true);
 

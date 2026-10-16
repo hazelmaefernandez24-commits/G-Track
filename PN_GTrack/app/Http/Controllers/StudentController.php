@@ -102,13 +102,11 @@ class StudentController extends Controller
 
         if ($request->sos_status === 'safe') {
             // When student cancels SOS, resolve any open SOS alerts
-            \App\Models\Notification::where('student_id', $student->id)
-                ->where('type', 'sos')
+            \App\Models\SosAlert::where('student_id', $student->id)
                 ->where('status', '!=', 'resolved')
                 ->update(['status' => 'resolved', 'read' => true]);
         }
-        // NOTE: SOS notification creation (with video) is handled exclusively by
-        // NotificationController@apiSend via POST /upload-video or /notifications/send
+        // SOS notification creation (with video) is handled by SosAlertController.
 
         return response()->json([
             'message'    => 'SOS status updated',

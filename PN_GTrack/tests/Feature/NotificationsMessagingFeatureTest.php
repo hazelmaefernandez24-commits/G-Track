@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Admin;
+use App\Models\BroadcastNotification;
 use App\Models\Notification;
+use App\Models\SosAlert;
 use App\Models\Student;
+use App\Models\StudentMessage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -12,6 +15,36 @@ use Tests\TestCase;
 class NotificationsMessagingFeatureTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_notification_domain_models_only_query_their_own_types(): void
+    {
+        $student = $this->createStudent();
+
+        Notification::create([
+            'student_id' => $student->id,
+            'type' => 'sos',
+            'message' => 'Emergency',
+            'read' => false,
+            'status' => 'pending',
+        ]);
+        Notification::create([
+            'student_id' => $student->id,
+            'type' => 'student_message',
+            'message' => 'Please help.',
+            'read' => false,
+            'status' => 'pending',
+        ]);
+        Notification::create([
+            'type' => 'broadcast',
+            'message' => 'Campus update.',
+            'read' => true,
+            'status' => 'pending',
+        ]);
+
+        $this->assertSame(1, SosAlert::count());
+        $this->assertSame(1, StudentMessage::count());
+        $this->assertSame(1, BroadcastNotification::count());
+    }
 
     public function test_admin_can_send_a_broadcast_to_all_students(): void
     {
@@ -78,45 +111,6 @@ class NotificationsMessagingFeatureTest extends TestCase
             'resolved_by_admin_id' => $admin->id,
         ]);
         $this->assertSame('safe', $student->fresh()->sos_status);
-    }
-
-    public function test_admin_can_acknowledge_a_blackout_alert_and_message_the_student_once(): void
-    {
-        $admin = $this->createAdmin('main');
-        $student = $this->createStudent();
-        $alert = Notification::create([
-            'student_id' => $student->id,
-            'admin_id' => $admin->id,
-            'type' => 'blackout',
-            'sender_type' => 'student',
-            'message' => 'Blackout alert',
-            'read' => false,
-            'status' => 'pending',
-        ]);
-
-        $this->actingAs($admin, 'admin')
-            ->post("/notifications/{$alert->id}/acknowledge")
-            ->assertSessionHas('success');
-
-        $this->assertDatabaseHas('notifications', [
-            'student_id' => $student->id,
-            'admin_id' => $admin->id,
-            'type' => 'admin_reply',
-            'sender_type' => 'admin',
-            'reply_to_id' => $alert->id,
-            'message' => 'Your blackout alert has been acknowledged.',
-            'read' => false,
-        ]);
-
-        $this->post("/notifications/{$alert->id}/acknowledge")
-            ->assertSessionHas('info', 'This alert has already been acknowledged; no additional message was sent.');
-
-        $this->assertSame(
-            1,
-            Notification::where('reply_to_id', $alert->id)
-                ->where('type', 'admin_reply')
-                ->count()
-        );
     }
 
     public function test_staff_can_load_conversation_messages_and_mark_student_messages_read(): void

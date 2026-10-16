@@ -291,7 +291,6 @@
 |-----------|------|
 | **A1 – Student Not Found** | The system returns a 404 error. |
 | **A2 – Admin Resolves Alert** | An admin can manually resolve an SOS alert through the notifications panel, which sets the student's `sos_status` back to `'safe'`. |
-| **A3 – Blackout Alert (Auto-detected)** | If the SOS message contains keywords like *"low on battery"* or *"battery is low"*, the system automatically categorizes it as a **Blackout** alert instead of an SOS alert. |
 
 ### Postconditions
 
@@ -300,7 +299,7 @@
 
 ### Relationship
 
-- `<<appears in>>` **UC-11: View Notification and Activity** — SOS and Blackout alerts appear in the notification center for admin review.
+- `<<appears in>>` **UC-11: View Notification and Activity** — SOS alerts appear in the notification center for admin review.
 
 ---
 
@@ -461,7 +460,7 @@
 | **Use Case ID** | UC-11 |
 | **Use Case Name** | View Notification and Activity |
 | **Primary Actor** | Admin (Education), Main Admin |
-| **Description** | The admin views and manages all system notifications organized into tabs: **SOS/Blackout Alerts**, **Student Messages**, and **Broadcasts**. Admins can acknowledge, resolve, and delete notifications. The system tracks read/unread status and provides filtering by class. |
+| **Description** | The admin views and manages system notifications on separate screens for **SOS Alerts**, **Student Messages**, and **Broadcasts**. Admins can acknowledge, resolve, and delete notifications. The system tracks read/unread status and provides filtering by class. |
 | **Trigger** | The admin navigates to `/notifications` or clicks the notification bell icon. |
 | **Preconditions** | The admin must be authenticated. |
 
@@ -471,7 +470,7 @@
 |------|-------|-----------------|
 | 1 | Admin navigates to the Notifications page. | — |
 | 2 | — | The system loads notifications for the current tab (default: Student Messages). |
-| 3 | — | For **SOS/Blackout** tab: The system displays alerts sorted by newest first with status indicators (pending, acknowledged, resolved). Only SOS alerts with a valid video are shown. |
+| 3 | — | For the **SOS Alerts** screen: The system displays alerts sorted by newest first with status indicators (pending, acknowledged, resolved). |
 | 4 | — | For **Student Messages** tab: The system groups messages by student in a Messenger-style layout. Education admins only see conversations assigned to them. |
 | 5 | — | For **Broadcast** tab: The system displays all broadcast messages. |
 | 6 | — | The system computes stats: unread count, active SOS count, broadcast count, online/offline counts. |
@@ -480,10 +479,10 @@
 
 | Action | Description |
 |--------|-------------|
-| **Acknowledge Alert** | Admin clicks "Acknowledge" on an SOS/Blackout alert. The system records the admin's name and timestamp, and marks it as read. |
+| **Acknowledge Alert** | Admin clicks "Acknowledge" on an SOS alert. The system records the admin's name and timestamp, and marks it as read. |
 | **Resolve Alert** | Admin clicks "Resolve" on an alert. The system marks the notification as `'resolved'`, records the resolver's name, and if it's an SOS alert, sets the student's `sos_status` to `'safe'`. |
 | **Mark as Read** | Admin clicks to mark a notification as read, updating the `read` field. |
-| **Delete Archives** | Admin can delete all resolved SOS or Blackout archives in bulk. |
+| **Delete Archives** | Admin can delete all resolved SOS archives in bulk. |
 | **Filter by Class** | Admin selects a class from the dropdown to filter notifications by student class. |
 
 ### Alternative Flows
@@ -491,7 +490,7 @@
 | Condition | Flow |
 |-----------|------|
 | **A1 – No Notifications** | If there are no notifications for the selected tab, an empty state is displayed. |
-| **A2 – Main Admin Scope** | Main admins see conversations assigned to them plus all broadcasts, SOS, and blackout alerts. |
+| **A2 – Main Admin Scope** | Main admins see conversations assigned to them plus all broadcasts and SOS alerts. |
 
 ### Postconditions
 

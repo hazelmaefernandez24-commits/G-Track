@@ -133,7 +133,7 @@ erDiagram
 
 | Area | Proposed structure |
 | --- | --- |
-| Emergency alerts | Store SOS/blackout data, its description, and lifecycle in `emergency_alerts`. The description accompanies the SOS video, whose file reference is stored in `alert_media`. Its nullable `location_id` references the captured incident location in `locations`, avoiding duplicate coordinates or a separate location string. |
+| Emergency alerts | Store SOS data, its description, and lifecycle in `emergency_alerts`. The description accompanies the SOS video, whose file reference is stored in `alert_media`. Its nullable `location_id` references the captured incident location in `locations`, avoiding duplicate coordinates or a separate location string. |
 | Conversations | Store the student/admin thread in `conversations`; individual text-only messages and replies go in `messages`. Messaging does not support file attachments. |
 | Broadcasts | Store the broadcast content once in `broadcasts`. `broadcast_recipients` stores the audience and each student's `read_at` timestamp. |
 | Battery and signal | Removed from the proposed schema entirely, including student/device monitoring and emergency alert records. |

@@ -52,13 +52,11 @@ class LocationController extends Controller
 
                 if ($validated['sos_status'] === 'safe' && $oldStatus === 'help') {
                     // If moving from help to safe, resolve any active alerts
-                    \App\Models\Notification::where('student_id', $student->id)
-                        ->where('type', 'sos')
+                    \App\Models\SosAlert::where('student_id', $student->id)
                         ->where('status', '!=', 'resolved')
                         ->update(['status' => 'resolved', 'read' => true]);
                 }
-                // NOTE: SOS notification creation (with video) is handled exclusively by
-                // NotificationController@apiSend via POST /upload-video or /notifications/send
+                // SOS notification creation (with video) is handled by SosAlertController.
             }
             $student->save();
         }
@@ -97,12 +95,10 @@ class LocationController extends Controller
         $student->last_update = now()->format('M d, Y h:i A');
         $student->save();
 
-        // NOTE: SOS notification creation (with video) is handled exclusively by
-        // NotificationController@apiSend via POST /upload-video or /notifications/send
+        // SOS notification creation (with video) is handled by SosAlertController.
         if ($request->sos_status === 'safe') {
             // Mark as resolved if student is safe
-            \App\Models\Notification::where('student_id', $student->id)
-                ->where('type', 'sos')
+            \App\Models\SosAlert::where('student_id', $student->id)
                 ->where('status', '!=', 'resolved')
                 ->update(['status' => 'resolved', 'read' => true]);
         }

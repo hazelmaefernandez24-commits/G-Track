@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SosAlertController;
+use App\Http\Controllers\StudentMessageController;
+use App\Http\Controllers\BroadcastController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\StatusController;
 
@@ -32,16 +35,16 @@ Route::middleware('api')->group(function () {
 
     // 🔵 NOTIFICATIONS & VIDEO UPLOAD
     Route::post('/notifications/send', [NotificationController::class, 'apiSend']);
-    Route::post('/upload-video', [NotificationController::class, 'apiSend']); // Mobile app endpoint
+    Route::post('/upload-video', [SosAlertController::class, 'apiSend']); // Mobile app endpoint
     Route::get('/notifications/{student_id}', [NotificationController::class, 'apiGet']);
-    Route::get('/notification/{id}/video', [NotificationController::class, 'apiGetVideo']);
-    Route::get('/student/{student_id}/latest-video', [NotificationController::class, 'apiGetLatestVideo']);
+    Route::get('/notification/{id}/video', [SosAlertController::class, 'apiGetVideo']);
+    Route::get('/student/{student_id}/latest-video', [SosAlertController::class, 'apiGetLatestVideo']);
 
     // 👨‍💼 ADMIN MOBILE ACTIONS
     Route::get('/admins', [NotificationController::class, 'getAdmins']);
-    Route::post('/admin/broadcast', [NotificationController::class, 'apiAdminBroadcast']);
-    Route::post('/admin/message/send/{student_id}', [NotificationController::class, 'apiAdminSendMessage']);
-    Route::post('/admin/notification/resolve/{id}', [NotificationController::class, 'apiAdminResolve']);
+    Route::post('/admin/broadcast', [BroadcastController::class, 'apiAdminBroadcast']);
+    Route::post('/admin/message/send/{student_id}', [StudentMessageController::class, 'apiAdminSendMessage']);
+    Route::post('/admin/notification/resolve/{id}', [SosAlertController::class, 'apiResolve']);
 
     // 🟡 DEVICE STATUS
     // 'update' is correct (returns JSON)
@@ -49,7 +52,7 @@ Route::middleware('api')->group(function () {
     // 'getAll' method does NOT exist. DeviceController@index returns a dashboard view.
     // Route::get('/device/status', [DeviceController::class, 'getAll']);
 
-    // 🟡 BLACKOUT / STATUS
+    // 🟡 SYSTEM STATUS
     // StatusController has 'index' method that returns JSON, not 'getAll'. changed 'getAll' -> 'index'
     Route::get('/status/all', [StatusController::class, 'index']);
 

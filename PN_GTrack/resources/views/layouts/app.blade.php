@@ -444,9 +444,18 @@
                 <i data-lucide="activity"></i>
                 Student Activity
             </a>
-            <a href="/notifications" class="nav-item {{ request()->is('notifications') ? 'active' : '' }}">
-                <i data-lucide="bell"></i>
-                Notifications
+            <div style="margin: 16px 16px 0; font-size: 11px; font-weight: 800; color: rgb(12, 20, 59); text-transform: uppercase; letter-spacing: 0.5px;">Communications</div>
+            <a href="{{ route('notifications.screen', ['screen' => 'messages']) }}" class="nav-item {{ request()->route('screen') === 'messages' || request()->is('notifications') ? 'active' : '' }}">
+                <i data-lucide="message-circle"></i>
+                Student Messages
+            </a>
+            <a href="{{ route('notifications.screen', ['screen' => 'alerts']) }}" class="nav-item {{ request()->route('screen') === 'alerts' ? 'active' : '' }}">
+                <i data-lucide="siren"></i>
+                Emergency Alerts
+            </a>
+            <a href="{{ route('notifications.screen', ['screen' => 'broadcasts']) }}" class="nav-item {{ request()->route('screen') === 'broadcasts' ? 'active' : '' }}">
+                <i data-lucide="megaphone"></i>
+                Broadcast Notifications
             </a>
 
             @if(Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === 'main')
@@ -491,12 +500,11 @@
                     $currentAdminId = $currentUser ? $currentUser->getKey() : null;
                     $currentAdminRole = $currentUser->role ?? null;
 
-                    $broadcastCountHeader = \DB::table('notifications')->where('type', 'broadcast')->where('read', false)->count();
-                    $sosCountHeader = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->count();
+                    $broadcastCountHeader = \App\Models\BroadcastNotification::where('read', false)->count();
+                    $sosCountHeader = \App\Models\SosAlert::where('status', '!=', 'resolved')->where('read', false)->count();
                     
-                    $studentMessagesQueryHeader = \DB::table('notifications')
+                    $studentMessagesQueryHeader = \App\Models\StudentMessage::query()
                         ->where('sender_type', 'student')
-                        ->whereNotIn('type', ['sos', 'blackout', 'broadcast'])
                         ->where('read', false);
                         
                     if ($currentAdminId && in_array($currentAdminRole, ['education', 'main'], true)) {
@@ -506,8 +514,8 @@
                     $studentMessagesCountHeader = $studentMessagesQueryHeader->count();
                     $totalUnreadHeader = $sosCountHeader + $studentMessagesCountHeader;
                 @endphp
-                <a href="/notifications" class="notification-btn">
-                    <i data-lucide="bell"></i>
+                <a href="/notifications" class="notification-btn" title="Messages and Notifications">
+                    <i data-lucide="message-square"></i>
                     @if($totalUnreadHeader > 0)
                         <span class="notification-badge">{{ $totalUnreadHeader }}</span>
                     @endif

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Notifications')
-@section('subtitle', 'Send and manage notifications')
+@section('title', 'Emergency Alerts')
+@section('subtitle', 'Monitor and respond to student emergency alerts')
 
 @push('styles')
 <style>
@@ -1034,209 +1034,27 @@
         }
     
 </style>
-<!-- Quill Rich Text Editor -->
-<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 @endpush
 
 @section('content')
-
-        @if(session('info'))
-            <div role="status"
-                style="margin: 0 24px 16px; padding: 12px 16px; border: 1px solid rgba(34, 187, 234, 0.35); border-radius: 10px; background: #EAF9FE; color: #075985; font-weight: 600;">
-                {{ session('info') }}
+    @if(session('info'))
+        <div role="status" style="margin: 0 24px 16px; padding: 12px 16px; border: 1px solid rgba(34, 187, 234, 0.35); border-radius: 10px; background: #EAF9FE; color: #075985; font-weight: 600;">{{ session('info') }}</div>
+    @endif
+    <div class="section" style="margin-top: 0;">
+        <form class="filter-block" style="border-radius: 12px; border: 1px solid var(--line);" method="GET" action="{{ route('notifications.screen', ['screen' => 'alerts']) }}">
+            <label class="filter-label" for="class-filter">Filter by Class</label>
+            <div class="select-wrap"><span style="color:var(--muted);font-size:15px;">:</span>
+                <select id="class-filter" name="class" onchange="this.form.submit()">
+                    <option value="all" {{ $class === 'all' ? 'selected' : '' }}>All Classes</option>
+                    @foreach($classes as $c)<option value="{{ $c->name }}" {{ $dbClass === $c->name ? 'selected' : '' }}>Class {{ $c->name }}</option>@endforeach
+                </select>
             </div>
-        @endif
-
-{{--
-    <div class="page-title" style="margin-bottom: 24px;">
-            
-            <p>Summary of system communications and alerts</p>
-        </div>
-
-        <section class="cards">
-
-            <!-- Emergency Alerts -->
-            <article class="card">
-                <div class="card-head">
-                    <div>
-                        <div class="card-title">Emergency Alerts</div>
-                        <div class="stat-number" style="color: var(--red);">{{ $stats['sos'] }}</div>
-                        <div class="stat-sub">
-                            Pending SOS alerts
-                        </div>
-                    </div>
-                    <div class="status-dot" style="color: var(--red);">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 21h22L12 2 1 21Zm12-3h-2v-2h2v2Zm0-4h-2v-4h2v4Z" fill="currentColor" />
-                        </svg>
-                    </div>
-                </div>
-            </article>
-
-            <!-- Broadcast History -->
-            <article class="card">
-                <div class="card-head">
-                    <div>
-                        <div class="card-title">Broadcast History</div>
-                        <div class="stat-number" style="color: var(--accent-dark);">{{ $stats['broadcast'] }}</div>
-                        <div class="stat-sub">
-                            Announcements sent
-                        </div>
-                    </div>
-                    <div class="status-dot" style="color: var(--accent-dark);">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2Zm0 14H5.17L4 17.17V4h16v12Z"
-                                fill="currentColor" />
-                            <path d="M7 9h10v2H7z" fill="currentColor" opacity=".3" />
-                        </svg>
-                    </div>
-                </div>
-            </article>
-        </section>
-        --}}
-
-        <div class='section' style="margin-top: 0px;">
-            <div class='filter-block' style="border-radius: 12px; border: 1px solid var(--line);">
-                <span class='filter-label'>Filter by Class</span>
-                <div class='select-wrap'>
-                    <span style='color:var(--muted);font-size:15px;'>:</span>
-                    <select id='class-filter'
-                        onchange="location.href='?class=' + encodeURIComponent(this.value) + '&tab={{ $tab }}'">
-                        <option value='all' {{ $class === 'all' ? 'selected' : '' }}>All Classes</option>
-                        @foreach($classes as $c)
-                            <option value='{{ $c->name }}' {{ $dbClass === $c->name ? 'selected' : '' }}>Class {{ $c->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class='section'>
-            <div class='tabs'>
-                <a class='tab {{ $tab === "student" ? "active" : "" }}'
-                    href='?class={{ urlencode($class) }}&tab=student'>
-                    Student Messages
-                    @php $studentUnread = $unreadCounts->sum(); @endphp
-                    @if($studentUnread > 0)
-                        <span class="tab-count">{{ $studentUnread }}</span>
-                    @endif
-                </a>
-                <a class='tab {{ $tab === "sos" ? "active" : "" }}'
-                    href='?class={{ urlencode($class) }}&tab=sos'>
-                    Emergency Alerts
-                    @if($stats['sos'] > 0)
-                        <span style="background: var(--red); color: white; padding: 2px 6px; border-radius: 12px; font-size: 11px; margin-left: 6px; font-weight: bold;">{{ $stats['sos'] }}</span>
-                    @endif
-                </a>
-                <a class='tab {{ $tab === "broadcast" ? "active" : "" }}'
-                    href='?class={{ urlencode($class) }}&tab=broadcast'>
-                    Broadcast Notifications
-                </a>
-            </div>
-
-            <div class='card-panel'>
-                <div class='card-panel-grid'>
-                    <div>
-                        <h3 class="card-title" style="font-size: 17px;">
-    {{ $class === 'all' ? 'All Classes' : 'Class of ' . $class }}
-</h3>
-                       {{-- <p class='card-sub'>{{ $notifications->count() }}
-                            {{ $notifications->count() === 1 ? 'message' : 'messages' }}
-                        </p> --}}
-                    </div>
-                </div>
-
-                @if($tab === 'broadcast')
-                    <div id="broadcast-form-container"
-                        style="display: none; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); animation: slide-down 0.3s ease-out;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
-                            <div>
-                                <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800;">Compose New Broadcast</h3>
-                                <p style="margin: 0; font-size: 13px; color: var(--muted);">Prepare and send an announcement
-                                    to students</p>
-                            </div>
-                            <button onclick="toggleBroadcastForm()"
-                                style="background: #F8FBFF; color: var(--muted); border: none; padding: 8px; border-radius: 8px; cursor: pointer;">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </button>
-                        </div>
-
-                        <form method="POST" action="/notifications/send" id="broadcast-form"
-                            style="display: flex; flex-direction: column; gap: 16px;">
-                            @csrf
-                            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px;">
-                                <div>
-                                    <label
-                                        style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Target
-                                        Audience</label>
-                                    <select name="target" required
-                                        style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
-                                        <option value="all">All Students</option>
-                                        @foreach($classes as $c)
-                                            <option value="{{ $c->name }}">Class {{ $c->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label
-                                        style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Subject
-                                        Line</label>
-                                    <input type="text" name="subject" required placeholder="Enter subject Title..."
-                                        style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
-                                </div>
-                            </div>
-
-                            <div>
-                                <label
-                                    style="display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Message
-                                    Content (Rich Text)</label>
-                                <div id="quill-editor"
-                                    style="height: 150px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--line);">
-                                </div>
-                                <input type="hidden" name="message" id="broadcast-message-input">
-                            </div>
-
-                            <div style="display: flex; justify-content: flex-end; gap: 12px;">
-                                <button type="button" onclick="toggleBroadcastForm()"
-                                    style="background: #F8FBFF; color: var(--muted); border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">
-                                    Cancel
-                                </button>
-                                <button type="submit"
-                                    style="background: var(--blue); color: #fff; border: none; padding: 12px 32px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s;">
-                                    Send Announcement Now
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class='broadcast-info'
-                        style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong>Broadcast Notifications History</strong>
-                            <p style="margin: 4px 0 0 0;">Detailed log of all outbound school-wide announcements.</p>
-                        </div>
-                        <button onclick="toggleBroadcastForm()" id="toggle-broadcast-btn"
-                            style="background: var(--blue); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); transition: all 0.2s;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            Send New Broadcast
-                        </button>
-                    </div>
-                @endif
-
-                <div class='messages'>
-                    @if($tab === 'sos')
-                        @if($tab === 'sos')
+        </form>
+    </div>
+    <div class="section">
+        <div class="card-panel">
+            <div class="card-panel-grid"><div><h3 class="card-title" style="font-size:17px;">{{ $class === 'all' ? 'All Classes' : 'Class of ' . $class }}</h3></div></div>
+            <div class="messages">
                             <div style="margin-bottom: 16px; display: flex; justify-content: flex-end;">
                                 <button type="button" class="action-btn" onclick="openSOSHistoryModal()" style="background: var(--blue); display: flex; align-items: center; gap: 6px;">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1415,331 +1233,184 @@
                                     style='background:#f8fafc;border-style:dashed;text-align:center;color:var(--muted);'>No current
                                     SOS alerts.</div>
                             @endforelse
-                        @else
-                            <div style="margin-bottom: 16px; display: flex; justify-content: flex-end;">
-                                <button type="button" class="action-btn" onclick="openBlackoutHistoryModal()" style="background: var(--blue); display: flex; align-items: center; gap: 6px;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <polyline points="12 6 12 12 16 14"></polyline>
-                                    </svg>
-                                    Archives
-                                </button>
-                            </div>
-                                @forelse($notifications->where('type', 'blackout')->where('status', '!=', 'resolved') as $notification)
-                                        <div class='message-item' style="border-left: 4px solid var(--blue);">
-                                            <div class='message-head'>
-                                                <p class='message-title'>
-                                                    Blackout Alert: {{ optional($notification->student)->name ?? 'Unknown Student' }}
-                                                   
-                                                </p>
-                                                <span
-                                                    class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
-                                            </div>
-                                            @php
-                                                // Get the student's latest GPS record from the locations table
-                                                $latestLocation = $notification->student
-                                                    ? \App\Models\Location::where('student_id', $notification->student->id)
-                                                        ->orderBy('recorded_at', 'desc')
-                                                        ->first()
-                                                    : null;
-
-                                                $currentLat = $latestLocation->latitude ?? optional($notification->student)->latitude ?? $notification->latitude;
-                                                $currentLng = $latestLocation->longitude ?? optional($notification->student)->longitude ?? $notification->longitude;
-                                            @endphp
-
-                                            <div class='message-meta'
-                                                style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);'>
-                                                <div
-                                                    style="display: grid; grid-template-columns: 1fr; gap: 12px;">
-                                                    <div>
-                                                        <div
-                                                            style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
-                                                            Last Known Location</div>
-                                                        <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
-                                                            @if($currentLat)
-                                                                <a href="/tracking?student_id={{ optional($notification->student)->student_id ?? $notification->student_id }}"
-                                                                    style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
-                                                                    📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }}
-                                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                                                                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                                        stroke-linejoin="round">
-                                                                        <line x1="7" y1="17" x2="17" y2="7"></line>
-                                                                        <polyline points="7 7 17 7 17 17"></polyline>
-                                                                    </svg>
-                                                                </a>
-                                                            @else
-                                                                {{ $notification->location ?? 'Location Unavailable' }}
-                                                            @endif
-                                                        </div>
-                                                    </div>
-
-                                                    @if($notification->status !== 'resolved')
-                                                        <div
-                                                            style="grid-column: span 4; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
-                                                            @if($notification->acknowledged_at)
-                                                                <div class='message-meta' style='width: 100%; color: var(--blue); font-weight: 700; text-align: left;'>
-                                                                    Already acknowledged by {{ $notification->acknowledged_by_name ?? 'Admin' }}
-                                                                    at {{ $notification->acknowledged_at->format('n/j/Y, h:i A') }}
-                                                                </div>
-                                                            @endif
-                                                            <div style="display: flex; justify-content: flex-end; gap: 10px; width: 100%;">
-                                                                {{-- Acknowledged (Mark as Seen) --}}
-                                                                @if(!$notification->acknowledged_at)
-                                                                    <form method='POST' action='/notifications/{{ $notification->id }}/acknowledge'
-                                                                        style='display:inline;'>
-                                                                        @csrf
-                                                                        <button class='action-btn'
-                                                                            style="font-size:11px; padding:8px 16px; border-radius: 8px; background: var(--blue); color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
-                                                                            type='submit'>
-                                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                                                stroke-linejoin="round">
-                                                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                                                                <circle cx="12" cy="12" r="3"></circle>
-                                                                            </svg>
-                                                                            Acknowledge
-                                                                        </button>
-                                                                    </form>
-                                                                @endif
-
-                                                                {{-- Mark as Resolved (Safe) --}}
-                                                                <form method='POST' action='/notifications/{{ $notification->id }}/resolve'
-                                                                    style='display:inline;'>
-                                                                    @csrf
-                                                                    <button class='action-btn ack-btn'
-                                                                        style="font-size:11px; padding:8px 16px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 4px;"
-                                                                        type='submit'>
-                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                                            stroke-linejoin="round">
-                                                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                                                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                                                        </svg>
-                                                                        Mark as Resolved
-                                                                    </button>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                @empty
-                                <div class='message-item'
-                                    style='background:#f8fafc;border-style:dashed;text-align:center;color:var(--muted);'>No blackout
-                                    events.</div>
-                            @endforelse
-                        @endif
-                    @elseif($tab === 'broadcast')
-                    @forelse($notifications as $notification)
-                        <div class='message-item broadcast-item-clickable'
-                            onclick="showBroadcastDetails('{{ addslashes($notification->subject ?? 'Broadcast Notification') }}', '{{ addslashes($notification->message) }}', '{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}', '{{ addslashes($notification->sender_name ?? ($notification->sender_type === 'admin' ? 'Admin' : 'System')) }}')"
-                            style="border-left: 4px solid var(--yellow);">
-                            <div class='message-head'>
-                                <p class='message-title'>
-                                    {{ $notification->subject ?? 'No Subject' }}
-                                    <span class='badge-pill'
-                                        style='background:rgba(255, 153, 51, 0.16);color:var(--accent);border-color:rgba(255, 153, 51, 0.25);'>Outbound</span>
-                                </p>
-                                <span
-                                    class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
-                            </div>
-                            <div class='message-meta' style='margin-top:8px;'>
-                                <span style='font-weight:700;color:var(--muted);'>Sent by:</span> {{ $notification->sender_name ?? ($notification->sender_type === 'admin' ? 'Admin' : 'System') }}
-                            </div>
-                            <div class='message-meta' style='margin-top:6px;'>
-                                @if($notification->class && $notification->class !== 'all') Class: {{ $notification->class }} |
-                                @endif
-                                <span class='badge-pill' style="font-size: 10px;">Sent to All</span>
-                            </div>
-                        </div>
-                    @empty
-                        <div class='message-item'
-                            style='background:#fff;border-color:rgba(34, 187, 234, 0.18);text-align:center;padding:30px;color:var(--muted);'>No
-                            broadcast history.</div>
-                    @endforelse
-                @else
-                    {{-- MESSENGER-STYLE STUDENT CHAT --}}
-                    <div class="messenger-wrapper">
-                        {{-- Sidebar --}}
-                        <aside class="student-panel">
-                            <div class="panel-header">
-                                <div class="panel-title" style="display: flex; align-items: center; gap: 10px;">
-                                    Student Chats
-                                    <button id="view-students-btn" type="button" onclick="openStudentsModal()" style="margin-left: 50px; padding: 4px 12px; font-size: 12px; font-weight: 700; border-radius: 8px; border: 1px solid #009DE1; background: #fff; color: #009DE1; cursor: pointer; transition: background 0.2s;">
-                                        View students
-                                    </button>
-                                </div>
-                                    <!-- All Students Modal -->
-                                    <div id="all-students-modal" onclick="closeStudentsModal(event)" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.18); align-items:center; justify-content:center;">
-                                        <div onclick="event.stopPropagation()" style="background:#fff; border-radius:16px; max-width:480px; width:96vw; max-height:80vh; overflow:auto; box-shadow:0 8px 32px rgba(0,0,0,0.18); padding:28px 24px 18px 24px; position:relative;">
-                                            <button type="button" onclick="closeStudentsModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:20px; color:var(--muted); cursor:pointer;">&times;</button>
-                                            <h2 style="font-size:20px; font-weight:800; margin-bottom:12px;">All Students</h2>
-                                            <div style="margin-bottom:12px; display:flex; gap:10px; align-items:center;">
-                                                <label for="modal-class-filter" style="font-weight:700; font-size:13px;">Class:</label>
-                                                <select id="modal-class-filter" style="padding:6px 12px; border-radius:8px; border:1px solid var(--line); font-size:13px;">
-                                                    <option value="all">All</option>
-                                                    @foreach($classes as $c)
-                                                        <option value="{{ $c->name }}">{{ $c->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div style="margin-bottom:10px;">
-                                                <input id="modal-student-search" type="text" placeholder="Search students..." style="width:100%; padding:7px 12px; border-radius:8px; border:1px solid var(--line); font-size:13px;">
-                                            </div>
-                                            <div id="modal-student-list" style="max-height:48vh; overflow:auto;">
-                                                <div style="text-align:center; color:var(--muted); font-size:13px; padding:30px 0;">Loading...</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <div class="search-box">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="11" cy="11" r="8" />
-                                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                                    </svg>
-                                    <input type="text" id="student-search" placeholder="Search students..."
-                                        autocomplete="off" oninput="filterStudentList()">
-                                </div>
-                               
-                            </div>
-                            <div class="student-list" id="student-list-container">
-                                @php $currentLetter = ''; @endphp
-                                @forelse($sidebarStudents as $student)
-                                    @php
-                                        $letter = strtoupper(substr($student->name, 0, 1));
-                                        $isFemale = strtolower($student->gender ?? '') === 'female';
-                                        $unread = $unreadCounts[$student->id] ?? 0;
-                                        if ($unread === 0) {
-                                            $unreadQuery = \App\Models\Notification::where(function ($q) use ($student) {
-                                                $q->where('student_id', $student->id)
-                                                  ->orWhere('student_id', $student->student_id);
-                                            })
-                                            ->where('sender_type', 'student')
-                                            ->where('read', false);
-
-                                            if (isset($currentAdminId) && in_array($currentAdminRole, ['education', 'main'])) {
-                                                $unreadQuery->where('admin_id', $currentAdminId);
-                                            }
-
-                                            $unread = $unreadQuery->count();
-                                        }
-                                    @endphp
-                                    @if($letter !== $currentLetter)
-                                        @php $currentLetter = $letter; @endphp
-                                        <div class="alpha-heading alpha-row">{{ $letter }}</div>
-                                    @endif
-                                    <div class="student-row" data-id="{{ $student->id }}"
-                                        data-name="{{ strtolower($student->name) }}" data-class="{{ $student->class }}"
-                                        data-display-name="{{ $student->name }}" data-student-id="{{ $student->student_id }}"
-                                        data-gender="{{ strtolower($student->gender ?? '') }}"
-                                        @php
-                                            // Resolve profile picture URL — handle both old full-URL and new relative-path formats
-                                            $profilePicUrl = '';
-                                            if ($student->profile_picture) {
-                                                if (str_starts_with($student->profile_picture, 'http')) {
-                                                    // Old format: full URL (may have wrong IP) — rewrite using current asset() base
-                                                    $picPath = ltrim(parse_url($student->profile_picture, PHP_URL_PATH), '/');
-                                                    // $picPath is like: storage/profile_pictures/xxx.jpg
-                                                    $profilePicUrl = asset($picPath);
-                                                } else {
-                                                    // New format: relative path like profile_pictures/xxx.jpg
-                                                    $profilePicUrl = asset('storage/' . $student->profile_picture);
-                                                }
-                                            }
-                                        @endphp
-                                        data-profile-picture="{{ $profilePicUrl }}">
-                                        <div class="avatar {{ $isFemale ? 'female' : '' }}">
-                                            @if($profilePicUrl)
-                                                <img src="{{ $profilePicUrl }}" alt="{{ $student->name }}" class="profile-pic" onerror="this.style.display='none';this.parentElement.textContent='{{ strtoupper(substr($student->name, 0, 1)) }}'">
-                                            @else
-                                                {{ strtoupper(substr($student->name, 0, 1)) }}
-                                            @endif
-                                            @if($unread > 0)
-                                            <div class="unread-badge">{{ $unread > 99 ? '99+' : $unread }}</div>@endif
-                                        </div>
-                                        <div class="student-info" style="flex: 1;">
-                                            <div class="student-name">{{ $student->name }}</div>
-                                            <div class="student-sub">{{ $student->student_id }} · {{ $student->class }}</div>
-                                        </div>
-                                        <div class="student-actions" style="position: relative;">
-                                            <button type="button" class="three-dot-btn" onclick="toggleStudentMenu(event, {{ $student->id }})" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:4px;">
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <circle cx="12" cy="12" r="1"></circle>
-                                                    <circle cx="12" cy="5" r="1"></circle>
-                                                    <circle cx="12" cy="19" r="1"></circle>
-                                                </svg>
-                                            </button>
-                                            <div id="student-menu-{{ $student->id }}" class="student-dropdown" style="display:none; position:absolute; right:0; top:100%; background:#fff; border:1px solid var(--line); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:150px;">
-                                                <button type="button" onclick="deleteStudentConversation(event, {{ $student->id }})" style="width:100%; text-align:left; padding:8px 12px; background:none; border:none; color:var(--red); font-size:13px; font-weight:600; cursor:pointer;">
-                                                    Delete Conversation
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <div style="padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px;">
-                                        No students found.</div>
-                                @endforelse
-                            </div>
-                        </aside>
-
-                        {{-- Chat Panel --}}
-                        <section class="chat-panel">
-                            <div class="chat-empty" id="chat-empty">
-                                <div
-                                    style="background: #eff6ff; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--blue)"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                                    </svg>
-                                </div>
-                                <p style="font-weight: 800; color: #404040; font-size: 16px;">Select a student</p>
-                                <p style="font-size: 13px; color: var(--muted);">Click on a student to see message history
-                                </p>
-                            </div>
-
-                            <div class="chat-header" id="chat-header" style="display:none;">
-                                <div class="chat-header-profile">
-                                    <div class="avatar" id="chat-header-avatar"></div>
-                                    <div class="student-info">
-                                        <div class="chat-header-name" id="chat-header-name">Student Name</div>
-                                        <div class="chat-header-sub" id="chat-header-sub">ID · Class</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="chat-messages" id="chat-messages" style="display:none;"></div>
-
-                            <div class="chat-input-area" id="chat-input-area" style="display:none;">
-                                @if($canMessage)
-                                    <div class="input-wrap">
-                                        <textarea id="msg-input" rows="1" placeholder="Type a message..."
-                                            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-                                    </div>
-                                    <button type="button" class="send-btn" id="send-btn" title="Send message">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <line x1="22" y1="2" x2="11" y2="13" />
-                                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                                        </svg>
-                                    </button>
-                                @else
-                                    <div style="width:100%; padding:12px 14px; border-radius:12px; background:rgba(255, 153, 51, 0.12); color:var(--accent); font-size:13px; font-weight:600; text-align:center;">
-                                        Messaging is available for education staff only.
-                                    </div>
-                                @endif
-                            </div>
-                        </section>
-                    </div>
-                @endif
             </div>
         </div>
+    </div>
+<!-- SOS History Modal -->
+    <div id="sos-history-modal" class="modal-backdrop" onclick="closeSOSHistoryModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="document.getElementById('sos-history-modal').style.display='none'">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-right: 40px;">
+                <div>
+                    <h2 class="modal-subject">SOS Alerts History</h2>
+                    <p style="font-size: 13px; color: var(--muted); margin-top: 4px; margin-bottom: 0;">Resolved SOS alerts.</p>
+                </div>
+                <button type="button" onclick="document.getElementById('deleteArchiveModal').style.display='flex'" style="background: rgba(220, 38, 38, 0.1); color: var(--red); border: 1px solid rgba(220, 38, 38, 0.2); padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='rgba(220, 38, 38, 0.2)'" onmouseout="this.style.background='rgba(220, 38, 38, 0.1)'">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Delete all Archive
+                </button>
+            </div>
+
+            <div class="modal-body-container" style="background: transparent; border: none; padding: 0;">
+                <div class="modal-scroll-area" style="padding: 0;">
+                    @php
+                        $resolvedSosList = $notifications->where('type', 'sos')->where('status', 'resolved');
+                    @endphp
+                    @forelse($resolvedSosList as $notification)
+                        <div class='message-item' style="border-left: 4px solid var(--muted); opacity: 0.8; margin-bottom: 12px; background: #fff;">
+                            <div class='message-head'>
+                                <p class='message-title'>
+                                    SOS Alert: {{ optional($notification->student)->name ?? 'Unknown Student' }}
+                                    ({{ optional($notification->student)->student_id ?? 'N/A' }})
+                                    <span class='badge-pill'
+                                        style='background:rgba(34, 187, 234, 0.08);color:rgba(64, 64, 64, 0.68);border-color:rgba(34, 187, 234, 0.18);'>I am Safe
+                                        (Resolved)</span>
+                                </p>
+                                <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
+                            </div>
+                            @if($notification->acknowledged_at || $notification->resolved_at)
+                                <div class='message-meta' style='margin-top: 8px; color: var(--muted);'>
+                                    @if($notification->acknowledged_at)
+                                        Acknowledged by {{ $notification->acknowledged_by_name ?? 'Admin' }} at {{ $notification->acknowledged_at->format('n/j/Y, h:i A') }}.
+                                    @endif
+                                    @if($notification->resolved_at)
+                                        Resolved by {{ $notification->resolved_by_name ?? 'Admin' }} at {{ $notification->resolved_at->format('n/j/Y, h:i A') }}.
+                                    @endif
+                                </div>
+                            @endif
+                                    @php
+                                        // Get the student's latest GPS record from the locations table
+                                        $latestLocation = $notification->student
+                                            ? \App\Models\Location::where('student_id', $notification->student->id)
+                                                ->orderBy('recorded_at', 'desc')
+                                                ->first()
+                                            : null;
+
+                                        $currentLat = $latestLocation->latitude ?? optional($notification->student)->latitude ?? $notification->latitude;
+                                        $currentLng = $latestLocation->longitude ?? optional($notification->student)->longitude ?? $notification->longitude;
+                                    @endphp
+
+                                    <div class='message-meta'
+                                        style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);'>
+                                        <!-- MEDIA FEEDS SECTION -->
+                                        <div
+                                            style="margin-bottom: 12px;">
+                                            <!-- Video Feed Container -->
+                                            <div
+                                                style="background: #404040; border-radius: 8px; padding: 12px; min-height: 160px; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;">
+                                                <div
+                                                    style="position: absolute; top: 12px; left: 12px; background: rgba(220, 38, 38, 0.9); color: #fff; font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; z-index: 10; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                                                    <span
+                                                        style="width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulse 1s infinite;"></span>
+                                                    Live Video Feed
+                                                </div>
+
+                                                @if($notification->video_url || (isset($notification->media_url) && !Str::endsWith($notification->media_url, ['.mp3', '.wav'])))
+                                                    <div style="position: relative;">
+                                                        <video controls style="width: 100%; border-radius: 6px; max-height: 400px; background: #000;">
+                                                            <source src="{{ $notification->video_url ?? $notification->media_url }}"
+                                                                type="video/mp4">
+                                                        </video>
+                                                        <div style="margin-top: 8px; display: flex; justify-content: flex-end;">
+                                                            <a href="{{ $notification->video_url ?? $notification->media_url }}" download 
+                                                               style="background: rgba(255,255,255,0.1); color: #fff; text-decoration: none; font-size: 11px; padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 6px; transition: all 0.2s;"
+                                                               onmouseover="this.style.background='rgba(255,255,255,0.2)'"
+                                                               onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                                                </svg>
+                                                                Save to Laptop
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <div style="text-align: center; color: rgba(255,255,255,0.4); padding: 40px 0;">
+                                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2"
+                                                            style="margin-bottom: 12px; opacity: 0.5;">
+                                                            <path d="M23 7l-7 5 7 5V7z" />
+                                                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                                                        </svg>
+                                                        <div style="font-size: 13px; font-weight: 700;">No Video Feed Available</div>
+                                                        <p style="font-size: 11px; opacity: 0.6; margin-top: 4px;">Student device has not uploaded video data</p>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <!-- Location -->
+                                        <div
+                                            style="display: grid; grid-template-columns: 1fr; gap: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05);">
+                                            <div>
+                                                <div
+                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
+                                                    Last Known Location</div>
+                                                <div
+                                                    style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
+                                                    @if($currentLat)
+                                                        <a href="/tracking?student_id={{ optional($notification->student)->student_id ?? $notification->student_id }}"
+                                                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                                                            📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }}
+                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                                stroke-linejoin="round">
+                                                                <line x1="7" y1="17" x2="17" y2="7"></line>
+                                                                <polyline points="7 7 17 7 17 17"></polyline>
+                                                            </svg>
+                                                        </a>
+                                                    @else
+                                                        {{ $notification->location ?? 'Location Unavailable' }}
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                    @empty
+                        <div class='message-item' style='background:#f8fafc;border-style:dashed;text-align:center;color:var(--muted); padding: 30px;'>No resolved SOS events.</div>
+                    @endforelse
+                </div>
+            </div>
+
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button onclick="document.getElementById('sos-history-modal').style.display='none'"
+                    style="background: #F8FBFF; color: var(--muted); border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer;">
+                    Close
+                </button>
+            </div>
         </div>
-    
+    </div>
 
+    <!-- Delete All Archive Modal -->
+    <div id="deleteArchiveModal" style="display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center;" onclick="if(event.target === this) this.style.display='none'">
+        <div style="background-color: #fff; padding: 24px; border-radius: 16px; width: 350px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+            <h3 style="color: #dc2626; margin-top: 0; font-size: 18px; font-weight: 700;">Confirm Delete</h3>
+            <p style="margin: 20px 0; font-size: 14px; color: #4b5563;">Are you sure you want to delete all SOS archives?</p>
+            <form method="POST" action="{{ route('notifications.delete-all-sos') }}">
+                @csrf
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button type="submit" style="flex:1; background: #f97316; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#ea580c'" onmouseout="this.style.background='#f97316'">Yes, Delete</button>
+                    <button type="button" style="flex:1; background-color: #6b7280; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'" onclick="document.getElementById('deleteArchiveModal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <script>
+@endsection
+
+@push('scripts')
+<script>
         function pollDashboardStats() {
             fetch('/api/dashboard/stats')
                 .then(res => res.json())
@@ -2006,7 +1677,10 @@
         document.getElementById('modal-student-search')?.addEventListener('input', filterModalStudentList);
 
         function filterStudentList() {
-            const q = document.getElementById('student-search').value.toLowerCase();
+            const searchInput = document.getElementById('student-search');
+            if (!searchInput) return;
+
+            const q = searchInput.value.toLowerCase();
             const cls = document.getElementById('student-class-filter')?.value || 'all';
 
             document.querySelectorAll('.student-row').forEach(row => {
@@ -2124,7 +1798,7 @@
                         const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                         const timeStr = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                         const isAdmin = msg.sender_type === 'admin';
-                        const isEmergency = msg.type === 'sos' || msg.type === 'blackout';
+                        const isEmergency = msg.type === 'sos';
 
                         if (dateStr !== prevDate) {
                             html += `<div class="date-sep"><span>${dateStr}</span></div>`;
@@ -2279,304 +1953,6 @@
             }
         });
     </script>
-
-    <!-- Broadcast Details Modal -->
-    <div id="broadcast-modal" class="modal-backdrop" onclick="closeBroadcastModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="document.getElementById('broadcast-modal').style.display='none'">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-            <div id="modal-time"
-                style="font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
-            </div>
-            <div id="modal-sender" style="font-size: 12px; font-weight: 700; color: var(--blue-dark); margin-bottom: 8px;"></div>
-            <h2 id="modal-subject" class="modal-subject"></h2>
-
-            <div class="modal-body-container">
-                <div class="modal-scroll-area">
-                    <div id="modal-message" style="line-height: 1.6; font-size: 15px; color: #334155;"></div>
-                </div>
-            </div>
-
-            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
-                <button onclick="document.getElementById('broadcast-modal').style.display='none'"
-                    style="background: #F8FBFF; color: var(--muted); border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer;">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- SOS History Modal -->
-    <div id="sos-history-modal" class="modal-backdrop" onclick="closeSOSHistoryModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="document.getElementById('sos-history-modal').style.display='none'">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-right: 40px;">
-                <div>
-                    <h2 class="modal-subject">SOS Alerts History</h2>
-                    <p style="font-size: 13px; color: var(--muted); margin-top: 4px; margin-bottom: 0;">Resolved SOS alerts.</p>
-                </div>
-                <button type="button" onclick="document.getElementById('deleteArchiveModal').style.display='flex'" style="background: rgba(220, 38, 38, 0.1); color: var(--red); border: 1px solid rgba(220, 38, 38, 0.2); padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='rgba(220, 38, 38, 0.2)'" onmouseout="this.style.background='rgba(220, 38, 38, 0.1)'">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                    Delete all Archive
-                </button>
-            </div>
-
-            <div class="modal-body-container" style="background: transparent; border: none; padding: 0;">
-                <div class="modal-scroll-area" style="padding: 0;">
-                    @php
-                        $resolvedSosList = $notifications->where('type', 'sos')->where('status', 'resolved');
-                    @endphp
-                    @forelse($resolvedSosList as $notification)
-                        <div class='message-item' style="border-left: 4px solid var(--muted); opacity: 0.8; margin-bottom: 12px; background: #fff;">
-                            <div class='message-head'>
-                                <p class='message-title'>
-                                    SOS Alert: {{ optional($notification->student)->name ?? 'Unknown Student' }}
-                                    ({{ optional($notification->student)->student_id ?? 'N/A' }})
-                                    <span class='badge-pill'
-                                        style='background:rgba(34, 187, 234, 0.08);color:rgba(64, 64, 64, 0.68);border-color:rgba(34, 187, 234, 0.18);'>I am Safe
-                                        (Resolved)</span>
-                                </p>
-                                <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
-                            </div>
-                            @if($notification->acknowledged_at || $notification->resolved_at)
-                                <div class='message-meta' style='margin-top: 8px; color: var(--muted);'>
-                                    @if($notification->acknowledged_at)
-                                        Acknowledged by {{ $notification->acknowledged_by_name ?? 'Admin' }} at {{ $notification->acknowledged_at->format('n/j/Y, h:i A') }}.
-                                    @endif
-                                    @if($notification->resolved_at)
-                                        Resolved by {{ $notification->resolved_by_name ?? 'Admin' }} at {{ $notification->resolved_at->format('n/j/Y, h:i A') }}.
-                                    @endif
-                                </div>
-                            @endif
-                                    @php
-                                        // Get the student's latest GPS record from the locations table
-                                        $latestLocation = $notification->student
-                                            ? \App\Models\Location::where('student_id', $notification->student->id)
-                                                ->orderBy('recorded_at', 'desc')
-                                                ->first()
-                                            : null;
-
-                                        $currentLat = $latestLocation->latitude ?? optional($notification->student)->latitude ?? $notification->latitude;
-                                        $currentLng = $latestLocation->longitude ?? optional($notification->student)->longitude ?? $notification->longitude;
-                                    @endphp
-
-                                    <div class='message-meta'
-                                        style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);'>
-                                        <!-- MEDIA FEEDS SECTION -->
-                                        <div
-                                            style="margin-bottom: 12px;">
-                                            <!-- Video Feed Container -->
-                                            <div
-                                                style="background: #404040; border-radius: 8px; padding: 12px; min-height: 160px; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;">
-                                                <div
-                                                    style="position: absolute; top: 12px; left: 12px; background: rgba(220, 38, 38, 0.9); color: #fff; font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; z-index: 10; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                                                    <span
-                                                        style="width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulse 1s infinite;"></span>
-                                                    Live Video Feed
-                                                </div>
-
-                                                @if($notification->video_url || (isset($notification->media_url) && !Str::endsWith($notification->media_url, ['.mp3', '.wav'])))
-                                                    <div style="position: relative;">
-                                                        <video controls style="width: 100%; border-radius: 6px; max-height: 400px; background: #000;">
-                                                            <source src="{{ $notification->video_url ?? $notification->media_url }}"
-                                                                type="video/mp4">
-                                                        </video>
-                                                        <div style="margin-top: 8px; display: flex; justify-content: flex-end;">
-                                                            <a href="{{ $notification->video_url ?? $notification->media_url }}" download 
-                                                               style="background: rgba(255,255,255,0.1); color: #fff; text-decoration: none; font-size: 11px; padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 6px; transition: all 0.2s;"
-                                                               onmouseover="this.style.background='rgba(255,255,255,0.2)'"
-                                                               onmouseout="this.style.background='rgba(255,255,255,0.1)'">
-                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                                                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                                                                </svg>
-                                                                Save to Laptop
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                @else
-                                                    <div style="text-align: center; color: rgba(255,255,255,0.4); padding: 40px 0;">
-                                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
-                                                            stroke="currentColor" stroke-width="2"
-                                                            style="margin-bottom: 12px; opacity: 0.5;">
-                                                            <path d="M23 7l-7 5 7 5V7z" />
-                                                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-                                                        </svg>
-                                                        <div style="font-size: 13px; font-weight: 700;">No Video Feed Available</div>
-                                                        <p style="font-size: 11px; opacity: 0.6; margin-top: 4px;">Student device has not uploaded video data</p>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        <!-- Location -->
-                                        <div
-                                            style="display: grid; grid-template-columns: 1fr; gap: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05);">
-                                            <div>
-                                                <div
-                                                    style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted); letter-spacing: 0.5px;">
-                                                    Last Known Location</div>
-                                                <div
-                                                    style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">
-                                                    @if($currentLat)
-                                                        <a href="/tracking?student_id={{ optional($notification->student)->student_id ?? $notification->student_id }}"
-                                                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
-                                                            📍 {{ number_format($currentLat, 5) }}, {{ number_format($currentLng, 5) }}
-                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                                stroke-linejoin="round">
-                                                                <line x1="7" y1="17" x2="17" y2="7"></line>
-                                                                <polyline points="7 7 17 7 17 17"></polyline>
-                                                            </svg>
-                                                        </a>
-                                                    @else
-                                                        {{ $notification->location ?? 'Location Unavailable' }}
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                    @empty
-                        <div class='message-item' style='background:#f8fafc;border-style:dashed;text-align:center;color:var(--muted); padding: 30px;'>No resolved SOS events.</div>
-                    @endforelse
-                </div>
-            </div>
-
-            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
-                <button onclick="document.getElementById('sos-history-modal').style.display='none'"
-                    style="background: #F8FBFF; color: var(--muted); border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer;">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Blackout History Modal -->
-    <div id="blackout-history-modal" class="modal-backdrop" onclick="closeBlackoutHistoryModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="document.getElementById('blackout-history-modal').style.display='none'">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-right: 40px;">
-                <div>
-                    <h2 class="modal-subject">Blackout Alerts History</h2>
-                    <p style="font-size: 13px; color: var(--muted); margin-top: 4px; margin-bottom: 0;">Resolved blackout alerts.</p>
-                </div>
-                <button type="button" onclick="document.getElementById('deleteBlackoutArchiveModal').style.display='flex'" style="background: rgba(220, 38, 38, 0.1); color: var(--red); border: 1px solid rgba(220, 38, 38, 0.2); padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='rgba(220, 38, 38, 0.2)'" onmouseout="this.style.background='rgba(220, 38, 38, 0.1)'">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                    Delete all Archive
-                </button>
-            </div>
-
-            <div class="modal-body-container" style="background: transparent; border: none; padding: 0;">
-                <div class="modal-scroll-area" style="padding: 0;">
-                    @forelse($notifications->where('type', 'blackout')->where('status', 'resolved') as $notification)
-                        <div class='message-item' style="border-left: 4px solid var(--muted); opacity: 0.8; margin-bottom: 12px; background: #fff;">
-                            <div class='message-head'>
-                                <p class='message-title'>
-                                    Blackout Alert: {{ optional($notification->student)->name ?? 'Unknown Student' }}
-                                </p>
-                                <span class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
-                            </div>
-                            @if($notification->acknowledged_at || $notification->resolved_at)
-                                <div class='message-meta' style='margin-top: 8px; color: var(--muted);'>
-                                    @if($notification->acknowledged_at)
-                                        Acknowledged by {{ $notification->acknowledged_by_name ?? 'Admin' }} at {{ $notification->acknowledged_at->format('n/j/Y, h:i A') }}.
-                                    @endif
-                                    @if($notification->resolved_at)
-                                        Resolved by {{ $notification->resolved_by_name ?? 'Admin' }} at {{ $notification->resolved_at->format('n/j/Y, h:i A') }}.
-                                    @endif
-                                </div>
-                            @endif
-                            <div class='message-meta' style='margin-top:12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);'>
-                                <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
-                                    <div>
-                                        <div style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--muted);">Location</div>
-                                        <div style="font-weight: 700; color: var(--blue); font-size: 13px; margin-top: 2px;">{{ $notification->location ?? 'Location Unavailable' }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class='message-item' style='background:#f8fafc;border-style:dashed;text-align:center;color:var(--muted); padding: 30px;'>No resolved blackout events.</div>
-                    @endforelse
-                </div>
-            </div>
-
-            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
-                <button onclick="document.getElementById('blackout-history-modal').style.display='none'"
-                    style="background: #F8FBFF; color: var(--muted); border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer;">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Delete All Archive Modal -->
-    <div id="deleteArchiveModal" style="display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center;" onclick="if(event.target === this) this.style.display='none'">
-        <div style="background-color: #fff; padding: 24px; border-radius: 16px; width: 350px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
-            <h3 style="color: #dc2626; margin-top: 0; font-size: 18px; font-weight: 700;">Confirm Delete</h3>
-            <p style="margin: 20px 0; font-size: 14px; color: #4b5563;">Are you sure you want to delete all SOS archives?</p>
-            <form method="POST" action="{{ route('notifications.delete-all-sos') }}">
-                @csrf
-                <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button type="submit" style="flex:1; background: #f97316; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#ea580c'" onmouseout="this.style.background='#f97316'">Yes, Delete</button>
-                    <button type="button" style="flex:1; background-color: #6b7280; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'" onclick="document.getElementById('deleteArchiveModal').style.display='none'">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Delete All Blackout Archive Modal -->
-    <div id="deleteBlackoutArchiveModal" style="display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center;" onclick="if(event.target === this) this.style.display='none'">
-        <div style="background-color: #fff; padding: 24px; border-radius: 16px; width: 350px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
-            <h3 style="color: #dc2626; margin-top: 0; font-size: 18px; font-weight: 700;">Confirm Delete</h3>
-            <p style="margin: 20px 0; font-size: 14px; color: #4b5563;">Are you sure you want to delete all Blackout archives?</p>
-            <form method="POST" action="{{ route('notifications.delete-all-blackout') }}">
-                @csrf
-                <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button type="submit" style="flex:1; background: #f97316; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#ea580c'" onmouseout="this.style.background='#f97316'">Yes, Delete</button>
-                    <button type="button" style="flex:1; background-color: #6b7280; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'" onclick="document.getElementById('deleteBlackoutArchiveModal').style.display='none'">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Delete Conversation Modal -->
-    <div id="deleteConversationModal" style="display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center;" onclick="if(event.target === this) this.style.display='none'">
-        <div style="background-color: #fff; padding: 24px; border-radius: 16px; width: 350px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
-            <h3 style="color: #dc2626; margin-top: 0; font-size: 18px; font-weight: 700;">Confirm Delete</h3>
-            <p style="margin: 20px 0; font-size: 14px; color: #4b5563;">Are you sure you want to delete this conversation?</p>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button type="button" id="confirmDeleteConversationBtn" style="flex:1; background: #f97316; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#ea580c'" onmouseout="this.style.background='#f97316'">Yes, Delete</button>
-                <button type="button" style="flex:1; background-color: #6b7280; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'" onclick="document.getElementById('deleteConversationModal').style.display='none'">Cancel</button>
-            </div>
-        </div>
-    </div>
     <script>
         function openSOSHistoryModal() {
             document.getElementById('sos-history-modal').style.display = 'flex';
@@ -2643,4 +2019,4 @@
             };
         }
     </script>
-@endsection
+@endpush

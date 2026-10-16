@@ -51,8 +51,8 @@ public function index()
     $onlineCount   = $students->where('status', true)->count();
     $offlineCount  = $students->where('status', false)->count();
 
-    $broadcastCount = \DB::table('notifications')->where('type', 'broadcast')->where('read', false)->count();
-    $sosCount       = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->count();
+    $broadcastCount = \App\Models\BroadcastNotification::where('read', false)->count();
+    $sosCount       = \App\Models\SosAlert::where('status', '!=', 'resolved')->count();
 
     // Latest overall system update
     $latestUpdate = \App\Models\Student::max('updated_at');
@@ -91,10 +91,9 @@ public function apiStats(Request $request)
 
     $onlineCount   = $students->where('status', true)->count();
     $offlineCount  = $students->where('status', false)->count();
-    $broadcastCount = \DB::table('notifications')->where('type', 'broadcast')->where('read', false)->count();
-    $sosCount       = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->count();
-    $unreadSosCount = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->where('read', false)->count();
-    $blackoutCount  = \DB::table('notifications')->where('type', 'blackout')->where('read', false)->count();
+    $broadcastCount = \App\Models\BroadcastNotification::where('read', false)->count();
+    $sosCount       = \App\Models\SosAlert::where('status', '!=', 'resolved')->count();
+    $unreadSosCount = \App\Models\SosAlert::where('status', '!=', 'resolved')->where('read', false)->count();
     $sosStudents    = $students->where('sos_status', 'help')->pluck('student_id');
 
     // Use updated_at (real timestamp) for accurate latest update calculation
@@ -107,7 +106,7 @@ public function apiStats(Request $request)
     
     $studentMessagesQuery = \DB::table('notifications')
         ->where('sender_type', 'student')
-        ->whereNotIn('type', ['sos', 'blackout', 'broadcast'])
+        ->where('type', 'student_message')
         ->where('read', false);
 
     if ($adminId && in_array($adminRole, ['education', 'main'], true)) {
@@ -115,7 +114,7 @@ public function apiStats(Request $request)
     }
     
     $studentMessagesCount = $studentMessagesQuery->count();
-    $totalUnread = $unreadSosCount + $blackoutCount + $studentMessagesCount;
+    $totalUnread = $unreadSosCount + $studentMessagesCount;
 
     return response()->json([
         'totalUnread'    => $totalUnread,
@@ -147,14 +146,14 @@ public function apiStats(Request $request)
 public function tracking()
 {
     $classes = \App\Models\BatchClass::orderBy('name')->get();
-    $sosCount = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->count();
+    $sosCount = \App\Models\SosAlert::where('status', '!=', 'resolved')->count();
     return view('tracking', compact('sosCount', 'classes'));
 }
 
 public function activity()
 {
     $classes = \App\Models\BatchClass::orderBy('name')->get();
-    $sosCount = \App\Models\Notification::where('type', 'sos')->where('status', '!=', 'resolved')->count();
+    $sosCount = \App\Models\SosAlert::where('status', '!=', 'resolved')->count();
     return view('activity', compact('sosCount', 'classes'));
 }
 

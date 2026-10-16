@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class NotificationSeeder extends Seeder
 {
     /**
-     * Seed realistic example data for emergency alerts, blackouts, broadcasts,
+     * Seed realistic example data for emergency alerts, broadcasts,
      * and the student messenger — used purely for visualization/demo purposes.
      */
     public function run(): void
@@ -18,10 +18,9 @@ class NotificationSeeder extends Seeder
         $hazel = DB::table('students')->where('student_id', 'STU2026009')->first();
         $john  = DB::table('students')->where('student_id', 'STU2027001')->first();
         $jane  = DB::table('students')->where('student_id', 'STU2028005')->first();
-        $mike  = DB::table('students')->where('student_id', 'STU2026012')->first();
 
         // Guard: skip if students haven't been seeded yet
-        if (! $hazel || ! $john || ! $jane || ! $mike) {
+        if (! $hazel || ! $john || ! $jane) {
             $this->command->warn('NotificationSeeder: Students not found. Run StudentSeeder first.');
             return;
         }
@@ -97,77 +96,7 @@ class NotificationSeeder extends Seeder
         ]);
 
         // ─────────────────────────────────────────────────────────────
-        // 2. BLACKOUT ALERTS
-        // ─────────────────────────────────────────────────────────────
-
-        // Blackout #1 – Jane Smith (Critical Battery)
-        DB::table('notifications')->insert([
-            'student_id'   => $jane->id,
-            'class'        => '2028',
-            'type'         => 'blackout',
-            'sender_type'  => 'student',
-            'message'      => 'My battery is critically low. Running low on battery, might lose connection soon.',
-            'latitude'     => 14.59688,
-            'longitude'    => 120.98415,
-            'battery_level'=> 8,
-            'signal_status'=> 'Weak',
-            'location'     => 'Main Gate, PNU Campus',
-            'media_url'    => null,
-            'video_url'    => null,
-            'audio_url'    => null,
-            'read'         => false,
-            'status'       => 'pending',
-            'reply_to_id'    => null,
-            'created_at'   => Carbon::now()->subMinutes(5),
-            'updated_at'   => Carbon::now()->subMinutes(5),
-        ]);
-
-        // Blackout #2 – John Doe (Low Battery, acknowledged)
-        DB::table('notifications')->insert([
-            'student_id'   => $john->id,
-            'class'        => '2027',
-            'type'         => 'blackout',
-            'sender_type'  => 'student',
-            'message'      => 'Device is low on battery. Signal is dropping near the main gate area.',
-            'latitude'     => 14.59700,
-            'longitude'    => 120.98355,
-            'battery_level'=> 15,
-            'signal_status'=> 'Moderate',
-            'location'     => 'Gate 2, PNU Campus',
-            'media_url'    => null,
-            'video_url'    => null,
-            'audio_url'    => null,
-            'read'         => true,
-            'status'       => 'pending',
-            'reply_to_id'    => null,
-            'created_at'   => Carbon::now()->subHours(1),
-            'updated_at'   => Carbon::now()->subHours(1),
-        ]);
-
-        // Blackout #3 – Mike Ross (Resolved)
-        DB::table('notifications')->insert([
-            'student_id'   => $mike->id,
-            'class'        => '2026',
-            'type'         => 'blackout',
-            'sender_type'  => 'student',
-            'message'      => 'Battery at 10%. Charger is already plugged in. Will be back online shortly.',
-            'latitude'     => 14.59635,
-            'longitude'    => 120.98290,
-            'battery_level'=> 10,
-            'signal_status'=> 'Strong',
-            'location'     => 'Admin Building, PNU Campus',
-            'media_url'    => null,
-            'video_url'    => null,
-            'audio_url'    => null,
-            'read'         => true,
-            'status'       => 'resolved',
-            'reply_to_id'    => null,
-            'created_at'   => Carbon::now()->subHours(3),
-            'updated_at'   => Carbon::now()->subHours(2)->subMinutes(30),
-        ]);
-
-        // ─────────────────────────────────────────────────────────────
-        // 3. BROADCAST NOTIFICATIONS (Admin → All / Per Class)
+        // 2. BROADCAST NOTIFICATIONS (Admin → All / Per Class)
         // ─────────────────────────────────────────────────────────────
 
         // Broadcast #1 – All Students
@@ -346,7 +275,6 @@ class NotificationSeeder extends Seeder
 
         $this->command->info('✅ NotificationSeeder: Sample data created successfully!');
         $this->command->info('   → 3 SOS Alerts (1 active, 1 acknowledged, 1 resolved)');
-        $this->command->info('   → 3 Blackout Alerts (1 active, 1 acknowledged, 1 resolved)');
         $this->command->info('   → 4 Broadcast Notifications (2 all-class, 1 Class 2026, 1 Class 2027)');
         $this->command->info('   → Student messages & admin replies for Hazel, John, and Jane');
     }

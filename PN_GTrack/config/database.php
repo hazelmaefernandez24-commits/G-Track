@@ -64,24 +64,43 @@ return [
             ]) : [],
         ],
 
-        'gtrack_system' => [
-            'driver' => 'mysql',
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_GTRACK_SYSTEM_DATABASE', 'gtrack_system'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
-            'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => env('DB_CHARSET', 'utf8mb4'),
-            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
-        ],
+        'gtrack_system' => (function () {
+            $driver = env('DB_GTRACK_SYSTEM_DRIVER', env('DB_CONNECTION', 'mysql'));
+            $database = env('DB_GTRACK_SYSTEM_DATABASE');
+
+            if ($driver === 'sqlite' || ($database !== null && str_ends_with((string) $database, '.sqlite'))) {
+                return [
+                    'driver' => 'sqlite',
+                    'url' => env('DB_GTRACK_SYSTEM_URL'),
+                    'database' => $database ?? database_path('gtrack_system.sqlite'),
+                    'prefix' => '',
+                    'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
+                    'busy_timeout' => null,
+                    'journal_mode' => null,
+                    'synchronous' => null,
+                    'transaction_mode' => 'DEFERRED',
+                ];
+            }
+
+            return [
+                'driver' => 'mysql',
+                'host' => env('DB_HOST', '127.0.0.1'),
+                'port' => env('DB_PORT', '3306'),
+                'database' => $database ?? env('DB_GTRACK_SYSTEM_DATABASE', 'gtrack_system'),
+                'username' => env('DB_USERNAME', 'root'),
+                'password' => env('DB_PASSWORD', ''),
+                'unix_socket' => env('DB_SOCKET', ''),
+                'charset' => env('DB_CHARSET', 'utf8mb4'),
+                'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+                'prefix' => '',
+                'prefix_indexes' => true,
+                'strict' => true,
+                'engine' => null,
+                'options' => extension_loaded('pdo_mysql') ? array_filter([
+                    (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+                ]) : [],
+            ];
+        })(),
 
         'mariadb' => [
             'driver' => 'mariadb',
