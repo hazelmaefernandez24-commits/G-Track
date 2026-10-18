@@ -78,6 +78,13 @@ class MobileApiFeatureCoverageTest extends TestCase
         $this->assertTrue($student->fresh()->status);
         $this->assertSame(63, $student->fresh()->battery_level);
         $this->assertSame('Weak', $student->fresh()->signal_status);
+        Notification::create([
+            'student_id' => $student->id,
+            'type' => 'sos',
+            'message' => 'Emergency',
+            'read' => false,
+            'status' => 'pending',
+        ]);
 
         $this->getJson('/api/dashboard/stats')
             ->assertOk()
@@ -85,7 +92,16 @@ class MobileApiFeatureCoverageTest extends TestCase
             ->assertJsonPath('offlineCount', 0)
             ->assertJsonPath('students.0.student_id', $student->student_id)
             ->assertJsonPath('students.0.first_name', 'Jamie')
-            ->assertJsonPath('students.0.last_name', 'Student');
+            ->assertJsonPath('students.0.last_name', 'Student')
+            ->assertJsonPath('currentSosAlerts.0.last_name', 'Student')
+            ->assertJsonPath('currentSosAlerts.0.first_name', 'Jamie')
+            ->assertJsonPath('currentSosAlerts.0.class', '2026')
+            ->assertJsonPath('currentSosAlerts.0.alert', 'SOS ALERT')
+            ->assertJsonStructure([
+                'students' => [
+                    ['last_sync_at'],
+                ],
+            ]);
     }
 
     public function test_status_endpoint_returns_latest_location_and_student_online_state(): void

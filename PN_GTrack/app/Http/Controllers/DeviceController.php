@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\SosAlert;
 class DeviceController extends Controller
 {
  public function update(Request $request)
@@ -67,11 +68,13 @@ public function index()
         'class' => $student->class,
         'status' => (bool) $student->status,
     ])->values();
+    $currentSosAlerts = $this->currentSosAlerts();
 
     return view('dashboard', compact(
         'students',
         'activeStudents',
         'activeStudentsData',
+        'currentSosAlerts',
         'classes',
         'onlineCount',
         'offlineCount',
@@ -107,6 +110,7 @@ public function apiStats(Request $request)
     $sosCount       = \App\Models\SosAlert::where('status', '!=', 'resolved')->count();
     $unreadSosCount = \App\Models\SosAlert::where('status', '!=', 'resolved')->where('read', false)->count();
     $sosStudents    = $students->where('sos_status', 'help')->pluck('student_id');
+    $currentSosAlerts = $this->currentSosAlerts();
 
     // Use updated_at (real timestamp) for accurate latest update calculation
     $latestUpdate   = \App\Models\Student::max('updated_at');
@@ -135,6 +139,7 @@ public function apiStats(Request $request)
         'broadcastCount' => $broadcastCount,
         'sosCount'       => $sosCount,
         'sosStudents'    => $sosStudents,
+        'currentSosAlerts' => $currentSosAlerts,
         'latestTime'     => $latestTime,
         'latestDate'     => $latestDate,
         'students'       => $students->map(function ($s) {
@@ -151,10 +156,32 @@ public function apiStats(Request $request)
                 'signal_status'  => $s->signal_status,
                 'sos_status'     => $s->sos_status,
                 'last_update'    => $s->last_update,
+                'last_sync_at'   => $s->last_update ? Carbon::parse($s->last_update)->toIso8601String() : null,
                 'contact'        => $s->contact,
             ];
         }),
     ]);
+}
+
+private function currentSosAlerts()
+{
+    return SosAlert::with('student')
+        ->where('status', '!=', 'resolved')
+        ->latest('created_at')
+        ->get()
+        ->filter(fn ($alert) => $alert->student !== null)
+        ->map(function ($alert) {
+            $student = $alert->student;
+            $nameParts = preg_split('/\s+/', trim((string) $student->name), -1, PREG_SPLIT_NO_EMPTY);
+
+            return [
+                'last_name' => $student->last_name ?: (count($nameParts) > 1 ? $nameParts[count($nameParts) - 1] : ''),
+                'first_name' => $student->first_name ?: ($nameParts[0] ?? ''),
+                'class' => $student->class,
+                'alert' => 'SOS ALERT',
+            ];
+        })
+        ->values();
 }
 
 public function tracking()

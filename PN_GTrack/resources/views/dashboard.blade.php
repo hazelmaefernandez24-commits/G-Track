@@ -133,13 +133,15 @@
         width: 100%;
         max-width: 100%;
         min-width: 0;
-        margin-top: 32px;
+        margin-top: 0;
     }
 
-    @media (min-width: 768px) {
-        .active-students-card {
-            width: calc(66.6667% - 8px);
-        }
+    .dashboard-lists {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        align-items: start;
+        gap: 24px;
+        margin-top: 32px;
     }
 
     .main-wrapper:has(.active-students-card) {
@@ -202,6 +204,13 @@
     .active-students-batch {
         width: 100%;
         min-width: 0;
+    }
+
+    .current-sos-batch {
+        width: auto;
+        min-width: 140px;
+        max-width: 180px;
+        flex: 0 0 auto;
     }
 
     .active-students-search:focus,
@@ -281,7 +290,16 @@
         text-align: center;
     }
 
+    .sos-alert-status {
+        color: #DC2626;
+        font-weight: 700;
+    }
+
     @media (max-width: 640px) {
+        .dashboard-lists {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
         .active-students-filters {
             grid-template-columns: minmax(0, 1fr);
         }
@@ -293,6 +311,11 @@
 
         .active-students-search {
             width: 100%;
+        }
+
+        .current-sos-batch {
+            width: 100%;
+            max-width: none;
         }
 
         .active-students-table th,
@@ -331,7 +354,7 @@
 
     <div class="stat-card">
         <div class="stat-content">
-            <h3>Latest Update</h3>
+            <h3>Last Update</h3>
             <div class="stat-value" style="font-size: 24px; margin-top: 6px;" id="latest-time">{{ $latestTime ?? '--:--' }}</div>
             <div class="stat-subtitle" id="latest-date">{{ $latestDate ?? '' }}</div>
         </div>
@@ -341,6 +364,7 @@
     </div>
 </div>
 
+<div class="dashboard-lists">
 <section class="card active-students-card" aria-labelledby="active-students-title">
     <div class="active-students-header">
         <div>
@@ -393,6 +417,50 @@
     </div>
 </section>
 
+<section class="card active-students-card current-sos-card" aria-labelledby="current-sos-alerts-title">
+    <div class="active-students-header">
+        <div>
+            <h2 id="current-sos-alerts-title">Current SOS Alerts</h2>
+            <p class="active-students-count">
+                <span id="current-sos-alert-count">{{ $currentSosAlerts->count() }}</span>
+                <span id="current-sos-alert-label">student SOS alerts</span>
+            </p>
+        </div>
+        <select id="current-sos-alert-batch" class="active-students-batch current-sos-batch" aria-label="Filter SOS alerts by batch">
+            <option value="All Classes">All Classes</option>
+            @foreach($classes as $class)
+                <option value="{{ $class->name }}">{{ $class->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="active-students-table-wrap">
+        <table class="active-students-table">
+            <thead>
+                <tr>
+                    <th scope="col">Last Name</th>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody id="current-sos-alert-rows">
+                @forelse($currentSosAlerts as $alert)
+                    <tr>
+                        <td>{{ $alert['last_name'] }}</td>
+                        <td>{{ $alert['first_name'] }}</td>
+                        <td class="sos-alert-status">{{ $alert['alert'] }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td class="active-students-empty" colspan="3">NO SOS ALERT</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</section>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -402,6 +470,47 @@
     const activeStudentsSearch = document.getElementById('active-students-search');
     const activeStudentsBatch = document.getElementById('active-students-batch');
     let dashboardStudents = @json($activeStudentsData);
+    const currentSosAlertRows = document.getElementById('current-sos-alert-rows');
+    const currentSosAlertCount = document.getElementById('current-sos-alert-count');
+    const currentSosAlertLabel = document.getElementById('current-sos-alert-label');
+    const currentSosAlertBatch = document.getElementById('current-sos-alert-batch');
+    let dashboardSosAlerts = @json($currentSosAlerts);
+
+    function renderCurrentSosAlerts() {
+        currentSosAlertRows.replaceChildren();
+        const selectedBatch = currentSosAlertBatch.value;
+        const visibleAlerts = dashboardSosAlerts.filter(alert =>
+            selectedBatch === 'All Classes' || alert.class === selectedBatch
+        );
+        currentSosAlertCount.textContent = visibleAlerts.length;
+        currentSosAlertLabel.textContent = `student SOS alert${visibleAlerts.length === 1 ? '' : 's'}`;
+
+        if (!visibleAlerts.length) {
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = 3;
+            cell.className = 'active-students-empty';
+            cell.textContent = 'NO SOS ALERT';
+            row.appendChild(cell);
+            currentSosAlertRows.appendChild(row);
+            return;
+        }
+
+        visibleAlerts.forEach(alert => {
+            const row = document.createElement('tr');
+            [alert.last_name, alert.first_name].forEach(value => {
+                const cell = document.createElement('td');
+                cell.textContent = value || '';
+                row.appendChild(cell);
+            });
+
+            const detailsCell = document.createElement('td');
+            detailsCell.className = 'sos-alert-status';
+            detailsCell.textContent = alert.alert || 'SOS ALERT';
+            row.appendChild(detailsCell);
+            currentSosAlertRows.appendChild(row);
+        });
+    }
 
     function renderActiveStudents() {
         const search = activeStudentsSearch.value.trim().toLocaleLowerCase();
@@ -465,6 +574,7 @@
 
     activeStudentsSearch.addEventListener('input', renderActiveStudents);
     activeStudentsBatch.addEventListener('change', renderActiveStudents);
+    currentSosAlertBatch.addEventListener('change', renderCurrentSosAlerts);
 
     // Poll just for the dashboard stats
     function updateDashboardStats() {
@@ -484,11 +594,16 @@
                     dashboardStudents = data.students;
                     renderActiveStudents();
                 }
+                if (Array.isArray(data.currentSosAlerts)) {
+                    dashboardSosAlerts = data.currentSosAlerts;
+                    renderCurrentSosAlerts();
+                }
             })
             .catch(err => console.error('Dashboard stats update failed:', err));
     }
 
     renderActiveStudents();
+    renderCurrentSosAlerts();
     setInterval(updateDashboardStats, 10000);
 </script>
 @endpush

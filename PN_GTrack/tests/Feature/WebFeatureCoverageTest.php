@@ -83,7 +83,7 @@ class WebFeatureCoverageTest extends TestCase
         ]);
 
         $this->actingAs($admin, 'admin');
-        $this->get('/dashboard')->assertOk();
+        $this->get('/dashboard')->assertOk()->assertSee('NO SOS ALERT');
         $this->get('/tracking')->assertOk();
         $this->get('/activity')->assertOk();
         $this->get(route('students.history', $student))->assertOk();
@@ -94,6 +94,13 @@ class WebFeatureCoverageTest extends TestCase
         $admin = $this->createAdmin('MAIN001', 'main');
         $activeStudent = $this->createStudent();
         $activeStudent->update(['status' => true]);
+        Notification::create([
+            'student_id' => $activeStudent->id,
+            'type' => 'sos',
+            'message' => 'Emergency',
+            'read' => false,
+            'status' => 'pending',
+        ]);
         BatchClass::firstOrCreate(['name' => '2027']);
         Student::create([
             'student_id' => 'STU2027002',
@@ -116,6 +123,8 @@ class WebFeatureCoverageTest extends TestCase
             ->assertSee('2026')
             ->assertSee('value="2027"', false)
             ->assertSee('On')
+            ->assertSee('Current SOS Alerts')
+            ->assertSee('SOS ALERT')
             ->assertDontSee('Taylor Offline');
     }
 

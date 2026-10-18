@@ -442,7 +442,7 @@
             </a>
             <a href="/activity" class="nav-item {{ request()->is('activity') ? 'active' : '' }}">
                 <i data-lucide="activity"></i>
-                Student Activity
+                Student List
             </a>
             <div style="margin: 16px 16px 0; font-size: 11px; font-weight: 800; color: rgb(12, 20, 59); text-transform: uppercase; letter-spacing: 0.5px;">Communications</div>
             <a href="{{ route('notifications.screen', ['screen' => 'messages']) }}" class="nav-item {{ request()->route('screen') === 'messages' || request()->is('notifications') ? 'active' : '' }}">
