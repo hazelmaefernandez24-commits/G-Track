@@ -83,7 +83,9 @@ class MobileApiFeatureCoverageTest extends TestCase
             ->assertOk()
             ->assertJsonPath('onlineCount', 1)
             ->assertJsonPath('offlineCount', 0)
-            ->assertJsonPath('students.0.student_id', $student->student_id);
+            ->assertJsonPath('students.0.student_id', $student->student_id)
+            ->assertJsonPath('students.0.first_name', 'Jamie')
+            ->assertJsonPath('students.0.last_name', 'Student');
     }
 
     public function test_status_endpoint_returns_latest_location_and_student_online_state(): void

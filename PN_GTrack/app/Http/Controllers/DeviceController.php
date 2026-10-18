@@ -58,9 +58,21 @@ public function index()
     $latestUpdate = \App\Models\Student::max('updated_at');
     $latestTime   = $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('h:i A') : null;
     $latestDate   = $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('M d, Y') : null;
+    $classes      = \App\Models\BatchClass::orderBy('name')->get(['name']);
+    $activeStudents = $students->where('status', true)->values();
+    $activeStudentsData = $activeStudents->map(fn ($student) => [
+        'first_name' => $student->first_name,
+        'last_name' => $student->last_name,
+        'name' => $student->name,
+        'class' => $student->class,
+        'status' => (bool) $student->status,
+    ])->values();
 
     return view('dashboard', compact(
         'students',
+        'activeStudents',
+        'activeStudentsData',
+        'classes',
         'onlineCount',
         'offlineCount',
         'broadcastCount',
@@ -130,6 +142,8 @@ public function apiStats(Request $request)
                 'id'             => $s->id,
                 'student_id'     => $s->student_id,
                 'name'           => $s->name,
+                'first_name'     => $s->first_name,
+                'last_name'      => $s->last_name,
                 'class'          => $s->class,
                 'gender'         => $s->gender,
                 'status'         => $s->status,

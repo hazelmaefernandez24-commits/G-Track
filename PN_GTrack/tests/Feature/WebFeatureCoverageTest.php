@@ -89,6 +89,36 @@ class WebFeatureCoverageTest extends TestCase
         $this->get(route('students.history', $student))->assertOk();
     }
 
+    public function test_dashboard_lists_only_active_students_and_provides_batch_filters(): void
+    {
+        $admin = $this->createAdmin('MAIN001', 'main');
+        $activeStudent = $this->createStudent();
+        $activeStudent->update(['status' => true]);
+        BatchClass::firstOrCreate(['name' => '2027']);
+        Student::create([
+            'student_id' => 'STU2027002',
+            'name' => 'Taylor Offline',
+            'first_name' => 'Taylor',
+            'last_name' => 'Offline',
+            'email' => 'taylor@example.com',
+            'class' => '2027',
+            'gender' => 'Male',
+            'contact' => '09987654321',
+            'status' => false,
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Student List Active')
+            ->assertSee('Jamie')
+            ->assertSee('Student')
+            ->assertSee('2026')
+            ->assertSee('value="2027"', false)
+            ->assertSee('On')
+            ->assertDontSee('Taylor Offline');
+    }
+
     public function test_management_index_views_render_for_main_admin(): void
     {
         $admin = $this->createAdmin('MAIN001', 'main');

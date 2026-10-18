@@ -128,6 +128,178 @@
         color: var(--text-muted);
         line-height: 1.4;
     }
+
+    .active-students-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin-top: 32px;
+    }
+
+    @media (min-width: 768px) {
+        .active-students-card {
+            width: calc(66.6667% - 8px);
+        }
+    }
+
+    .main-wrapper:has(.active-students-card) {
+        min-width: 0;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .stat-card {
+        min-width: 0;
+    }
+
+    .active-students-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .active-students-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .active-students-count {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .active-students-filters {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(120px, 35%);
+        justify-content: end;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .active-students-search,
+    .active-students-batch {
+        min-height: 40px;
+        padding: 8px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: #FFFFFF;
+        color: var(--text-main);
+        font-size: 14px;
+        outline: none;
+    }
+
+    .active-students-search {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .active-students-batch {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .active-students-search:focus,
+    .active-students-batch:focus {
+        border-color: var(--primary-dark);
+        box-shadow: 0 0 0 2px rgba(0, 157, 225, 0.14);
+    }
+
+    .active-students-table-wrap {
+        overflow-x: auto;
+    }
+
+    .active-students-table {
+        width: 100%;
+        min-width: 0;
+        border-collapse: collapse;
+        text-align: left;
+        table-layout: fixed;
+    }
+
+    .active-students-table th:nth-child(1),
+    .active-students-table td:nth-child(1),
+    .active-students-table th:nth-child(2),
+    .active-students-table td:nth-child(2) {
+        width: 25%;
+    }
+
+    .active-students-table th:nth-child(3),
+    .active-students-table td:nth-child(3) {
+        width: 25%;
+    }
+
+    .active-students-table th:nth-child(4),
+    .active-students-table td:nth-child(4) {
+        width: 25%;
+    }
+
+    .active-students-table th,
+    .active-students-table td {
+        padding: 14px 4px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 14px;
+        overflow-wrap: anywhere;
+    }
+
+    .active-students-table th {
+        color: var(--text-muted);
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+    }
+
+    .active-students-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .active-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--online);
+        font-weight: 600;
+    }
+
+    .active-status::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .active-students-empty {
+        color: var(--text-muted);
+        text-align: center;
+    }
+
+    @media (max-width: 640px) {
+        .active-students-filters {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .active-students-header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .active-students-search {
+            width: 100%;
+        }
+
+        .active-students-table th,
+        .active-students-table td {
+            padding: 12px 6px;
+        }
+    }
 </style>
 @endpush
 
@@ -169,10 +341,131 @@
     </div>
 </div>
 
+<section class="card active-students-card" aria-labelledby="active-students-title">
+    <div class="active-students-header">
+        <div>
+            <h2 id="active-students-title">Student List Active</h2>
+            <p class="active-students-count"><span id="active-students-count">{{ $activeStudents->count() }}</span> students online</p>
+        </div>
+    </div>
+
+    <div class="active-students-filters">
+        <input
+            id="active-students-search"
+            class="active-students-search"
+            type="search"
+            placeholder="Search students"
+            aria-label="Search active students"
+        >
+        <select id="active-students-batch" class="active-students-batch" aria-label="Filter active students by batch">
+            <option value="All Classes">All Classes</option>
+            @foreach($classes as $class)
+                <option value="{{ $class->name }}">{{ $class->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="active-students-table-wrap">
+        <table class="active-students-table">
+            <thead>
+                <tr>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Last Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Batches</th>
+                </tr>
+            </thead>
+            <tbody id="active-students-rows">
+                @forelse($activeStudents as $student)
+                    <tr>
+                        <td>{{ $student->first_name ?: \Illuminate\Support\Str::before($student->name, ' ') }}</td>
+                        <td>{{ $student->last_name ?: (\Illuminate\Support\Str::contains($student->name, ' ') ? \Illuminate\Support\Str::afterLast($student->name, ' ') : '') }}</td>
+                        <td><span class="active-status">On</span></td>
+                        <td>{{ $student->class }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td class="active-students-empty" colspan="4">No students are currently online.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</section>
+
 @endsection
 
 @push('scripts')
 <script>
+    const activeStudentsRows = document.getElementById('active-students-rows');
+    const activeStudentsCount = document.getElementById('active-students-count');
+    const activeStudentsSearch = document.getElementById('active-students-search');
+    const activeStudentsBatch = document.getElementById('active-students-batch');
+    let dashboardStudents = @json($activeStudentsData);
+
+    function renderActiveStudents() {
+        const search = activeStudentsSearch.value.trim().toLocaleLowerCase();
+        const batch = activeStudentsBatch.value;
+        const activeStudents = dashboardStudents.filter(student => {
+            if (student.status !== true) return false;
+
+            const parts = (student.name || '').trim().split(/\s+/);
+            const firstName = student.first_name || parts[0] || '';
+            const lastName = student.last_name || (parts.length > 1 ? parts[parts.length - 1] : '');
+            const matchesSearch = `${firstName} ${lastName}`.toLocaleLowerCase().includes(search);
+            const matchesBatch = batch === 'All Classes' || student.class === batch;
+
+            return matchesSearch && matchesBatch;
+        });
+
+        activeStudentsRows.replaceChildren();
+        activeStudentsCount.textContent = activeStudents.length;
+
+        if (activeStudents.length === 0) {
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = 4;
+            cell.className = 'active-students-empty';
+            cell.textContent = dashboardStudents.some(student => student.status === true)
+                ? 'No active students match your filters.'
+                : 'No students are currently online.';
+            row.appendChild(cell);
+            activeStudentsRows.appendChild(row);
+            return;
+        }
+
+        activeStudents.forEach(student => {
+            const parts = (student.name || '').trim().split(/\s+/);
+            const values = [
+                student.first_name || parts[0] || '',
+                student.last_name || (parts.length > 1 ? parts[parts.length - 1] : ''),
+            ];
+            const row = document.createElement('tr');
+
+            values.forEach(value => {
+                const cell = document.createElement('td');
+                cell.textContent = value;
+                row.appendChild(cell);
+            });
+
+            const statusCell = document.createElement('td');
+            const status = document.createElement('span');
+            status.className = 'active-status';
+            status.textContent = 'On';
+            statusCell.appendChild(status);
+            row.appendChild(statusCell);
+
+            const batchCell = document.createElement('td');
+            batchCell.textContent = student.class || '';
+            row.appendChild(batchCell);
+
+            activeStudentsRows.appendChild(row);
+        });
+    }
+
+    activeStudentsSearch.addEventListener('input', renderActiveStudents);
+    activeStudentsBatch.addEventListener('change', renderActiveStudents);
+
     // Poll just for the dashboard stats
     function updateDashboardStats() {
         fetch('/api/dashboard/stats')
@@ -187,10 +480,15 @@
                 if (offlineEl) offlineEl.textContent = data.offlineCount;
                 if (timeEl)    timeEl.textContent    = data.latestTime ?? '--:--';
                 if (dateEl)    dateEl.textContent    = data.latestDate ?? '';
+                if (Array.isArray(data.students)) {
+                    dashboardStudents = data.students;
+                    renderActiveStudents();
+                }
             })
             .catch(err => console.error('Dashboard stats update failed:', err));
     }
 
+    renderActiveStudents();
     setInterval(updateDashboardStats, 10000);
 </script>
 @endpush
