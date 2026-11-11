@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin.role' => \App\Http\Middleware\AdminRole::class,
+            'password.change.required' => \App\Http\Middleware\RequirePasswordChange::class,
         ]);
 
         $middleware->redirectTo(

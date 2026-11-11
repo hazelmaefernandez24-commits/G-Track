@@ -94,11 +94,20 @@
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+        @if($errors->any())
+            <div class="alert alert-danger" role="alert">
+                <ul style="margin:0; padding-left:20px;">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
         <div class="student-mgmt-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h2 style="margin:0; font-size:20px;">All Students</h2>
-                <button class="btn btn-primary" onclick="openModal('addModal')">Add New Student</button>
+                <a class="btn btn-primary" href="{{ route('students.create') }}">Add New Student</a>
             </div>
 
             <div class="table-container">
@@ -106,7 +115,9 @@
                     <thead>
                         <tr>
                             <th>Student ID</th>
-                            <th>Name</th>
+                            <th>First Name</th>
+                            <th>Middle Initial</th>
+                            <th>Last Name</th>
                             <th>Class</th>
                             <th>Gender</th>
                             <th>Contact</th>
@@ -117,16 +128,18 @@
                         @foreach($students as $student)
                         <tr>
                             <td style="font-weight:700;">{{ $student->student_id }}</td>
-                            <td>{{ $student->name }}</td>
+                            <td>{{ $student->first_name }}</td>
+                            <td>{{ $student->middle_initial }}</td>
+                            <td>{{ $student->last_name }}</td>
                             <td>{{ $student->class }}</td>
                             <td>{{ $student->gender }}</td>
                             <td>{{ $student->contact }}</td>
                             <td style="text-align:right; white-space:nowrap;">
-                                <button class="btn btn-success" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" 
-                                    onclick="editStudent({{ json_encode($student) }})">
+                                <a class="btn btn-success" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;"
+                                    href="{{ route('students.edit', $student) }}">
                                     <i data-lucide="edit-3" style="width:13px; height:13px;"></i>
                                     Edit
-                                </button>
+                                </a>
                                 <button type="button" class="btn btn-danger" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" onclick="confirmDelete('{{ $student->id }}')">
                                     <i data-lucide="trash-2" style="width:13px; height:13px;"></i>
                                     Delete

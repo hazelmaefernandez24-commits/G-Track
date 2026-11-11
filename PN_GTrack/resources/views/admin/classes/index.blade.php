@@ -135,10 +135,10 @@
                     <h2 style="margin:0; font-size:20px; font-weight:700;">All Classes</h2>
                     <p style="margin:4px 0 0; color:var(--text-muted); font-size:13px;">Create and manage graduating batches or classes</p>
                 </div>
-                <button class="btn btn-primary" onclick="openModal('addModal')">
+                <a class="btn btn-primary" href="{{ route('classes.create') }}">
                     <i data-lucide="plus" style="width:16px; height:16px;"></i>
                     Add New Class
-                </button>
+                </a>
             </div>
 
             <div class="table-container">
@@ -166,11 +166,11 @@
                                 {{ $c->created_at ? $c->created_at->format('M d, Y') : '—' }}
                             </td>
                             <td style="text-align:right; white-space:nowrap;">
-                                <button class="btn btn-success" style="padding:5px 10px; font-size:12px;" 
-                                    onclick="editClass({{ json_encode($c) }})">
+                                <a class="btn btn-success" style="padding:5px 10px; font-size:12px;"
+                                    href="{{ route('classes.edit', $c) }}">
                                     <i data-lucide="edit-3" style="width:13px; height:13px;"></i>
                                     Edit
-                                </button>
+                                </a>
                                 <button type="button" class="btn btn-danger" style="padding:5px 10px; font-size:12px;" 
                                     onclick="confirmDelete({{ json_encode($c->id) }}, {{ json_encode($c->name) }}, {{ $c->students_count }})">
                                     <i data-lucide="trash-2" style="width:13px; height:13px;"></i>

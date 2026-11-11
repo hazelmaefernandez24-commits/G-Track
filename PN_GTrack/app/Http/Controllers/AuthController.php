@@ -19,17 +19,56 @@ class AuthController extends Controller
 
     
     public function login(Request $request)
-{
-    $credentials = $request->only('staff_id', 'password');
+    {
+        $credentials = $request->only('staff_id', 'password');
 
-    if (Auth::guard('admin')->attempt($credentials)) {
-        return redirect('/dashboard');
+        if (Auth::guard('admin')->attempt($credentials)) {
+            $request->session()->regenerate();
+
+            if (Auth::guard('admin')->user()->must_change_password) {
+                return redirect()->route('account.first-login-password.show');
+            }
+
+            return redirect('/dashboard');
+        }
+
+        return back()->withErrors([
+            'staff_id' => 'Invalid Staff ID or password',
+        ]);
     }
 
-    return back()->withErrors([
-        'staff_id' => 'Invalid Staff ID or password',
-    ]);
-}
+    public function showFirstLoginPasswordForm()
+    {
+        abort_unless(Auth::guard('admin')->user()->must_change_password, 403);
+
+        return view('first-login-password');
+    }
+
+    public function setFirstLoginPassword(Request $request)
+    {
+        $admin = Auth::guard('admin')->user();
+        abort_unless($admin->must_change_password, 403);
+
+        $validated = $request->validate([
+            'new_password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        if (Hash::check($validated['new_password'], $admin->password)) {
+            return back()->withErrors([
+                'new_password' => 'Choose a password different from your temporary password.',
+            ]);
+        }
+
+        $admin->password = Hash::make($validated['new_password']);
+        $admin->must_change_password = false;
+        $admin->password_changed_at = now();
+        $admin->save();
+
+        return redirect()->route('dashboard')->with(
+            'password_change_status',
+            'Your password has been changed successfully.'
+        );
+    }
     public function showResetPasswordForm()
     {
         return view('reset-password');
@@ -102,6 +141,7 @@ class AuthController extends Controller
         }
 
         $admin->password = Hash::make($request->password);
+        $admin->must_change_password = false;
         $admin->password_changed_at = now();
         $admin->save();
 

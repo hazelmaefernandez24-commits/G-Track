@@ -30,7 +30,13 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])
     ->name('reset-password.store');
 
 // --- PROTECTED ROUTES (Requires Login) ---
-Route::middleware(['auth:admin'])->group(function () {
+Route::middleware(['auth:admin', 'password.change.required'])->group(function () {
+    Route::get('/account/first-login-password', [AuthController::class, 'showFirstLoginPasswordForm'])
+        ->name('account.first-login-password.show');
+    Route::put('/account/first-login-password', [AuthController::class, 'setFirstLoginPassword'])
+        ->middleware('throttle:5,1')
+        ->name('account.first-login-password.update');
+
     Route::put('/account/profile', [AuthController::class, 'updateProfile'])
         ->name('account.profile.update');
     Route::put('/account/change-password', [AuthController::class, 'changePassword'])
@@ -46,6 +52,8 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('/notifications/{screen?}', [NotificationController::class, 'index'])
         ->whereIn('screen', ['alerts', 'messages', 'broadcasts'])
         ->name('notifications.screen');
+    Route::get('/notifications/sos/active', [SosAlertController::class, 'activeForAdmin'])
+        ->name('notifications.sos.active');
     Route::post('/notifications/send', [BroadcastController::class, 'send']);
     Route::post('/notifications/delete-all-sos-archives', [SosAlertController::class, 'deleteArchives'])->name('notifications.delete-all-sos');
     Route::post('/notifications/{id}/acknowledge', [SosAlertController::class, 'acknowledge']);
@@ -63,6 +71,8 @@ Route::middleware(['auth:admin'])->group(function () {
 
     // --- MANAGEMENT ROUTES (Main Admin Only) ---
     Route::middleware(['admin.role:main'])->prefix('admin')->group(function () {
+        Route::post('students/import', [StudentManagementController::class, 'importCsv'])
+            ->name('students.import');
         Route::resource('students', StudentManagementController::class);
         Route::resource('classes', ClassManagementController::class);
         Route::resource('admins', AdminManagementController::class);

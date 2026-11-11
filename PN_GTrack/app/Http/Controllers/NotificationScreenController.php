@@ -3,79 +3,129 @@
 namespace App\Http\Controllers;
 
 use App\Models\BatchClass;
-use App\Models\Notification;
-use App\Models\BroadcastNotification;
 use App\Models\SosAlert;
 use App\Models\Student;
-use App\Models\StudentMessage;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 abstract class NotificationScreenController extends Controller
 {
-    protected function renderScreen(Request $request, string $screen, Builder $query, bool $groupByStudent = false)
+    protected function renderMessagesScreen(Request $request)
     {
         $class = $request->query('class', 'all');
         $dbClass = str_starts_with($class, 'Class ')
             ? str_replace('Class ', '', $class)
             : $class;
-
-        if ($class !== 'all') {
-            $query->where(function ($classQuery) use ($dbClass, $screen) {
-                $classQuery->where('class', $dbClass)
-                    ->orWhereHas('student', fn ($studentQuery) => $studentQuery->where('class', $dbClass));
-
-                if ($screen !== 'messages') {
-                    $classQuery->orWhere('class', 'all');
-                }
-            });
-        }
-
-        $allNotifications = $query->with(['replies', 'student'])
-            ->orderByDesc('created_at')
-            ->get();
-        $notifications = $groupByStudent
-            ? $allNotifications->whereNotNull('student_id')->groupBy('student_id')
-            : $allNotifications->values();
-
-        $students = Student::all();
-        $latestUpdate = Student::max('updated_at');
         $user = Auth::guard('admin')->user();
-        $threadStudentIds = $allNotifications->whereNotNull('student_id')
-            ->pluck('student_id')->filter()->unique()->values();
 
-        $unreadCountsQuery = StudentMessage::selectRaw('student_id, count(*) as unread_count')
+        $query = \App\Models\Conversation::with(['student.studentClass', 'messages'])
+            ->when($user && in_array($user->role, ['education', 'main'], true), function ($builder) use ($user) {
+                $builder->where('admin_id', $user->getKey());
+            })
+            ->when($class !== 'all', function ($builder) use ($dbClass) {
+                $builder->whereHas('student.studentClass', fn ($studentQuery) => $studentQuery->where('year', $dbClass));
+            });
+
+        $conversations = $query->orderByDesc('updated_at')->get();
+        $students = $conversations->pluck('student')->filter()->unique('id')->values();
+        $studentIds = $students->pluck('id');
+
+        $unreadCounts = DB::table('messages')
+            ->join('conversations', 'conversations.id', '=', 'messages.conversation_id')
+            ->whereIn('conversations.student_id', $studentIds)
+            ->where('messages.sender_type', 'student')
+            ->whereNull('messages.read_at')
+            ->when($user && in_array($user->role, ['education', 'main'], true), function ($builder) use ($user) {
+                $builder->where('conversations.admin_id', $user->getKey());
+            })
+            ->select('conversations.student_id', DB::raw('count(*) as unread_count'))
+            ->groupBy('conversations.student_id')
+            ->pluck('unread_count', 'student_id');
+
+        $latestUpdate = DB::table('student_statuses')->max('recorded_at');
+        $allStudents = Student::with('latestStatus')->get();
+        $activeAlerts = DB::table('emergency_alerts')->where('status', '!=', 'resolved');
+        $unreadAlerts = (clone $activeAlerts)->whereNull('read_at')->count();
+        $broadcastUnread = DB::table('broadcast_recipients')->whereNull('read_at')->count();
+        $unreadMessages = DB::table('messages')
             ->where('sender_type', 'student')
-            ->where('read', false)
-            ->whereNotNull('student_id');
+            ->whereNull('read_at')
+            ->count();
 
-        if ($user && in_array($user->role, ['education', 'main'], true)) {
-            $unreadCountsQuery->where('admin_id', $user->getKey());
-        }
-
-        return view($screen, [
-            'notifications' => $notifications,
-            'sidebarStudents' => $threadStudentIds->isNotEmpty()
-                ? Student::whereIn('id', $threadStudentIds)->orderBy('name')->get()
-                : collect(),
+        return view('messages', [
+            'notifications' => $conversations,
+            'sidebarStudents' => $students->sortBy('name')->values(),
             'stats' => [
-                'unread' => Notification::where('read', false)->count(),
-                'sos' => SosAlert::where('status', '!=', 'resolved')->where('read', false)->count(),
-                'broadcast' => BroadcastNotification::count(),
-                'onlineCount' => $students->where('status', true)->count(),
-                'offlineCount' => $students->where('status', false)->count(),
+                'unread' => $unreadAlerts + $broadcastUnread + $unreadMessages,
+                'sos' => $unreadAlerts,
+                'broadcast' => DB::table('broadcasts')->count(),
+                'onlineCount' => $allStudents->where('status', true)->count(),
+                'offlineCount' => $allStudents->where('status', false)->count(),
                 'latestTime' => $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('h:i A') : null,
                 'latestDate' => $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('M d, Y') : null,
             ],
-            'screen' => $screen,
+            'screen' => 'messages',
             'class' => $class,
             'dbClass' => $dbClass,
-            'classes' => BatchClass::orderBy('name')->get(),
+            'classes' => BatchClass::orderBy('year')->get(),
             'canMessage' => $this->canSendMessages(),
-            'unreadCounts' => $unreadCountsQuery->groupBy('student_id')->pluck('unread_count', 'student_id'),
-            'currentAdminId' => $user ? $user->getKey() : null,
-            'currentAdminRole' => $user ? $user->role : null,
+            'unreadCounts' => $unreadCounts,
+            'currentAdminId' => $user?->getKey(),
+            'currentAdminRole' => $user?->role,
+        ]);
+    }
+
+    protected function renderAlertsScreen(Request $request)
+    {
+        $class = $request->query('class', 'all');
+        $dbClass = str_starts_with($class, 'Class ')
+            ? str_replace('Class ', '', $class)
+            : $class;
+        $user = Auth::guard('admin')->user();
+
+        $alerts = SosAlert::with([
+            'student.studentClass',
+            'alertLocation',
+            'media',
+            'acknowledgedBy',
+            'resolvedBy',
+        ])
+            ->when($class !== 'all', function ($query) use ($dbClass) {
+                $query->whereHas('student.studentClass', fn ($studentQuery) => $studentQuery->where('year', $dbClass));
+            })
+            ->orderByDesc('created_at')
+            ->get();
+
+        $latestUpdate = DB::table('student_statuses')->max('recorded_at');
+        $allStudents = Student::with('latestStatus')->get();
+        $unreadAlerts = (clone SosAlert::query())->whereNull('read_at')->count();
+        $broadcastUnread = DB::table('broadcast_recipients')->whereNull('read_at')->count();
+        $unreadMessages = DB::table('messages')
+            ->where('sender_type', 'student')
+            ->whereNull('read_at')
+            ->count();
+
+        return view('alerts', [
+            'notifications' => $alerts,
+            'sidebarStudents' => collect(),
+            'stats' => [
+                'unread' => $unreadAlerts + $broadcastUnread + $unreadMessages,
+                'sos' => $unreadAlerts,
+                'broadcast' => DB::table('broadcasts')->count(),
+                'onlineCount' => $allStudents->where('status', true)->count(),
+                'offlineCount' => $allStudents->where('status', false)->count(),
+                'latestTime' => $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('h:i A') : null,
+                'latestDate' => $latestUpdate ? \Carbon\Carbon::parse($latestUpdate)->format('M d, Y') : null,
+            ],
+            'screen' => 'alerts',
+            'class' => $class,
+            'dbClass' => $dbClass,
+            'classes' => BatchClass::orderBy('year')->get(),
+            'canMessage' => $this->canSendMessages(),
+            'unreadCounts' => collect(),
+            'currentAdminId' => $user?->getKey(),
+            'currentAdminRole' => $user?->role,
         ]);
     }
 
@@ -102,7 +152,7 @@ abstract class NotificationScreenController extends Controller
 
         return trim(implode(' ', array_filter([
             $user->first_name,
-            $user->middle_initial,
+            $user->middle_initial ? $user->middle_initial . '.' : null,
             $user->last_name,
         ])));
     }

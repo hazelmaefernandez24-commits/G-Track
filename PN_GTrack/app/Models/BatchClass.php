@@ -9,7 +9,7 @@ class BatchClass extends Model
     protected $table = 'student_classes';
 
     protected $fillable = [
-        'name',
+        'year',
     ];
 
     /**
@@ -17,6 +17,11 @@ class BatchClass extends Model
      */
     public function students()
     {
-        return $this->hasMany(Student::class, 'class', 'name');
+        return $this->hasMany(Student::class, 'student_class_id');
+    }
+
+    public function getNameAttribute(): string
+    {
+        return (string) $this->year;
     }
 }

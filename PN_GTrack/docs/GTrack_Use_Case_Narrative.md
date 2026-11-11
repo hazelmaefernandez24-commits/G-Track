@@ -1,595 +1,716 @@
-# GTrack Web System — Use Case Narrative
+# G!Track Use Case Narratives
 
-**Project Name:** GTrack (GPS Student Tracking & Monitoring System)  
-**Document Version:** 1.0  
-**Date:** October 8, 2026  
+**Project Name:** G!Track Student Tracking and Monitoring System
+**Document Version:** 1.1
+**Date:** November 7, 2026
 
----
-
-## Table of Contents
-
-1. [UC-01: Authenticate (Student)](#uc-01-authenticate-student)
-2. [UC-02: Authenticate (Admin)](#uc-02-authenticate-admin)
-3. [UC-03: Manage Own Profile](#uc-03-manage-own-profile)
-4. [UC-04: Send Heartbeat and Device Status](#uc-04-send-heartbeat-and-device-status)
-5. [UC-05: Share Current Location](#uc-05-share-current-location)
-6. [UC-06: Send or Cancel Alert](#uc-06-send-or-cancel-alert)
-7. [UC-07: Upload SOS Media](#uc-07-upload-sos-media)
-8. [UC-08: View Dashboard](#uc-08-view-dashboard)
-9. [UC-09: View Live Tracking](#uc-09-view-live-tracking)
-10. [UC-10: View Location History](#uc-10-view-location-history)
-11. [UC-11: View Notification and Activity](#uc-11-view-notification-and-activity)
-12. [UC-12: Send and Receive Student Messages](#uc-12-send-and-receive-student-messages)
-13. [UC-13: Send Broadcast](#uc-13-send-broadcast)
-
----
+This document uses the detailed narrative layout for the student mobile workflows and administrator web portal. Actor actions and system responses are listed in sequence for each use case.
 
 ## Actors
 
 | Actor | Description |
-|-------|-------------|
-| **Student** | A registered student who uses the GTrack mobile application to share location, send alerts, manage their profile, and communicate with administrators. |
-| **Admin (Education)** | An education staff member who logs into the GTrack web or mobile platform to monitor students, respond to SOS alerts, manage messages, and view live tracking data. |
-| **Main Admin** | A senior administrator with elevated privileges who can manage all system entities (students, classes, admins), send broadcasts, view all notifications, and perform all Admin (Education) functions. |
-| **Database** | The MySQL/MariaDB database that persists all system records including student data, admin accounts, locations, and notifications. |
-| **Storage** | The Laravel file storage system (public disk) used to store uploaded media such as SOS video recordings and student profile pictures. |
-| **Migration** | The Laravel migration system that manages database schema versioning and structural changes. |
+|---|---|
+| **Student User** | A registered student who uses the mobile application to authenticate, share device status and location, send safety alerts, and communicate with administrators. |
+| **Student App** | The student's mobile application, including automated background tasks that transmit student status and location. |
+| **Administrative User** | An Education Staff or Main Administrator who uses the G!Track web portal to monitor students, manage alerts, and communicate. |
+| **Main Administrator** | An administrator with additional permission to manage student, class, and administrator records. |
 
 ---
 
-## UC-01: Authenticate (Student)
+## UC-01: Student Log In
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-01 |
-| **Use Case Name** | Authenticate (Student) |
-| **Primary Actor** | Student |
-| **Description** | The student authenticates through the GTrack mobile application using their student ID and password to gain access to the system's features such as location sharing and SOS alerts. |
-| **Trigger** | The student opens the GTrack mobile application and navigates to the login screen. |
-| **Preconditions** | 1. The student must have a registered account in the system (created by the Main Admin). 2. The student's credentials must exist in the `student_auths` table. 3. The mobile application is installed and has network connectivity. |
+**Student Log In Use Case Narrative**
 
-### Main Success Scenario (Basic Flow)
+The Student Log In use case authenticates a registered student in the G!Track mobile application so the student can use location sharing, safety alerts, and messaging.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Student enters their Student ID and password on the mobile login screen. | — |
-| 2 | — | The system validates the student ID against the `student_auths` table. |
-| 3 | — | The system verifies the password using a hashed comparison. |
-| 4 | — | The system marks the student as **online** (`status = true`) and updates `last_update` with the current timestamp. |
-| 5 | — | The system returns a success response containing the student's profile data and role. |
-| 6 | Student is redirected to the mobile application home screen. | — |
+*Table 1: Student Log In Use Case Narrative*
 
-### Alternative Flows
+**Use Case Name:** Student Log In
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – Invalid Credentials** | At Step 3, if the student ID does not exist or the password is incorrect, the system returns a 401 error with the message *"Invalid student ID or password."* The student remains on the login screen. |
-| **A2 – Student Record Missing** | At Step 4, if the `student_auths` record exists but no corresponding `students` record is found, the system logs the student in but cannot update online status. The student can still use limited features. |
+**Actor(s):**  
 
-### Postconditions
+**Purpose**
 
-- **Success:** The student is authenticated, marked as online, and can access all mobile features.
-- **Failure:** The student is not authenticated and remains on the login screen with an error message displayed.
+· Authenticate the student using their registered student ID and password.
 
-### Related Use Cases
+**Overview**
 
-- **UC-03:** Manage Own Profile — `<<updates>>` Authenticate (Student), since managing the profile modifies the authenticated student's data.
+· The student submits their credentials through the mobile app. The system verifies the account and opens the student's app session.
 
----
+**Pre-condition**
 
-## UC-02: Authenticate (Admin)
+· The student has an account and valid credentials, and the mobile app can connect to G!Track.
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-02 |
-| **Use Case Name** | Authenticate (Admin) |
-| **Primary Actor** | Admin (Education), Main Admin |
-| **Description** | An administrator authenticates through the GTrack web application or mobile app using their Staff ID and password to access the monitoring dashboard and management features. |
-| **Trigger** | The admin navigates to the GTrack web login page (`/login`) or opens the mobile admin login screen. |
-| **Preconditions** | 1. The admin must have a registered account in the `admins` table (created by the Main Admin). 2. The admin's Staff ID and password must be valid. |
+**Post-condition**
 
-### Main Success Scenario (Basic Flow)
+· The student is authenticated and can access the mobile app's student features.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Admin enters their Staff ID and password on the login form. | — |
-| 2 | — | The system authenticates using the `admin` guard with the provided credentials. |
-| 3 | — | The system creates a session (web) or returns user data (API). |
-| 4 | Admin is redirected to the Dashboard (`/dashboard`). | — |
+**Trigger Event**
 
-### Alternative Flows
+· The student opens the app and submits their student ID and password.
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – Invalid Credentials** | At Step 2, if the Staff ID or password is incorrect, the system returns an error *"Invalid Staff ID or password."* The admin remains on the login page. |
-| **A2 – Password Reset** | Before Step 1, the admin selects "Forgot Password." The system presents a reset form requiring Staff ID, email, and new password. If the Staff ID and email match an existing account, the password is updated. |
+**Flow of Events**
 
-### Postconditions
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Opens the G!Track mobile app. | 2. Displays the student sign-in screen. |
+| 3. Enters the registered Student ID and password. | 4. Receives the submitted credentials and checks them against the student account. |
+| 5. Waits for authentication. | 6. On success, returns the student account information and allows access to the app. |
 
-- **Success:** The admin is authenticated and can access all dashboard features based on their role (`education` or `main`).
-- **Failure:** The admin remains on the login page with an error message.
+**Alternative Flow**
 
-### Related Use Cases
-
-- **UC-08:** View Dashboard — The dashboard is the first page displayed after successful authentication.
+· If the credentials are invalid or the account cannot be found, the system rejects the request and displays an authentication error.
 
 ---
 
-## UC-03: Manage Own Profile
+## UC-02: Administrator Log In
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-03 |
-| **Use Case Name** | Manage Own Profile |
-| **Primary Actor** | Student |
-| **Supporting Actor** | Admin (Education) — for admin profile updates |
-| **Description** | The student updates their own profile information, including uploading a profile picture through the mobile application. Education admins can also update their own profile (name, email) and change their password through the web interface. |
-| **Trigger** | The student navigates to the profile section in the mobile app, or the admin navigates to their account settings. |
-| **Preconditions** | The user must be authenticated. |
+**Administrator Log In Use Case Narrative**
 
-### Main Success Scenario — Student Profile Picture Upload
+The Administrator Log In use case authenticates Education Staff and Main Administrators in the G!Track web portal using their Staff ID and password. Newly provisioned accounts are required to set a personal password before accessing the dashboard.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Student selects a profile picture from their device (JPG, JPEG, PNG, or WebP; max 5 MB). | — |
-| 2 | — | The system validates the uploaded file format and size. |
-| 3 | — | If a previous profile picture exists, the system deletes the old file from storage. |
-| 4 | — | The system stores the new image in `storage/profile_pictures/` on the public disk. |
-| 5 | — | The system updates the student's `profile_picture` field with the relative file path. |
-| 6 | — | The system returns a success response with the new profile picture URL. |
+*Table 2: Administrator Log In Use Case Narrative*
 
-### Main Success Scenario — Admin Profile Update
+**Use Case Name:** Administrator Log In
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Admin (Education) enters updated first name, middle initial, last name, and/or email. | — |
-| 2 | — | The system validates the input (name fields accept letters only; email must be unique). |
-| 3 | — | The system updates the admin record in the database. |
-| 4 | — | The system returns a success message: *"Your profile has been updated successfully."* |
+**Actor(s):** Administrative User, Main Administrator
 
-### Alternative Flows
+**Purpose**
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – Invalid File Type** | At Step 2 (Student), the system rejects files that are not JPG/JPEG/PNG/WebP and returns a validation error. |
-| **A2 – File Too Large** | At Step 2 (Student), files exceeding 5 MB are rejected with a validation error. |
-| **A3 – Password Change (Admin)** | The admin can change their password by providing the current password and a new password (minimum 6 characters, must be confirmed). If the current password is incorrect, the system returns an error. |
+· Verify an administrator's identity and grant access to the web portal according to their account role.
 
-### Postconditions
+**Overview**
 
-- The user's profile is updated in the database, and the changes are reflected across the system.
+· The administrator signs in with a Staff ID and password. On first login, the system requires a password change; otherwise, it routes the administrator to the dashboard.
 
-### Relationship
+**Pre-condition**
 
-- `<<updates>>` **UC-01: Authenticate (Student)** — Profile updates modify the authenticated student's data stored during login.
+· The administrator has an account in G!Track and can access the web portal.
 
----
+**Post-condition**
 
-## UC-04: Send Heartbeat and Device Status
+· The administrator has an authenticated web session and is directed to the first-login password screen or the role-appropriate dashboard.
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-04 |
-| **Use Case Name** | Send Heartbeat and Device Status |
-| **Primary Actor** | Student (via mobile application — automated) |
-| **Description** | The mobile application automatically sends periodic heartbeat signals (approximately every 30 seconds) to keep the student marked as online and to transmit real-time device telemetry (battery level, signal strength) to the server. |
-| **Trigger** | Automatic timer within the mobile application fires every ~30 seconds while the app is running. |
-| **Preconditions** | 1. The student is authenticated and the mobile app is running. 2. The device has network connectivity. |
+**Trigger Event**
 
-### Main Success Scenario (Basic Flow)
+· The administrator opens the web portal and submits their Staff ID and password.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | The mobile app automatically sends a heartbeat request containing: `student_id`, `battery_level`, and `signal` status. | — |
-| 2 | — | The system locates the student record by `student_id`. |
-| 3 | — | The system updates the student's status to **online** (`status = true`). |
-| 4 | — | The system updates `last_update` to the current timestamp. |
-| 5 | — | The system updates `battery_level` and `signal_status` if provided. |
-| 6 | — | The system touches the `updated_at` timestamp (even if data is unchanged) to prevent premature offline marking. |
-| 7 | — | The system returns a confirmation: *"Heartbeat received."* |
+**Flow of Events**
 
-### Alternative Flows
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Opens the G!Track web portal. | 2. Displays the administrator sign-in page. |
+| 3. Enters the Staff ID and password. | 4. Verifies the credentials against the administrator account. |
+| 5. Submits the sign-in form. | 6. Starts an authenticated session and regenerates the session ID. |
+| 7. If prompted for first-time setup, enters and confirms a new personal password. | 8. Validates and saves the new password, clears the first-login requirement, and directs the administrator to the dashboard. |
+| 9. Otherwise, waits for the dashboard to load. | 10. Directs the administrator to the dashboard. |
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – Student Not Found** | At Step 2, if no student record matches the provided ID, the system returns a 404 error. |
-| **A2 – Heartbeat Timeout** | If no heartbeat is received for 15 minutes, the dashboard auto-marks the student as **offline** (`status = false`) during the next stats poll. |
-| **A3 – App Closed / Logout** | When the student logs out or closes the app, a `goOffline` request is sent, explicitly setting `status = false`. |
+**Alternative Flow**
 
-### Postconditions
+· If the Staff ID or password is invalid, the system returns an error and keeps the administrator on the sign-in page.
 
-- The student's online status and device telemetry are current in the database.
-- The admin dashboard reflects real-time online/offline counts.
-
-### Relationship
-
-- `<<updates>>` **UC-09: View Live Tracking** — Heartbeat data keeps the live tracking map and student status up to date.
+· If first-time password confirmation or password requirements are not satisfied, the system displays validation errors and does not complete the password update.
 
 ---
 
-## UC-05: Share Current Location
+## UC-03: Recover or Change Administrator Password
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-05 |
-| **Use Case Name** | Share Current Location |
-| **Primary Actor** | Student (via mobile application — automated) |
-| **Description** | The mobile application periodically sends the student's GPS coordinates (latitude and longitude) to the server, creating a historical location log and updating the student's current position on the live tracking map. |
-| **Trigger** | The mobile app's location service transmits GPS coordinates at regular intervals while the app is active. |
-| **Preconditions** | 1. The student is authenticated and the mobile app is running. 2. GPS/location services are enabled on the device. 3. The device has network connectivity. |
+**Recover or Change Administrator Password Use Case Narrative**
 
-### Main Success Scenario (Basic Flow)
+This use case allows an administrator to recover access using their Staff ID and registered email, or to change their password while signed in.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | The mobile app sends a location update containing: `student_id`, `latitude`, `longitude`, and optionally `battery_level` and `sos_status`. | — |
-| 2 | — | The system validates the coordinates (latitude: -90 to 90; longitude: -180 to 180). |
-| 3 | — | The system locates the student by `student_id` or `id`. |
-| 4 | — | The system creates a new record in the `locations` table with the student ID, coordinates, and `recorded_at` timestamp. |
-| 5 | — | The system marks the student as **online** and updates `last_update`. |
-| 6 | — | The system updates battery level if provided. |
-| 7 | — | The system returns a success response with the created location record. |
+*Table 3: Recover or Change Administrator Password Use Case Narrative*
 
-### Alternative Flows
+**Use Case Name:** Recover or Change Administrator Password
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – Student Not Found** | At Step 3, the system returns a 404 error. |
-| **A2 – Invalid Coordinates** | At Step 2, coordinates outside valid ranges are rejected with a validation error. |
-| **A3 – SOS Status Change via Location Update** | If the location update includes `sos_status = 'safe'` and the student was previously in `'help'` status, the system automatically resolves all active SOS notifications for that student. |
+**Actor(s):** Administrative User
 
-### Postconditions
+**Purpose**
 
-- A new location record is persisted in the `locations` table.
-- The student's position on the live tracking map is updated.
-- The location history for the student grows by one entry.
+· Let an administrator restore access or update their password without changing account identity.
 
-### Relationship
+**Overview**
 
-- `<<creates>>` **UC-10: View Location History** — Each shared location creates a new history entry that can be viewed by admins.
+· Password recovery checks the Staff ID and registered email before saving a replacement password. A signed-in Education Staff user can change their password by providing the current password and confirming a new one.
 
----
+**Pre-condition**
 
-## UC-06: Send or Cancel Alert
+· For recovery, the administrator has access to the registered email information. For a signed-in password change, the administrator is authenticated.
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-06 |
-| **Use Case Name** | Send or Cancel Alert (SOS) |
-| **Primary Actor** | Student |
-| **Supporting Actor** | Admin (Education), Main Admin |
-| **Description** | The student triggers an SOS emergency alert from the mobile application when in danger, or cancels an active SOS alert when safe. The alert notifies administrators and updates the student's SOS status on the live tracking map. |
-| **Trigger** | The student presses the SOS button on the mobile app to send an alert, or presses the Cancel/Safe button to cancel. |
-| **Preconditions** | 1. The student is authenticated. 2. The mobile application is running. |
+**Post-condition**
 
-### Main Success Scenario — Send SOS Alert
+· The new password is saved and the password-change timestamp is updated. After recovery, the administrator is returned to the sign-in page.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Student presses the SOS button on the mobile app. | — |
-| 2 | The mobile app collects current GPS coordinates, battery level, and signal strength. | — |
-| 3 | The mobile app begins recording a video feed. | — |
-| 4 | — | The system receives the SOS request and validates the data (`sos_status = 'help'`). |
-| 5 | — | The system updates the student's `sos_status` to `'help'` along with coordinates, battery, and signal data. |
-| 6 | — | The system updates `last_update` to the current timestamp. |
-| 7 | — | The system returns a confirmation: *"SOS status updated."* |
-| 8 | — | The admin dashboard and live tracking map immediately reflect the SOS status with a visual alert indicator. |
+**Trigger Event**
 
-### Main Success Scenario — Cancel SOS Alert
+· The administrator selects Forgot Password or opens the Change Password option in their profile menu.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Student presses the "I'm Safe" / Cancel button. | — |
-| 2 | — | The system receives the cancellation request (`sos_status = 'safe'`). |
-| 3 | — | The system updates the student's `sos_status` to `'safe'`. |
-| 4 | — | The system resolves all open SOS notifications for that student (setting `status = 'resolved'` and `read = true`). |
-| 5 | — | The SOS alert indicator is removed from the admin dashboard and tracking map. |
+**Flow of Events — Password Recovery**
 
-### Alternative Flows
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Opens the Forgot Password page. | 2. Displays the password recovery form. |
+| 3. Enters Staff ID, registered email, new password, and confirmation. | 4. Validates the input and checks whether the Staff ID and email match an account. |
+| 5. Submits the recovery form. | 6. Hashes and saves the new password, clears any first-login password requirement, and redirects to sign-in with a confirmation message. |
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – Student Not Found** | The system returns a 404 error. |
-| **A2 – Admin Resolves Alert** | An admin can manually resolve an SOS alert through the notifications panel, which sets the student's `sos_status` back to `'safe'`. |
+**Flow of Events — Change Password While Signed In**
 
-### Postconditions
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Opens the profile menu and selects Change Password. | 2. Displays the password change form. |
+| 3. Enters the current password and a new password with confirmation. | 4. Checks the current password and validates the new password requirements. |
+| 5. Submits the form. | 6. Hashes and saves the new password, updates the password-change timestamp, and displays a success message. |
 
-- **Send:** The student's SOS status is `'help'` and admins are alerted in real time.
-- **Cancel:** The student's SOS status is `'safe'` and all related notifications are resolved.
+**Alternative Flow**
 
-### Relationship
+· If the Staff ID and email do not match, or the submitted passwords fail validation, the system displays an error and does not save the new password.
 
-- `<<appears in>>` **UC-11: View Notification and Activity** — SOS alerts appear in the notification center for admin review.
+· The current web recovery flow uses Staff ID and email verification; it does not use a 6-digit OTP.
 
 ---
 
-## UC-07: Upload SOS Media
+## UC-04: Manage Own Profile
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-07 |
-| **Use Case Name** | Upload SOS Media |
-| **Primary Actor** | Student (via mobile application — automated) |
-| **Description** | When an SOS alert is triggered, the mobile application records and uploads a video feed (and optionally other media) to the server. This media is attached to the SOS notification for admin review. An SOS notification is only considered complete and visible to admins when a video has been successfully uploaded. |
-| **Trigger** | The student triggers an SOS alert, and the mobile app begins recording video. |
-| **Preconditions** | 1. The student has triggered an SOS alert (UC-06). 2. The device camera is accessible. 3. The device has sufficient network bandwidth to upload. |
+**Manage Own Profile Use Case Narrative**
 
-### Main Success Scenario (Basic Flow)
+This use case allows a student to update their own profile information and profile picture through the mobile app, and allows authorized Education Staff to update their own profile information in the web portal.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | The mobile app records a short video during the SOS event. | — |
-| 2 | The mobile app sends the video file to `POST /api/upload-video` or `POST /api/notifications/send` with `target = 'sos'`. | — |
-| 3 | — | The system validates the uploaded file (MP4/MOV/AVI, max 25 MB). |
-| 4 | — | The system stores the video in `storage/recordings/videos/` on the public disk. |
-| 5 | — | If an existing unresolved SOS notification exists for the student, the system updates it with the new video URL. Otherwise, a new SOS notification is created. |
-| 6 | — | The system updates the student's real-time status (coordinates, battery, signal, `sos_status = 'help'`). |
-| 7 | — | The system returns a success response with the notification ID. |
+*Table 4: Manage Own Profile Use Case Narrative*
 
-### Alternative Flows
+**Use Case Name:** Manage Own Profile
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – No Video Attached** | The system creates the SOS notification immediately without a video, so admins can respond. A later video upload updates the same unresolved alert. |
-| **A2 – SOS Video Upload Failure** | The system logs the storage error and still creates or updates the SOS notification without a video. Other media upload failures return a 500 error. |
-| **A3 – Media Upload (Non-SOS)** | For `student_message` type notifications, media files (images, videos) up to 25 MB can also be attached. |
+**Actor(s):** Student User, Administrative User
 
-### Postconditions
+**Purpose**
 
-- The video/media file is stored in the server's file storage.
-- The SOS notification is created or updated with the media URL.
-- Admins can view the video from the notification panel.
+· Keep the user's personal account information current.
 
-### Relationship
+**Overview**
 
-- `<<appears in>>` **Storage** — Uploaded SOS media files are persisted in the Laravel public storage disk.
+· The user edits the profile fields available to their role. The system validates and saves the changes.
 
----
+**Pre-condition**
 
-## UC-08: View Dashboard
+· The user is authenticated.
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-08 |
-| **Use Case Name** | View Dashboard |
-| **Primary Actor** | Admin (Education), Main Admin |
-| **Description** | After authentication, the admin views the main dashboard which provides a real-time summary of the system's status including online/offline student counts, active SOS alerts, broadcast counts, and the latest system update time. The dashboard auto-refreshes statistics every 10 seconds. |
-| **Trigger** | The admin logs in and is redirected to `/dashboard`, or manually navigates to the dashboard page. |
-| **Preconditions** | The admin must be authenticated via the `admin` guard. |
+**Post-condition**
 
-### Main Success Scenario (Basic Flow)
+· Valid profile changes are saved and displayed in the user's account.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Admin navigates to the Dashboard. | — |
-| 2 | — | The system auto-marks students as **offline** if no heartbeat has been received in the last 15 minutes. |
-| 3 | — | The system fetches all students with their latest location data. |
-| 4 | — | The system computes summary statistics: online count, offline count, active SOS count, unread broadcast count, latest update time. |
-| 5 | — | The system renders the dashboard view with student list and summary cards. |
-| 6 | — | The dashboard JavaScript begins polling `/api/dashboard/stats` every 10 seconds to refresh counts in real time. |
+**Trigger Event**
 
-### Alternative Flows
+· The user opens the profile page or profile settings.
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – No Students Registered** | The dashboard displays zero counts and an empty student list. |
-| **A2 – Active SOS Alert** | If there are active SOS alerts, the dashboard prominently highlights the SOS count badge to draw attention. |
+**Flow of Events**
 
-### Postconditions
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Opens their profile settings. | 2. Displays the profile information and editable fields allowed for the user's role. |
+| 3. Updates available profile fields or selects a profile picture. | 4. Validates the submitted information and, for an uploaded picture, checks its file type and size. |
+| 5. Saves the changes. | 6. Stores valid changes and returns a confirmation. |
 
-- The admin sees up-to-date system statistics and student statuses.
-- The dashboard continues to poll for updates in the background.
+**Alternative Flow**
+
+· If a field or uploaded file fails validation, the system displays an error and does not apply the invalid change.
 
 ---
 
-## UC-09: View Live Tracking
+## UC-05: Send Heartbeat and Device Status
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-09 |
-| **Use Case Name** | View Live Tracking |
-| **Primary Actor** | Admin (Education), Main Admin |
-| **Description** | The admin views a real-time interactive map showing the current GPS positions of all students. Students are shown as markers on the map with indicators for online/offline status, SOS status, and gender. The map supports filtering by class. |
-| **Trigger** | The admin clicks on the "Tracking" navigation item or navigates to `/tracking`. |
-| **Preconditions** | 1. The admin must be authenticated. 2. Students must be sharing their location (UC-05). |
+**Send Heartbeat and Device Status Use Case Narrative**
 
-### Main Success Scenario (Basic Flow)
+The Student App periodically sends a heartbeat so G!Track can keep the student's connection status and device telemetry current for administrator monitoring.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Admin navigates to the Live Tracking page. | — |
-| 2 | — | The system loads the tracking view with an interactive map. |
-| 3 | — | The system fetches all student locations from `GET /api/location/all`. |
-| 4 | — | The system renders student markers on the map using their latest GPS coordinates. |
-| 5 | — | Markers display color-coded indicators: online (green), offline (grey), SOS active (red/pulsing). |
-| 6 | Admin can click a marker to view student details (name, class, battery, signal, SOS status). | — |
-| 7 | — | The map auto-refreshes location data periodically. |
+*Table 5: Send Heartbeat and Device Status Use Case Narrative*
 
-### Alternative Flows
+**Use Case Name:** Send Heartbeat and Device Status
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – Filter by Class** | The admin selects a specific class from the filter dropdown. The system re-fetches locations for only students in that class and updates the map. |
-| **A2 – No Location Data** | Students who have never shared their location do not appear on the map. |
-| **A3 – SOS Active** | Students with `sos_status = 'help'` are shown with a red alert marker, making them immediately identifiable. |
+**Actor(s):** Student App (Automated Background Process)
 
-### Postconditions
+**Purpose**
 
-- The admin can see the real-time geographic positions of monitored students.
+· Report that the student's device is active and provide the latest available device status.
 
----
+**Overview**
 
-## UC-10: View Location History
+· While the student app is operating, it sends a periodic status update. G!Track records the update and the web dashboard reflects the student's status.
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-10 |
-| **Use Case Name** | View Location History |
-| **Primary Actor** | Admin (Education), Main Admin |
-| **Description** | The admin views the complete location history of a specific student, including all previously recorded GPS coordinates with timestamps and SOS status at each point. The history is displayed on a map and in a tabular list. |
-| **Trigger** | The admin clicks on a student's name or a "View History" link from the dashboard or tracking page. |
-| **Preconditions** | 1. The admin must be authenticated. 2. The student must have at least one recorded location. |
+**Pre-condition**
 
-### Main Success Scenario (Basic Flow)
+· The student is signed in, and the device can connect to G!Track.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Admin selects a student and navigates to `/students/{id}/history`. | — |
-| 2 | — | The system retrieves the student's profile data. |
-| 3 | — | The system queries all entries from the `locations` table for that student, ordered by `recorded_at` descending. |
-| 4 | — | The system renders the history view showing: student details, a map with historical markers, and a sortable table listing each location record. |
-| 5 | Admin can browse through the location timeline and click on individual entries to see details. | — |
+**Post-condition**
 
-### Alternative Flows
+· The student's status and submitted device information are updated. The student may be marked offline after the configured heartbeat timeout if updates stop.
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – No History** | If the student has no recorded locations, the system displays an empty state message. |
-| **A2 – SOS Locations** | Location entries recorded during an active SOS event are visually distinguished (e.g., red markers). |
+**Trigger Event**
 
-### Postconditions
+· The app's periodic heartbeat process runs.
 
-- The admin has reviewed the student's historical movement data.
+**Flow of Events**
+
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Collects the available student/device status information. | 2. Receives the heartbeat request and validates the student identifier. |
+| 3. Sends the heartbeat to G!Track. | 4. Updates the student's online status and the latest status timestamp. |
+| 5. Waits for the response. | 6. Returns a success response to the app. |
+
+**Alternative Flow**
+
+· If the student record cannot be found or the request is invalid, the system returns an error and does not record the heartbeat.
+
+· If no heartbeat is received within the configured timeout, the web dashboard marks the student offline during a subsequent status check.
 
 ---
 
-## UC-11: View Notification and Activity
+## UC-06: Share Current Location
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-11 |
-| **Use Case Name** | View Notification and Activity |
-| **Primary Actor** | Admin (Education), Main Admin |
-| **Description** | The admin views and manages system notifications on separate screens for **SOS Alerts**, **Student Messages**, and **Broadcasts**. Admins can acknowledge, resolve, and delete notifications. The system tracks read/unread status and provides filtering by class. |
-| **Trigger** | The admin navigates to `/notifications` or clicks the notification bell icon. |
-| **Preconditions** | The admin must be authenticated. |
+**Share Current Location Use Case Narrative**
 
-### Main Success Scenario (Basic Flow)
+The Student App sends the student's current GPS coordinates to G!Track so administrators can monitor the latest available location and review location history.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Admin navigates to the Notifications page. | — |
-| 2 | — | The system loads notifications for the current tab (default: Student Messages). |
-| 3 | — | For the **SOS Alerts** screen: The system displays alerts sorted by newest first with status indicators (pending, acknowledged, resolved). |
-| 4 | — | For **Student Messages** tab: The system groups messages by student in a Messenger-style layout. Education admins only see conversations assigned to them. |
-| 5 | — | For **Broadcast** tab: The system displays all broadcast messages. |
-| 6 | — | The system computes stats: unread count, active SOS count, broadcast count, online/offline counts. |
+*Table 6: Share Current Location Use Case Narrative*
 
-### Sub-Flows
+**Use Case Name:** Share Current Location
 
-| Action | Description |
-|--------|-------------|
-| **Acknowledge Alert** | Admin clicks "Acknowledge" on an SOS alert. The system records the admin's name and timestamp, and marks it as read. |
-| **Resolve Alert** | Admin clicks "Resolve" on an alert. The system marks the notification as `'resolved'`, records the resolver's name, and if it's an SOS alert, sets the student's `sos_status` to `'safe'`. |
-| **Mark as Read** | Admin clicks to mark a notification as read, updating the `read` field. |
-| **Delete Archives** | Admin can delete all resolved SOS archives in bulk. |
-| **Filter by Class** | Admin selects a class from the dropdown to filter notifications by student class. |
+**Actor(s):** Student App (Automated Background Process)
 
-### Alternative Flows
+**Purpose**
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – No Notifications** | If there are no notifications for the selected tab, an empty state is displayed. |
-| **A2 – Main Admin Scope** | Main admins see conversations assigned to them plus all broadcasts and SOS alerts. |
+· Provide current student location information to G!Track for safety monitoring.
 
-### Postconditions
+**Overview**
 
-- The admin has reviewed and managed notifications.
-- Alert statuses are updated accordingly (acknowledged/resolved).
+· The app obtains GPS coordinates and submits them to the server. G!Track validates and records the location for live tracking and history.
 
----
+**Pre-condition**
 
-## UC-12: Send and Receive Student Messages
+· The student is signed in, location permission is enabled, and the device can connect to G!Track.
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-12 |
-| **Use Case Name** | Send and Receive Student Messages |
-| **Primary Actor** | Admin (Education), Main Admin |
-| **Supporting Actor** | Student |
-| **Description** | Administrators and students communicate through a Messenger-style messaging interface. Students send messages from the mobile app (directed to a specific admin), and admins reply from the web interface. The system supports real-time message updates, read receipts, and conversation management. |
-| **Trigger** | A student sends a message from the mobile app, or an admin opens a student conversation on the web. |
-| **Preconditions** | 1. Both parties must be authenticated. 2. Only admins with `education` or `main` roles can send messages. |
+**Post-condition**
 
-### Main Success Scenario — Student Sends Message
+· The latest location is saved and is available for authorized administrator views.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Student composes a message in the mobile app and selects a recipient admin. | — |
-| 2 | — | The system creates a notification record with `type = 'student_message'`, `sender_type = 'student'`, and the selected `admin_id`. |
-| 3 | — | The message appears in the admin's Student Messages tab with an unread indicator. |
+**Trigger Event**
 
-### Main Success Scenario — Admin Replies
+· The app's location service obtains a new GPS reading.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Admin opens a student conversation in the Messenger panel. | — |
-| 2 | — | The system fetches all messages for that student (via `GET /messages/{student_id}/json`). |
-| 3 | — | The system marks all unread student messages in the conversation as read. |
-| 4 | Admin types a reply and clicks Send. | — |
-| 5 | — | The system creates a notification record with `type = 'admin_reply'`, `sender_type = 'admin'`, and the admin's name. |
-| 6 | — | The message appears in the student's mobile notification feed. |
+**Flow of Events**
 
-### Alternative Flows
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Reads the current GPS coordinates. | 2. Receives the location update and validates the student identifier and coordinate values. |
+| 3. Sends the coordinates to G!Track. | 4. Records the location with its timestamp and updates the student's latest location information. |
+| 5. Waits for confirmation. | 6. Returns a success response to the app. |
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – New Conversation** | Admin opens the "New Message" modal, selects a student, and sends the first message. |
-| **A2 – Delete Conversation** | Admin deletes an entire conversation (`DELETE /messages/{student_id}`). All non-SOS, non-broadcast messages between the admin and student are removed. |
-| **A3 – Empty Message** | If the admin attempts to send an empty message, the system returns a 422 error. |
+**Alternative Flow**
 
-### Postconditions
+· If location permission is disabled, GPS is unavailable, or the device has no network connection, no new location is recorded.
 
-- Messages are persisted in the `notifications` table.
-- Unread counts are updated for both parties.
+· If the student cannot be found or coordinates are invalid, the system returns an error.
 
 ---
 
-## UC-13: Send Broadcast
+## UC-07: Send or Cancel Safety Alert
 
-| Field | Detail |
-|-------|--------|
-| **Use Case ID** | UC-13 |
-| **Use Case Name** | Send Broadcast |
-| **Primary Actor** | Admin (Education), Main Admin |
-| **Description** | An administrator sends a broadcast notification to all students, a specific class, or a specific student. Broadcasts appear in the student's mobile notification feed and in the Broadcast tab of the admin notifications panel. |
-| **Trigger** | The admin navigates to the Broadcast tab and clicks "Send Broadcast," or sends a broadcast from the mobile admin app. |
-| **Preconditions** | The admin must be authenticated. |
+**Send or Cancel Safety Alert Use Case Narrative**
 
-### Main Success Scenario (Basic Flow)
+This use case allows a student to send an SOS alert when assistance is needed and to mark the alert safe when the situation is resolved.
 
-| Step | Actor | System Response |
-|------|-------|-----------------|
-| 1 | Admin selects the target audience: **All Students**, a **specific class**, or a **specific student**. | — |
-| 2 | Admin enters a **subject** and **message body**. | — |
-| 3 | Admin clicks "Send Broadcast." | — |
-| 4 | — | The system validates the input (subject max 255 chars, message required). |
-| 5 | — | The system determines the target class based on the selection: `'all'` for all students, the class name for a class, or the student's class for an individual student. |
-| 6 | — | The system creates a notification record with `type = 'broadcast'`, `sender_type = 'admin'`, the admin's name as sender, and `read = true` (since the admin authored it). |
-| 7 | — | The system redirects with a success message: *"Broadcast notification sent successfully!"* |
-| 8 | — | The broadcast appears in students' mobile notification feeds (filtered by class or globally). |
+*Table 7: Send or Cancel Safety Alert Use Case Narrative*
 
-### Alternative Flows
+**Use Case Name:** Send or Cancel Safety Alert
 
-| Condition | Flow |
-|-----------|------|
-| **A1 – Mobile Admin Broadcast** | The admin sends a broadcast from the mobile app via `POST /api/admin/broadcast`. The flow is identical but returns a JSON response instead of a redirect. |
-| **A2 – Missing Fields** | If subject or message is empty, the system returns a validation error. |
+**Actor(s):** Student User, Student App, Administrative User
 
-### Postconditions
+**Purpose**
 
-- The broadcast notification is stored in the database.
-- All targeted students can view the broadcast in their mobile notification feed.
-- The broadcast appears in the admin's Broadcast tab.
+· Notify administrators of a student's safety concern and keep the alert state current.
+
+**Overview**
+
+· The student initiates an SOS alert from the app. G!Track records it for administrator review. When the student is safe, the alert can be canceled or resolved.
+
+**Pre-condition**
+
+· The student has an account and the app can communicate with G!Track.
+
+**Post-condition**
+
+· A sent alert is available for administrator review. A canceled or resolved alert is marked as no longer active.
+
+**Trigger Event**
+
+· The student presses the SOS control or marks themselves safe in the app.
+
+**Flow of Events — Send Alert**
+
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Presses the SOS control. | 2. Receives the safety alert and associated information submitted by the app. |
+| 3. Confirms the alert submission. | 4. Records the alert and makes it available in the administrator's alert view. |
+| 5. Waits for confirmation. | 6. Returns the alert submission result to the app. |
+
+**Flow of Events — Cancel or Mark Safe**
+
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Selects the safe or cancel action. | 2. Receives the updated safety state. |
+| 3. Confirms the action. | 4. Updates the student's safety status and resolves the applicable active alert. |
+
+**Alternative Flow**
+
+· If the app cannot connect, the alert state cannot be updated until a request reaches G!Track.
+
+· An authorized administrator may also acknowledge or resolve an alert through the web portal.
 
 ---
 
-## Use Case Relationships Summary
+## UC-08: Upload SOS Media
 
-| Relationship | Source Use Case | Target Use Case | Type |
-|-------------|-----------------|-----------------|------|
-| `<<updates>>` | UC-03: Manage Own Profile | UC-01: Authenticate (Student) | Extend |
-| `<<updates>>` | UC-04: Send Heartbeat and Device Status | UC-09: View Live Tracking | Extend |
-| `<<creates>>` | UC-05: Share Current Location | UC-10: View Location History | Include |
-| `<<appears in>>` | UC-06: Send or Cancel Alert | UC-11: View Notification and Activity | Include |
-| `<<appears in>>` | UC-07: Upload SOS Media | Storage | Include |
+**Upload SOS Media Use Case Narrative**
+
+The Student App can upload media associated with an SOS event so administrators have additional information when reviewing the alert.
+
+*Table 8: Upload SOS Media Use Case Narrative*
+
+**Use Case Name:** Upload SOS Media
+
+**Actor(s):** Student App, Student User
+
+**Purpose**
+
+· Attach supporting media to an SOS alert for administrator review.
+
+**Overview**
+
+· The app submits a media file associated with an SOS event. G!Track validates and stores the file and associates it with the alert.
+
+**Pre-condition**
+
+· An SOS event has been initiated, the app has access to the media, and the device can connect to G!Track.
+
+**Post-condition**
+
+· Successfully uploaded media is stored and associated with the relevant alert.
+
+**Trigger Event**
+
+· The student app completes or initiates a media upload for an SOS event.
+
+**Flow of Events**
+
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Selects or records media for the SOS event. | 2. Receives the upload and checks that the file meets the allowed type and size requirements. |
+| 3. Submits the media file. | 4. Stores the file and associates it with the relevant alert. |
+| 5. Waits for the upload result. | 6. Returns a success response so the app can report that the media was uploaded. |
+
+**Alternative Flow**
+
+· If the file is invalid or upload fails, the system reports the failure. The student can retry when a connection is available.
+
+---
+
+## UC-09: View Dashboard
+
+**View Dashboard Use Case Narrative**
+
+The dashboard gives administrators an at-a-glance overview of student connection status, recent updates, and active safety alerts.
+
+*Table 9: View Dashboard Use Case Narrative*
+
+**Use Case Name:** View Dashboard
+
+**Actor(s):** Administrative User, Main Administrator
+
+**Purpose**
+
+· Provide a summary of student and system status for monitoring.
+
+**Overview**
+
+· The web portal retrieves student status and alert information and displays summary cards and monitoring data. Dashboard statistics refresh periodically.
+
+**Pre-condition**
+
+· The administrator is signed in and has access to the dashboard.
+
+**Post-condition**
+
+· The administrator has reviewed the latest dashboard information.
+
+**Trigger Event**
+
+· The administrator signs in or selects Dashboard from the web portal.
+
+**Flow of Events**
+
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Opens the dashboard. | 2. Retrieves student status, latest update, and active alert information. |
+| 3. Reviews the summary information. | 4. Displays online/offline counts, recent updates, and relevant alert indicators. |
+| 5. Keeps the dashboard open. | 6. Refreshes dashboard statistics periodically. |
+
+**Alternative Flow**
+
+· If there are no registered students or alerts, the dashboard displays the available empty or zero-count state.
+
+---
+
+## UC-10: View Live Tracking
+
+**View Live Tracking Use Case Narrative**
+
+Live Tracking allows administrators to inspect available student locations on a map and filter the displayed students by class.
+
+*Table 10: View Live Tracking Use Case Narrative*
+
+**Use Case Name:** View Live Tracking
+
+**Actor(s):** Administrative User, Main Administrator
+
+**Purpose**
+
+· Monitor the latest student locations and safety status.
+
+**Overview**
+
+· The administrator opens the tracking map, reviews student markers, and may filter the map by class.
+
+**Pre-condition**
+
+· The administrator is signed in. Location data has been submitted for students whose positions should appear.
+
+**Post-condition**
+
+· The administrator has reviewed the available location information and any displayed safety indicators.
+
+**Trigger Event**
+
+· The administrator selects Live Tracking from the web portal.
+
+**Flow of Events**
+
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Opens the Live Tracking page. | 2. Loads the map and available class filters. |
+| 3. Selects a class filter or keeps the default selection. | 4. Displays available student locations matching the selected filter. |
+| 5. Selects or inspects a map marker. | 6. Displays the available student and status details for that location. |
+
+**Alternative Flow**
+
+· If a student has not submitted a location, no current marker is available for that student.
+
+· If no class is selected, the map displays the default set of available student locations.
+
+---
+
+## UC-11: View Location History
+
+**View Location History Use Case Narrative**
+
+Location History allows an administrator to inspect a student's previously recorded location entries and review the associated timeline.
+
+*Table 11: View Location History Use Case Narrative*
+
+**Use Case Name:** View Location History
+
+**Actor(s):** Administrative User, Main Administrator
+
+**Purpose**
+
+· Review the recorded location timeline for a selected student.
+
+**Overview**
+
+· The administrator opens a student's history from the activity or student view. The portal displays the student details and available location records.
+
+**Pre-condition**
+
+· The administrator is signed in and the selected student record exists.
+
+**Post-condition**
+
+· The administrator has viewed the available location history for the selected student.
+
+**Trigger Event**
+
+· The administrator selects View History for a student.
+
+**Flow of Events**
+
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Selects a student and opens the student's history. | 2. Retrieves the student information and recorded location entries. |
+| 3. Reviews the history timeline and map. | 4. Displays available location records and their timestamps. |
+| 5. Selects a history entry, if available. | 6. Focuses the map on the selected recorded location. |
+
+**Alternative Flow**
+
+· If there are no location records, the portal displays an empty state instead of a populated timeline.
+
+---
+
+## UC-12: View Notifications and Activity
+
+**View Notifications and Activity Use Case Narrative**
+
+This use case allows administrators to review safety alerts, student messages, broadcasts, and student activity, and to take the actions permitted for each item.
+
+*Table 12: View Notifications and Activity Use Case Narrative*
+
+**Use Case Name:** View Notifications and Activity
+
+**Actor(s):** Administrative User, Main Administrator
+
+**Purpose**
+
+· Keep administrators informed about student status and messages requiring attention.
+
+**Overview**
+
+· The portal presents alert, message, and broadcast views. Administrators can filter available information and acknowledge or resolve alerts.
+
+**Pre-condition**
+
+· The administrator is signed in.
+
+**Post-condition**
+
+· The administrator has reviewed relevant notification or activity information. Any acknowledged or resolved alert has its updated state recorded.
+
+**Trigger Event**
+
+· The administrator opens Notifications, Activity, or an alert indicator.
+
+**Flow of Events**
+
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Opens a notification or activity view. | 2. Retrieves and displays relevant alerts, messages, broadcasts, or activity details. |
+| 3. Selects an item or applies an available filter. | 4. Displays the selected item or filtered results. |
+| 5. Acknowledges or resolves an alert, when applicable. | 6. Records the alert state change and refreshes the displayed information. |
+
+**Alternative Flow**
+
+· If there are no items matching the selected view or filter, the portal displays an empty state.
+
+· The available conversations and management actions depend on the administrator's role and access permissions.
+
+---
+
+## UC-13: Send and Receive Student Messages
+
+**Send and Receive Student Messages Use Case Narrative**
+
+This use case allows students and authorized administrators to exchange messages through the student app and the administrator web portal.
+
+*Table 13: Send and Receive Student Messages Use Case Narrative*
+
+**Use Case Name:** Send and Receive Student Messages
+
+**Actor(s):** Student User, Administrative User
+
+**Purpose**
+
+· Support direct communication between a student and an authorized administrator.
+
+**Overview**
+
+· Students submit messages through the app. Administrators review conversations and send replies through the web portal.
+
+**Pre-condition**
+
+· The student and administrator have accounts. The administrator is signed in to the portal and is permitted to use messaging.
+
+**Post-condition**
+
+· The submitted message or reply is saved in its conversation and is available to the other participant.
+
+**Trigger Event**
+
+· A student sends a message, or an administrator opens a student conversation.
+
+**Flow of Events — Student Sends a Message**
+
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Selects an administrator and writes a message in the student app. | 2. Receives the message and associates it with the student-administrator conversation. |
+| 3. Submits the message. | 4. Saves the message and makes it available in the administrator's conversation view. |
+
+**Flow of Events — Administrator Replies**
+
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Opens the Messages view and selects a student conversation. | 2. Retrieves and displays the conversation history. |
+| 3. Writes and sends a reply. | 4. Saves the reply and makes it available to the student. |
+| 5. Reviews the updated conversation. | 6. Refreshes the conversation and read status as applicable. |
+
+**Alternative Flow**
+
+· If a message is empty or invalid, the system displays a validation error and does not save it.
+
+· If the conversation cannot be loaded or a message cannot be delivered, the system reports the failure.
+
+---
+
+## UC-14: Send Broadcast
+
+**Send Broadcast Use Case Narrative**
+
+The Send Broadcast use case allows an administrator to send an announcement to all students, a selected class, or an individual student.
+
+*Table 14: Send Broadcast Use Case Narrative*
+
+**Use Case Name:** Send Broadcast
+
+**Actor(s):** Administrative User, Main Administrator
+
+**Purpose**
+
+· Distribute an announcement to a selected student audience.
+
+**Overview**
+
+· The administrator selects the audience, enters the subject and message, and submits the broadcast. The system records the broadcast and its recipients.
+
+**Pre-condition**
+
+· The administrator is signed in and the selected audience contains at least one student.
+
+**Post-condition**
+
+· The broadcast and recipient records are saved and the targeted students can view the announcement.
+
+**Trigger Event**
+
+· The administrator opens Broadcasts and chooses to compose a new broadcast.
+
+**Flow of Events**
+
+| **Actor Actions** | **System Response** |
+|---|---|
+| 1. Opens the Broadcasts view. | 2. Displays the broadcast form and available audience options. |
+| 3. Selects all students, a class, or an individual student. | 4. Resolves the selected audience to student recipients. |
+| 5. Enters a subject and message. | 6. Validates the required fields and selected audience. |
+| 7. Submits the broadcast. | 8. Saves the broadcast and recipient records, then displays a success confirmation. |
+
+**Alternative Flow**
+
+· If required fields are missing or invalid, the system displays validation errors and does not send the broadcast.
+
+· If the selected audience has no students, the system reports that no recipients were found.
+
+---
+
+## Use Case Relationships
+
+| Relationship | Source Use Case | Related Use Case |
+|---|---|---|
+| Student account access | UC-01: Student Log In | UC-03: Manage Own Profile; UC-05: Send Heartbeat and Device Status; UC-06: Share Current Location |
+| Alert review | UC-07: Send or Cancel Safety Alert | UC-12: View Notifications and Activity |
+| Location records | UC-06: Share Current Location | UC-11: View Location History |
+| Alert evidence | UC-08: Upload SOS Media | UC-12: View Notifications and Activity |
+| Student communication | UC-13: Send and Receive Student Messages | UC-12: View Notifications and Activity |
+| Administrator access | UC-02: Administrator Log In | UC-09: View Dashboard; UC-10: View Live Tracking; UC-12: View Notifications and Activity; UC-14: Send Broadcast |

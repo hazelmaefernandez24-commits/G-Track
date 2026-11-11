@@ -19,10 +19,10 @@ class BatchClassManagementTest extends TestCase
         $admin = $this->createMainAdmin();
 
         $this->actingAs($admin, 'admin')
-            ->post(route('classes.store'), ['name' => 'Grade 9'])
+            ->post(route('classes.store'), ['name' => '2029'])
             ->assertSessionHas('success');
 
-        $this->assertDatabaseHas('student_classes', ['name' => 'Grade 9']);
+        $this->assertDatabaseHas('student_classes', ['name' => '2029']);
 
         $class = BatchClass::where('name', '2026')->firstOrFail();
         BatchClass::where('name', '2027')->delete();
@@ -52,10 +52,27 @@ class BatchClassManagementTest extends TestCase
         $this->assertDatabaseHas('students', ['id' => $student->id, 'class' => '2027']);
         $this->assertDatabaseHas('notifications', ['id' => $notificationId, 'class' => '2027']);
 
-        $newClass = BatchClass::where('name', 'Grade 9')->firstOrFail();
+        $newClass = BatchClass::where('name', '2029')->firstOrFail();
         $this->delete(route('classes.destroy', $newClass))
             ->assertSessionHas('success');
         $this->assertDatabaseMissing('student_classes', ['id' => $newClass->id]);
+    }
+
+    public function test_class_creation_requires_a_unique_numeric_year(): void
+    {
+        $admin = $this->createMainAdmin();
+
+        $this->actingAs($admin, 'admin')
+            ->post(route('classes.store'), ['name' => 'Grade 9'])
+            ->assertSessionHasErrors('name');
+
+        $this->assertDatabaseMissing('student_classes', ['name' => 'Grade 9']);
+
+        $this->actingAs($admin, 'admin')
+            ->post(route('classes.store'), ['name' => '2026'])
+            ->assertSessionHasErrors('name');
+
+        $this->assertSame(1, BatchClass::where('name', '2026')->count());
     }
 
     public function test_class_cannot_be_deleted_while_students_are_enrolled(): void

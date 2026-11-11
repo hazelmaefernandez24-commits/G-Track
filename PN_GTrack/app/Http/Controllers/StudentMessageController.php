@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Notification;
+use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\Student;
-use App\Models\StudentMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,20 +12,7 @@ class StudentMessageController extends NotificationScreenController
 {
     public function index(Request $request)
     {
-        $query = Notification::query()->whereIn('type', ['sos', 'student_message', 'admin_reply']);
-        $user = Auth::guard('admin')->user();
-        if ($user) {
-            if ($user->role === 'main') {
-                $query->where(function ($scopedQuery) use ($user) {
-                    $scopedQuery->where('admin_id', $user->getKey())
-                        ->orWhere('type', 'sos');
-                });
-            } else {
-                $query->where('admin_id', $user->getKey());
-            }
-        }
-
-        return $this->renderScreen($request, 'messages', $query, true);
+        return $this->renderMessagesScreen($request);
     }
 
     public function reply(Request $request, $id)
@@ -34,36 +21,26 @@ class StudentMessageController extends NotificationScreenController
             return redirect()->back()->with('error', 'Only education staff can send student messages.');
         }
 
-        $request->validate(['message' => 'required']);
-        $parent = Notification::whereIn('type', ['student_message', 'admin_reply', 'sos'])->find($id);
-        if (!$parent) {
-            return redirect()->back()->with('error', 'Message not found.');
-        }
+        $validated = $request->validate(['message' => 'required|string']);
+        $parent = Message::with('conversation')->findOrFail($id);
 
-        Notification::create([
-            'student_id' => $parent->student_id,
-            'admin_id' => $this->currentAdminId(),
-            'class' => $parent->class,
-            'type' => 'admin_reply',
+        $parent->conversation->messages()->create([
             'sender_type' => 'admin',
-            'sender_name' => $this->currentAdminName(),
-            'subject' => $this->normalizeSubject('admin_reply', $request->message, $parent->subject),
+            'sender_id' => $this->currentAdminId(),
+            'message' => $validated['message'],
             'reply_to_id' => $parent->id,
-            'message' => $request->message,
-            'read' => false,
-            'status' => 'replied',
         ]);
 
-        $parent->update(['status' => 'replied', 'read' => true]);
+        $parent->update(['read_at' => now()]);
 
         return redirect()->back()->with('success', 'Reply sent to student!');
     }
 
     public function read($id)
     {
-        Notification::findOrFail($id)->update(['read' => true]);
+        Message::whereKey($id)->whereNull('read_at')->update(['read_at' => now()]);
 
-        return redirect()->back()->with('success', 'Notification marked as read.');
+        return redirect()->back()->with('success', 'Message marked as read.');
     }
 
     public function getMessagesJson($studentId)
@@ -74,24 +51,28 @@ class StudentMessageController extends NotificationScreenController
         }
 
         $user = Auth::guard('admin')->user();
-        $markSeenQuery = StudentMessage::where('student_id', $student->id)
+        $conversations = Conversation::where('student_id', $student->id)
+            ->when($user && in_array($user->role, ['education', 'main'], true), function ($query) use ($user) {
+                $query->where('admin_id', $user->getKey());
+            })
+            ->get();
+
+        if ($conversations->isEmpty()) {
+            return response()->json(['messages' => []]);
+        }
+
+        Message::whereIn('conversation_id', $conversations->pluck('id'))
             ->where('sender_type', 'student')
-            ->where('read', false);
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
 
-        if ($user && in_array($user->role, ['education', 'main'], true)) {
-            $markSeenQuery->where('admin_id', $user->getKey());
-        }
-        $markSeenQuery->update(['read' => true]);
+        $messages = Message::with('conversation')
+            ->whereIn('conversation_id', $conversations->pluck('id'))
+            ->orderBy('created_at')
+            ->get()
+            ->map(fn (Message $message) => $this->formatMessage($message));
 
-        $messagesQuery = Notification::where('student_id', $student->id)
-            ->whereIn('type', ['sos', 'student_message', 'admin_reply']);
-        if ($user && in_array($user->role, ['education', 'main'], true)) {
-            $messagesQuery->where('admin_id', $user->getKey());
-        }
-
-        return response()->json([
-            'messages' => $messagesQuery->orderBy('created_at')->get(),
-        ]);
+        return response()->json(['messages' => $messages]);
     }
 
     public function sendMessageAjax(Request $request, $studentId)
@@ -100,44 +81,33 @@ class StudentMessageController extends NotificationScreenController
             return response()->json(['success' => false, 'message' => 'Only education staff can send student messages.'], 403);
         }
 
-        $message = trim((string) $request->input('message', ''));
-        if ($message === '') {
+        $messageText = trim((string) $request->input('message', ''));
+        if ($messageText === '') {
             return response()->json(['success' => false, 'message' => 'Message cannot be empty.'], 422);
         }
 
         $student = $this->findStudent($studentId);
         if (!$student) {
-            return response()->json(['success' => false], 404);
+            return response()->json(['success' => false, 'message' => 'Student not found.'], 404);
         }
 
-        $latestStudentMessage = StudentMessage::where('student_id', $student->id)
-            ->where('sender_type', 'student')
-            ->latest('created_at')
-            ->first();
-
-        $reply = StudentMessage::create([
+        $conversation = Conversation::firstOrCreate([
             'student_id' => $student->id,
             'admin_id' => $this->currentAdminId(),
-            'class' => $student->class,
-            'type' => 'admin_reply',
+        ]);
+        $latestStudentMessage = $conversation->messages()
+            ->where('sender_type', 'student')
+            ->latest()
+            ->first();
+
+        $message = $conversation->messages()->create([
             'sender_type' => 'admin',
-            'sender_name' => $this->currentAdminName(),
-            'subject' => $this->normalizeSubject('admin_reply', $message),
+            'sender_id' => $this->currentAdminId(),
+            'message' => $messageText,
             'reply_to_id' => $latestStudentMessage?->id,
-            'message' => $message,
-            'read' => false,
-            'status' => 'replied',
         ]);
 
-        $readMarkQuery = StudentMessage::where('student_id', $student->id)
-            ->where('sender_type', 'student')
-            ->where('read', false);
-        if (Auth::guard('admin')->user()->role === 'education') {
-            $readMarkQuery->where('admin_id', Auth::guard('admin')->id());
-        }
-        $readMarkQuery->update(['read' => true]);
-
-        return response()->json(['success' => true, 'id' => $reply->id]);
+        return response()->json(['success' => true, 'id' => $message->id]);
     }
 
     public function deleteConversation(Request $request, $studentId)
@@ -151,26 +121,23 @@ class StudentMessageController extends NotificationScreenController
             return response()->json(['success' => false, 'message' => 'Student not found.'], 404);
         }
 
-        $query = StudentMessage::where('student_id', $student->id);
-        $user = Auth::guard('admin')->user();
-        if (in_array($user->role, ['education', 'main'], true)) {
-            $query->where('admin_id', $user->getKey());
-        }
-        $query->delete();
+        Conversation::where('student_id', $student->id)
+            ->where('admin_id', $this->currentAdminId())
+            ->delete();
 
         return response()->json(['success' => true]);
     }
 
     public function allStudentsJson(Request $request)
     {
-        $query = Student::query();
         $class = $request->query('class');
-        if ($class && $class !== 'all') {
-            $query->where('class', $class);
-        }
-
-        $students = $query->orderBy('name')
-            ->get(['id', 'name', 'student_id', 'class', 'status', 'profile_picture'])
+        $students = Student::with('studentClass')
+            ->when($class && $class !== 'all', function ($query) use ($class) {
+                $query->whereHas('studentClass', fn ($classQuery) => $classQuery->where('year', $class));
+            })
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get()
             ->map(function (Student $student) {
                 $picture = $student->profile_picture;
                 if ($picture) {
@@ -194,68 +161,94 @@ class StudentMessageController extends NotificationScreenController
 
     public function apiSend(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'student_id' => 'required',
             'target' => 'required|in:student_message',
-            'message' => 'required',
+            'message' => 'required|string',
+            'admin_id' => 'nullable|integer|exists:admins,id',
+            'recipient_admin_id' => 'nullable|integer|exists:admins,id',
         ]);
 
-        $student = $this->findStudent($request->student_id);
+        $student = $this->findStudent($validated['student_id']);
         if (!$student) {
             return response()->json(['success' => false, 'message' => 'Invalid Student ID'], 404);
         }
 
-        $message = StudentMessage::create([
+        $adminId = $validated['admin_id'] ?? $validated['recipient_admin_id'] ?? null;
+        $conversation = Conversation::firstOrCreate([
             'student_id' => $student->id,
-            'admin_id' => $request->input('admin_id', $request->input('recipient_admin_id')),
-            'class' => $student->class,
+            'admin_id' => $adminId,
+        ]);
+        $message = $conversation->messages()->create([
             'sender_type' => 'student',
-            'sender_name' => $request->input('sender_name'),
-            'subject' => $this->normalizeSubject('student_message', $request->message),
-            'message' => $request->message,
-            'read' => false,
-            'status' => 'pending',
+            'sender_id' => $student->id,
+            'message' => $validated['message'],
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Notification received by Admin!',
+            'message' => 'Message received by Admin!',
             'notification_id' => $message->id,
         ]);
     }
 
     public function apiAdminSendMessage(Request $request, $studentId)
     {
-        $request->validate(['message' => 'required']);
+        $validated = $request->validate([
+            'message' => 'required|string',
+            'admin_id' => 'nullable|integer|exists:admins,id',
+        ]);
         $student = $this->findStudent($studentId);
         if (!$student) {
             return response()->json(['success' => false, 'message' => 'Student not found'], 404);
         }
 
-        $latestStudentMessage = StudentMessage::where('student_id', $student->id)
-            ->where('sender_type', 'student')
-            ->latest('created_at')
-            ->first();
-
-        $reply = StudentMessage::create([
+        $adminId = $validated['admin_id'] ?? Auth::guard('admin')->id();
+        $conversation = Conversation::firstOrCreate([
             'student_id' => $student->id,
-            'admin_id' => $request->input('admin_id'),
-            'class' => $student->class,
-            'type' => 'admin_reply',
+            'admin_id' => $adminId,
+        ]);
+        $parent = $conversation->messages()
+            ->where('sender_type', 'student')
+            ->latest()
+            ->first();
+        $message = $conversation->messages()->create([
             'sender_type' => 'admin',
-            'sender_name' => $request->input('admin_name', 'Admin'),
-            'subject' => $this->normalizeSubject('admin_reply', $request->message),
-            'reply_to_id' => $latestStudentMessage?->id,
-            'message' => $request->message,
-            'read' => false,
-            'status' => 'replied',
+            'sender_id' => $adminId,
+            'message' => $validated['message'],
+            'reply_to_id' => $parent?->id,
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Message sent successfully', 'id' => $reply->id]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Message sent successfully',
+            'id' => $message->id,
+        ]);
     }
 
     private function findStudent($id): ?Student
     {
         return Student::where('id', $id)->orWhere('student_id', $id)->first();
+    }
+
+    private function formatMessage(Message $message): array
+    {
+        $senderName = match ($message->sender_type) {
+            'student' => $message->conversation?->student?->name,
+            'admin' => \App\Models\Admin::find($message->sender_id)?->first_name,
+            default => 'System',
+        };
+
+        return [
+            'id' => $message->id,
+            'conversation_id' => $message->conversation_id,
+            'sender_type' => $message->sender_type,
+            'sender_id' => $message->sender_id,
+            'sender_name' => $senderName,
+            'message' => $message->message,
+            'read_at' => $message->read_at,
+            'reply_to_id' => $message->reply_to_id,
+            'created_at' => $message->created_at,
+        ];
     }
 }

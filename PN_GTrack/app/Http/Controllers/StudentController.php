@@ -24,12 +24,9 @@ class StudentController extends Controller
             return response()->json(['message' => 'Invalid student ID or password'], 401);
         }
 
-        // Mark student as online upon login
         $student = Student::where('student_id', $request->student_id)->first();
         if ($student) {
-            $student->status = true;
-            $student->last_update = now()->format('M d, Y h:i A');
-            $student->save();
+            $student->recordStatus('online');
         }
 
         // Return student details for the mobile application
@@ -56,13 +53,7 @@ class StudentController extends Controller
             return response()->json(['message' => 'Student not found'], 404);
         }
 
-        $student->status       = true;
-        $student->last_update  = now()->format('M d, Y h:i A');
-        $student->signal_status = $request->signal ?? $student->signal_status;
-        $battery = $request->input('battery_level', $request->input('battery'));
-        $student->battery_level = isset($battery) ? $battery : $student->battery_level;
-        $student->touch(); // Force updated_at timestamp to refresh even if data is same
-        $student->save();
+        $student->recordStatus('online');
 
         return response()->json(['message' => 'Heartbeat received', 'student_id' => $student->student_id]);
     }
@@ -90,28 +81,25 @@ class StudentController extends Controller
             return response()->json(['message' => 'Student not found'], 404);
         }
 
-        $student->sos_status  = $request->sos_status;
-        $student->last_update = now()->format('M d, Y h:i A');
-        if ($request->latitude)  $student->latitude  = $request->latitude;
-        if ($request->longitude) $student->longitude = $request->longitude;
-        $battery = $request->input('battery_level', $request->input('battery'));
-        if (isset($battery))   $student->battery_level = $battery;
-        if ($request->signal)   $student->signal_status = $request->signal;
-        $student->status = true;
-        $student->save();
+        if ($request->filled('latitude') && $request->filled('longitude')) {
+            $student->locations()->create([
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'recorded_at' => now(),
+            ]);
+        }
+        $student->recordStatus('online', $request->sos_status);
 
         if ($request->sos_status === 'safe') {
-            // When student cancels SOS, resolve any open SOS alerts
-            \App\Models\SosAlert::where('student_id', $student->id)
+            \DB::table('emergency_alerts')->where('student_id', $student->id)
                 ->where('status', '!=', 'resolved')
-                ->update(['status' => 'resolved', 'read' => true]);
+                ->update(['status' => 'resolved', 'resolved_at' => now()]);
         }
         // SOS notification creation (with video) is handled by SosAlertController.
 
         return response()->json([
             'message'    => 'SOS status updated',
             'sos_status' => $request->sos_status,
-            'battery_level' => $student->battery_level,
         ]);
     }
 
@@ -130,8 +118,7 @@ class StudentController extends Controller
             return response()->json(['message' => 'Student not found'], 404);
         }
 
-        $student->status = false;
-        $student->save();
+        $student->recordStatus('offline');
 
         return response()->json(['message' => 'Student marked as offline']);
     }

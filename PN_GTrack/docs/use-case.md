@@ -1,98 +1,103 @@
-# GTrack Use Case Diagram
+# G!Track Use Case Diagram
 
-This diagram models the primary interactions available to GTrack users through the admin web dashboard and student mobile/API client.
+This diagram summarizes the 14 use cases in [GTrack_Use_Case_Narrative.md](GTrack_Use_Case_Narrative.md). The actors are Student, Educator, and Main Admin. Student mobile-app background actions are represented by the Student actor rather than by a separate app actor.
 
 ## Use Case Diagram
 
 ```mermaid
 flowchart LR
     STUDENT[Student]
-    ADMIN[Admin]
+    EDUCATOR[Educator]
     MAIN[Main Admin]
 
-    subgraph GTRACK[GTrack System]
-        UC_LOGIN([Authenticate])
-        UC_PROFILE([Manage own profile])
-        UC_HEARTBEAT([Send heartbeat and device status])
-        UC_LOCATION([Share current location])
-        UC_SOS([Send or cancel SOS alert])
-        UC_MEDIA([Upload SOS media])
-
-        UC_DASHBOARD([View dashboard])
-        UC_TRACK([View live tracking])
-        UC_HISTORY([View student location history])
-        UC_NOTIFICATIONS([View notifications and activity])
-        UC_MESSAGE([Send and receive student messages])
-        UC_BROADCAST([Send broadcast])
-        UC_ACK([Acknowledge or resolve alert])
-
-        UC_STUDENTS([Manage students])
-        UC_CLASSES([Manage classes])
-        UC_ADMINS([Manage admin accounts])
+    subgraph GTRACK[G!Track System]
+        UC01([UC-01 Student Log In])
+        UC02([UC-02 Administrator Log In])
+        UC03([UC-03 Recover or Change Administrator Password])
+        UC04([UC-04 Manage Own Profile])
+        UC05([UC-05 Send Heartbeat and Device Status])
+        UC06([UC-06 Share Current Location])
+        UC07([UC-07 Send or Cancel Safety Alert])
+        UC08([UC-08 Upload SOS Media])
+        UC09([UC-09 View Dashboard])
+        UC10([UC-10 View Live Tracking])
+        UC11([UC-11 View Location History])
+        UC12([UC-12 View Notifications and Activity])
+        UC13([UC-13 Send and Receive Student Messages])
+        UC14([UC-14 Send Broadcast])
+        CREDENTIALS([Validate Account Credentials])
     end
 
-    STUDENT --> UC_LOGIN
-    STUDENT --> UC_PROFILE
-    STUDENT --> UC_HEARTBEAT
-    STUDENT --> UC_LOCATION
-    STUDENT --> UC_SOS
-    STUDENT --> UC_MEDIA
-    STUDENT --> UC_MESSAGE
+    STUDENT --> UC01
+    STUDENT --> UC04
+    STUDENT --> UC07
+    STUDENT --> UC13
 
-    ADMIN --> UC_LOGIN
-    ADMIN --> UC_DASHBOARD
-    ADMIN --> UC_TRACK
-    ADMIN --> UC_HISTORY
-    ADMIN --> UC_NOTIFICATIONS
-    ADMIN --> UC_MESSAGE
-    ADMIN --> UC_BROADCAST
-    ADMIN --> UC_ACK
+    STUDENT --> UC05
+    STUDENT --> UC06
+    STUDENT --> UC08
 
-    MAIN --> UC_LOGIN
-    MAIN --> UC_STUDENTS
-    MAIN --> UC_CLASSES
-    MAIN --> UC_ADMINS
+    EDUCATOR --> UC02
+    EDUCATOR --> UC03
+    EDUCATOR --> UC04
+    EDUCATOR --> UC09
+    EDUCATOR --> UC10
+    EDUCATOR --> UC11
+    EDUCATOR --> UC12
+    EDUCATOR --> UC13
+    EDUCATOR --> UC14
 
-    UC_SOS -. creates .-> UC_NOTIFICATIONS
-    UC_LOCATION -. updates .-> UC_TRACK
-    UC_HEARTBEAT -. updates .-> UC_DASHBOARD
-    UC_BROADCAST -. appears in .-> UC_NOTIFICATIONS
-    UC_MESSAGE -. uses .-> UC_NOTIFICATIONS
-    UC_ACK -. changes status of .-> UC_NOTIFICATIONS
-    UC_STUDENTS -. assigns .-> UC_CLASSES
+    MAIN --> UC02
+    MAIN --> UC03
+    MAIN --> UC09
+    MAIN --> UC10
+    MAIN --> UC11
+    MAIN --> UC12
+    MAIN --> UC14
+
+    UC01 -. "<<include>>" .-> CREDENTIALS
+    UC02 -. "<<include>>" .-> CREDENTIALS
+    UC08 -. "<<extend>> (optional SOS media)" .-> UC07
 ```
 
 ## Actor Responsibilities
 
 | Actor | Responsibilities |
-| --- | --- |
-| **Student** | Logs in through the mobile API, maintains profile information, reports heartbeat/device status, shares location, sends or cancels SOS alerts, uploads media, and exchanges messages. |
-| **Admin** | Logs in, views dashboard and tracking information, reviews activity and notifications, communicates with students, sends broadcasts, and acknowledges or resolves alerts. |
-| **Main Admin** | Performs all permitted admin activities and manages student records, classes, and admin accounts. |
+|---|---|
+| **Student** | Signs in to the mobile app, manages their profile, and uses the app to report device status and location, send or cancel safety alerts, upload optional SOS media, and exchange messages. |
+| **Educator** | Signs in to the web portal, manages their profile and password, monitors the dashboard and student locations, reviews history and notifications, communicates with students, and sends broadcasts. |
+| **Main Admin** | Signs in to the web portal, recovers their password, monitors the dashboard and student locations, reviews history and notifications, and sends broadcasts. |
 
 ## Use Case Summary
 
-| Use case | Primary actor | System behavior |
-| --- | --- | --- |
-| Authenticate | Student, Admin, Main Admin | Validates credentials and establishes the appropriate session or API access. |
-| Send heartbeat and device status | Student | Updates online status, battery, signal, and last-update information. |
-| Share current location | Student | Stores coordinates and timestamped location history. |
-| Send or cancel SOS alert | Student | Updates SOS state and creates or resolves the related alert workflow. |
-| Upload SOS media | Student | Stores uploaded media and associates its reference with a notification. |
-| View dashboard | Admin, Main Admin | Displays student status, notification counts, and operational summaries. |
-| View live tracking | Admin, Main Admin | Displays current student locations and SOS states. |
-| View student location history | Admin, Main Admin | Retrieves historical location records for a selected student. |
-| View notifications and activity | Admin, Main Admin | Lists broadcasts, SOS alerts, messages, and status changes. |
-| Send and receive student messages | Student, Admin, Main Admin | Stores and retrieves conversation threads and replies. |
-| Send broadcast | Admin, Main Admin | Creates a broadcast notification for students or classes. |
-| Acknowledge or resolve alert | Admin, Main Admin | Updates notification status and can return a student to a safe state. |
-| Manage students | Main Admin | Creates, edits, and removes student records and student login credentials. |
-| Manage classes | Main Admin | Creates, edits, and removes entries in the student class list. |
-| Manage admin accounts | Main Admin | Creates, edits, and removes administrator accounts and roles. |
+| ID | Use case | Primary actor(s) | System behavior |
+|---|---|---|---|
+| UC-01 | Student Log In | Student | Validates student credentials and grants access to the mobile app. |
+| UC-02 | Administrator Log In | Educator, Main Admin | Authenticates the administrator and routes first-time accounts through password setup before dashboard access. |
+| UC-03 | Recover or Change Administrator Password | Educator, Main Admin | Recovers a password using Staff ID and registered email; Educators can also change their password while signed in. |
+| UC-04 | Manage Own Profile | Student, Educator | Validates and saves the profile changes permitted for the user's role. |
+| UC-05 | Send Heartbeat and Device Status | Student | Updates student online status and the latest submitted status information. |
+| UC-06 | Share Current Location | Student | Validates and records the student's coordinates and timestamp for monitoring and history. |
+| UC-07 | Send or Cancel Safety Alert | Student | Records a student safety alert or updates the student's state when safe. |
+| UC-08 | Upload SOS Media | Student | Validates and stores optional media associated with an SOS event. |
+| UC-09 | View Dashboard | Educator, Main Admin | Displays student status, recent updates, and alert summaries. |
+| UC-10 | View Live Tracking | Educator, Main Admin | Displays available student locations and supports class filtering. |
+| UC-11 | View Location History | Educator, Main Admin | Retrieves and displays a selected student's recorded location timeline. |
+| UC-12 | View Notifications and Activity | Educator, Main Admin | Displays alerts, messages, broadcasts, and activity; supports applicable alert actions. |
+| UC-13 | Send and Receive Student Messages | Student, Educator | Saves and displays messages in the student-Educator conversation. |
+| UC-14 | Send Broadcast | Educator, Main Admin | Saves a broadcast and recipient records for the selected student audience. |
+
+## Relationships
+
+| Source | Relationship | Target |
+|---|---|---|
+| UC-01: Student Log In | `<<include>>` | Validate Account Credentials |
+| UC-02: Administrator Log In | `<<include>>` | Validate Account Credentials |
+| UC-08: Upload SOS Media | `<<extend>>` (optional SOS media) | UC-07: Send or Cancel Safety Alert |
 
 ## Access Notes
 
-- Admin-facing web routes are protected by the `auth:admin` middleware.
-- Student and admin mobile actions are exposed through the API routes.
-- Student, class, and admin management routes are additionally protected by the `admin.role:main` middleware.
-- SOS alerts, broadcasts, messages, locations, and device status updates are persisted through the application models and database tables documented in the ERD.
+- Administrator web pages require an authenticated administrator session.
+- The student login, automated heartbeat/location reporting, safety alert, and student-originated messaging actions are mobile app workflows.
+- The web administrator password recovery flow uses Staff ID and registered email; the current implementation does not use a 6-digit OTP.
+- Student and administrator access and available actions depend on their authenticated role.

@@ -2,19 +2,39 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Conversation;
+use App\Models\Location;
 use App\Models\SosAlert;
-use App\Models\StudentMessage;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class SosAlertController extends NotificationScreenController
 {
     public function index(Request $request)
     {
-        return $this->renderScreen($request, 'alerts', SosAlert::query());
+        return $this->renderAlertsScreen($request);
+    }
+
+    public function activeForAdmin()
+    {
+        $alerts = SosAlert::with('student:id,student_id,first_name,middle_initial,last_name')
+            ->where('status', '!=', 'resolved')
+            ->orderByDesc('updated_at')
+            ->get()
+            ->map(fn (SosAlert $alert) => [
+                'id' => $alert->id,
+                'notification_key' => (string) $alert->id,
+                'student_name' => $alert->student?->name ?? 'Unknown student',
+                'student_id' => $alert->student?->student_id,
+                'description' => $alert->description,
+                'created_at' => $alert->created_at?->toISOString(),
+            ]);
+
+        return response()->json(['alerts' => $alerts]);
     }
 
     public function acknowledge($id)
@@ -26,45 +46,25 @@ class SosAlertController extends NotificationScreenController
             if (!$alert || $alert->status === 'resolved') {
                 return 'unavailable';
             }
-
             if ($alert->acknowledged_at !== null) {
                 return 'already_acknowledged';
             }
 
             $now = now();
-            $updated = SosAlert::whereKey($alert->id)
-                ->where('status', '!=', 'resolved')
-                ->whereNull('acknowledged_at')
-                ->update([
-                    'acknowledged_by_admin_id' => $admin->getKey(),
-                    'acknowledged_by_name' => $this->currentAdminName(),
-                    'acknowledged_at' => $now,
-                    'read' => true,
-                    'updated_at' => $now,
-                ]);
+            $alert->update([
+                'acknowledged_by_admin_id' => $admin->getKey(),
+                'acknowledged_at' => $now,
+                'read_at' => $now,
+            ]);
 
-            if ($updated !== 1) {
-                return 'already_acknowledged';
-            }
-
-            if (!$alert->student_id) {
-                return 'missing_student';
-            }
-
-            StudentMessage::create([
+            $conversation = Conversation::firstOrCreate([
                 'student_id' => $alert->student_id,
                 'admin_id' => $admin->getKey(),
-                'class' => $alert->class,
-                'type' => 'admin_reply',
+            ]);
+            $conversation->messages()->create([
                 'sender_type' => 'admin',
-                'sender_name' => $this->currentAdminName(),
-                'subject' => $this->normalizeSubject('admin_reply', 'Your SOS alert has been acknowledged.'),
-                'reply_to_id' => $alert->id,
+                'sender_id' => $admin->getKey(),
                 'message' => 'Your SOS alert has been acknowledged.',
-                'read' => false,
-                'status' => 'replied',
-                'created_at' => $now,
-                'updated_at' => $now,
             ]);
 
             return 'acknowledged';
@@ -73,11 +73,8 @@ class SosAlertController extends NotificationScreenController
         if ($result === 'unavailable') {
             return redirect()->back()->with('error', 'Alert could not be found or has already been resolved.');
         }
-        if ($result === 'missing_student') {
-            return redirect()->back()->with('error', 'Alert acknowledged, but no student is linked to receive a message.');
-        }
         if ($result === 'already_acknowledged') {
-            return redirect()->back()->with('info', 'This alert has already been acknowledged; no additional message was sent.');
+            return redirect()->back()->with('info', 'This alert has already been acknowledged.');
         }
 
         return redirect()->back()->with('success', 'Alert acknowledged and message sent to the student.');
@@ -86,31 +83,23 @@ class SosAlertController extends NotificationScreenController
     public function resolve($id)
     {
         $admin = Auth::guard('admin')->user();
-        $now = now();
-        $resolved = SosAlert::whereKey($id)
-            ->where('status', '!=', 'resolved')
-            ->whereNull('resolved_at')
-            ->update([
-                'status' => 'resolved',
-                'read' => true,
-                'resolved_by_admin_id' => $admin->getKey(),
-                'resolved_by_name' => $this->currentAdminName(),
-                'resolved_at' => $now,
-                'updated_at' => $now,
-            ]);
-
-        if ($resolved) {
-            $alert = SosAlert::find($id);
-            if ($alert && $alert->student_id) {
-                $student = Student::where('student_id', $alert->student_id)
-                    ->orWhere('id', $alert->student_id)
-                    ->first();
-                if ($student) {
-                    $student->sos_status = 'safe';
-                    $student->save();
-                }
-            }
+        $alert = SosAlert::whereKey($id)->where('status', '!=', 'resolved')->first();
+        if (!$alert) {
+            return redirect()->back()->with('error', 'Alert could not be found or has already been resolved.');
         }
+
+        DB::transaction(function () use ($alert, $admin): void {
+            $now = now();
+            $alert->update([
+                'status' => 'resolved',
+                'read_at' => $now,
+                'acknowledged_by_admin_id' => $alert->acknowledged_by_admin_id ?? $admin->getKey(),
+                'acknowledged_at' => $alert->acknowledged_at ?? $now,
+                'resolved_by_admin_id' => $admin->getKey(),
+                'resolved_at' => $now,
+            ]);
+            $alert->student?->recordStatus(null, 'safe');
+        });
 
         return redirect()->back()->with('success', 'Alert marked as Resolved (Safe).');
     }
@@ -124,10 +113,10 @@ class SosAlertController extends NotificationScreenController
 
     public function apiSend(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'student_id' => 'required',
             'target' => 'required|in:sos',
-            'message' => 'required',
+            'message' => 'required|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'battery_level' => 'nullable|integer|between:0,100',
@@ -138,116 +127,89 @@ class SosAlertController extends NotificationScreenController
             'video' => 'nullable|file|mimes:mp4,mov,avi|max:25600',
         ]);
 
-        $student = Student::where('student_id', $request->student_id)
-            ->orWhere('id', $request->student_id)
+        $student = Student::where('student_id', $validated['student_id'])
+            ->orWhere('id', $validated['student_id'])
             ->first();
         if (!$student) {
             return response()->json(['success' => false, 'message' => 'Invalid Student ID'], 404);
         }
 
-        $videoUploadFailed = false;
-        try {
-            $mediaUrl = $request->hasFile('media')
-                ? asset('storage/' . $request->file('media')->store('recordings/media', 'public'))
-                : null;
-            $videoUrl = $request->hasFile('video')
-                ? asset('storage/' . $request->file('video')->store('recordings/videos', 'public'))
-                : null;
-        } catch (\Exception $exception) {
-            \Log::error('Failed to upload media/video files: ' . $exception->getMessage());
-            $mediaUrl = null;
-            $videoUrl = null;
-            $videoUploadFailed = true;
-        }
-
-        $recipientAdminId = $request->input(
-            'admin_id',
-            $request->input('recipient_admin_id', $request->input('target_admin_id', $request->input('to_admin_id')))
-        );
-
-        try {
-            $existingAlert = SosAlert::where('student_id', $student->id)
-                ->where('status', '!=', 'resolved')
-                ->first();
-
-            if ($existingAlert) {
-                $now = now();
-                $existingAlert->update([
-                    'video_url' => $videoUrl ?? $existingAlert->video_url,
-                    'media_url' => $mediaUrl ?? $existingAlert->media_url,
-                    'subject' => $this->normalizeSubject('sos', $request->message ?: $existingAlert->message, $existingAlert->subject),
-                    'message' => $request->message ?: $existingAlert->message,
-                    'latitude' => $request->latitude ?? $existingAlert->latitude,
-                    'longitude' => $request->longitude ?? $existingAlert->longitude,
-                    'battery_level' => $request->input('battery_level', $request->input('battery')) ?? $existingAlert->battery_level,
-                    'signal_status' => $request->signal ?? $existingAlert->signal_status,
-                    'location' => $request->location ?? $existingAlert->location,
-                    'updated_at' => $now,
-                ]);
-                $id = $existingAlert->id;
-            } else {
-                $alert = SosAlert::create([
-                    'student_id' => $student->id,
-                    'admin_id' => $recipientAdminId,
-                    'class' => $student->class,
-                    'sender_type' => 'student',
-                    'subject' => $this->normalizeSubject('sos', $request->message),
-                    'message' => $request->message,
-                    'latitude' => $request->latitude,
-                    'longitude' => $request->longitude,
-                    'battery_level' => $request->input('battery_level', $request->input('battery')),
-                    'signal_status' => $request->signal,
-                    'location' => $request->location,
-                    'media_url' => $mediaUrl,
-                    'video_url' => $videoUrl,
-                    'audio_url' => null,
-                    'read' => false,
-                    'status' => 'pending',
-                ]);
-                $id = $alert->id;
+        $uploadedMedia = [];
+        $uploadFailed = false;
+        foreach (['media', 'video'] as $field) {
+            if (!$request->hasFile($field)) {
+                continue;
             }
-        } catch (\Exception $exception) {
-            \Log::error('Failed to create/update notification: ' . $exception->getMessage());
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create/update notification: ' . $exception->getMessage(),
-            ], 500);
+            try {
+                $file = $request->file($field);
+                $uploadedMedia[] = [
+                    'file_path' => $file->store('recordings/' . ($field === 'video' ? 'videos' : 'media'), 'public'),
+                    'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+                ];
+            } catch (\Exception $exception) {
+                Log::error('Failed to upload SOS media.', ['field' => $field, 'error' => $exception->getMessage()]);
+                $uploadFailed = true;
+            }
         }
 
         try {
-            if ($request->filled('latitude')) {
-                $student->latitude = $request->latitude;
-            }
-            if ($request->filled('longitude')) {
-                $student->longitude = $request->longitude;
-            }
-            $battery = $request->input('battery_level', $request->input('battery'));
-            if (isset($battery)) {
-                $student->battery_level = $battery;
-            }
-            if ($request->filled('signal')) {
-                $student->signal_status = $request->signal;
-            }
-            $student->sos_status = 'help';
-            $student->last_update = now()->format('M d, Y h:i A');
-            $student->save();
+            $alert = DB::transaction(function () use ($student, $validated, $uploadedMedia) {
+                $location = null;
+                if (isset($validated['latitude'], $validated['longitude'])) {
+                    $location = Location::create([
+                        'student_id' => $student->id,
+                        'latitude' => $validated['latitude'],
+                        'longitude' => $validated['longitude'],
+                        'recorded_at' => now(),
+                    ]);
+                }
+
+                $alert = SosAlert::where('student_id', $student->id)
+                    ->where('status', '!=', 'resolved')
+                    ->latest()
+                    ->first();
+
+                if ($alert) {
+                    $alert->update([
+                        'description' => $validated['message'],
+                        'location_id' => $location?->id ?? $alert->location_id,
+                    ]);
+                } else {
+                    $alert = SosAlert::create([
+                        'student_id' => $student->id,
+                        'location_id' => $location?->id,
+                        'description' => $validated['message'],
+                        'status' => 'pending',
+                    ]);
+                }
+
+                foreach ($uploadedMedia as $media) {
+                    $alert->media()->create($media);
+                }
+
+                $student->recordStatus(null, 'help');
+
+                return $alert;
+            });
         } catch (\Exception $exception) {
-            \Log::error('Failed to update student status: ' . $exception->getMessage());
+            Log::error('Failed to create or update emergency alert.', ['error' => $exception->getMessage()]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Alert received but failed to update student status: ' . $exception->getMessage(),
+                'message' => 'Failed to create emergency alert.',
             ], 500);
         }
 
         return response()->json([
             'success' => true,
-            'message' => $videoUploadFailed
-                ? 'Emergency alert received by Admin, but the video could not be uploaded.'
+            'message' => $uploadFailed
+                ? 'Emergency alert received, but some media could not be uploaded.'
                 : 'Emergency alert received by Admin!',
-            'video_uploaded' => !$videoUploadFailed && !empty($videoUrl),
-            'notification_id' => $id,
+            'video_uploaded' => !$uploadFailed && collect($uploadedMedia)->contains(
+                fn (array $media) => str_starts_with($media['mime_type'], 'video/')
+            ),
+            'notification_id' => $alert->id,
         ]);
     }
 
@@ -255,19 +217,22 @@ class SosAlertController extends NotificationScreenController
     {
         $alert = SosAlert::find($id);
         if (!$alert) {
-            return response()->json(['success' => false, 'message' => 'Notification not found'], 404);
+            return response()->json(['success' => false, 'message' => 'Alert not found'], 404);
         }
 
-        $alert->update(['status' => 'resolved', 'read' => true]);
-        if ($alert->student_id) {
-            $student = Student::where('student_id', $alert->student_id)
-                ->orWhere('id', $alert->student_id)
-                ->first();
-            if ($student) {
-                $student->sos_status = 'safe';
-                $student->save();
-            }
-        }
+        DB::transaction(function () use ($alert): void {
+            $now = now();
+            $adminId = Auth::guard('admin')->id();
+            $alert->update([
+                'status' => 'resolved',
+                'read_at' => $now,
+                'acknowledged_by_admin_id' => $alert->acknowledged_by_admin_id ?? $adminId,
+                'acknowledged_at' => $alert->acknowledged_at ?? $now,
+                'resolved_by_admin_id' => $adminId,
+                'resolved_at' => $now,
+            ]);
+            $alert->student?->recordStatus(null, 'safe');
+        });
 
         return response()->json(['success' => true, 'message' => 'Alert marked as Resolved (Safe).']);
     }
@@ -276,7 +241,7 @@ class SosAlertController extends NotificationScreenController
     {
         $alert = SosAlert::find($id);
         if (!$alert) {
-            return response()->json(['success' => false, 'message' => 'Notification not found'], 404);
+            return response()->json(['success' => false, 'message' => 'Alert not found'], 404);
         }
 
         $videoUrl = $this->extractVideoUrl($alert);
@@ -305,16 +270,16 @@ class SosAlertController extends NotificationScreenController
             : response()->json(['success' => false, 'message' => 'No video feed available in the latest alert.']);
     }
 
-    private function extractVideoUrl(SosAlert $notification): ?string
+    private function extractVideoUrl(SosAlert $alert): ?string
     {
-        if (!empty($notification->video_url)) {
-            return $notification->video_url;
+        $video = $alert->media->first(fn ($media) => str_starts_with($media->mime_type, 'video/'));
+
+        if ($video) {
+            return $video->url;
         }
 
-        if (!empty($notification->media_url) && !Str::endsWith($notification->media_url, ['.mp3', '.wav'])) {
-            return $notification->media_url;
-        }
+        $media = $alert->media->first(fn ($item) => !Str::endsWith($item->file_path, ['.mp3', '.wav']));
 
-        return null;
+        return $media?->url;
     }
 }

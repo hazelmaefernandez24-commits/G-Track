@@ -18,7 +18,7 @@ return new class extends Migration
             $table->id();
             $table->string('student_id')->unique();
             $table->string('first_name');
-            $table->string('middle_name')->nullable();
+            $table->string('middle_initial', 1)->nullable();
             $table->string('last_name');
             $table->string('email')->unique();
             $table->string('gender');
@@ -60,7 +60,7 @@ return new class extends Migration
 
         Schema::connection('gtrack_system')->create('admins', function (Blueprint $table) {
             $table->id();
-            $table->string('staff_id')->unique();
+            $table->string('staff_id')->nullable()->unique();
             $table->string('first_name');
             $table->string('middle_name')->nullable();
             $table->string('last_name');
@@ -74,7 +74,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('student_id')->constrained('students')->restrictOnDelete();
             $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
-            $table->foreignId('assigned_admin_id')->nullable()->constrained('admins')->nullOnDelete();
             $table->string('type');
             $table->text('description')->nullable();
             $table->string('status')->default('pending');

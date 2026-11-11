@@ -15,7 +15,7 @@ erDiagram
         bigint id PK
         string student_id UK
         string first_name
-        string middle_name
+        string middle_initial
         string last_name
         string email UK
         string gender
@@ -51,7 +51,7 @@ erDiagram
         bigint id PK
         string staff_id UK
         string first_name
-        string middle_name
+        string middle_initial
         string last_name
         string email UK
         string password
@@ -62,7 +62,6 @@ erDiagram
         bigint id PK
         bigint student_id FK
         bigint location_id FK
-        bigint assigned_admin_id FK
         string type
         text description
         string status

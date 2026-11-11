@@ -113,6 +113,69 @@ class NotificationsMessagingFeatureTest extends TestCase
         $this->assertSame('safe', $student->fresh()->sos_status);
     }
 
+    public function test_admin_can_poll_for_active_sos_alerts_and_resolved_alerts_are_excluded(): void
+    {
+        $admin = $this->createAdmin('main');
+        $student = $this->createStudent();
+        $activeAlert = SosAlert::create([
+            'student_id' => $student->id,
+            'description' => 'Please send help.',
+            'status' => 'pending',
+        ]);
+        SosAlert::create([
+            'student_id' => $student->id,
+            'description' => 'Already resolved.',
+            'status' => 'resolved',
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->getJson(route('notifications.sos.active'))
+            ->assertOk()
+            ->assertJsonCount(1, 'alerts')
+            ->assertJsonPath('alerts.0.id', $activeAlert->id)
+            ->assertJsonPath('alerts.0.student_name', 'Jamie Student')
+            ->assertJsonPath('alerts.0.description', 'Please send help.');
+    }
+
+    public function test_all_staff_can_poll_active_sos_alerts(): void
+    {
+        $staff = $this->createAdmin('education');
+        $student = $this->createStudent();
+        $alert = SosAlert::create([
+            'student_id' => $student->id,
+            'description' => 'Available to all staff.',
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($staff, 'admin')
+            ->getJson(route('notifications.sos.active'))
+            ->assertOk()
+            ->assertJsonCount(1, 'alerts')
+            ->assertJsonPath('alerts.0.id', $alert->id);
+    }
+
+    public function test_directly_resolving_an_sos_records_admin_in_acknowledgement_and_resolution_fields(): void
+    {
+        $admin = $this->createAdmin('main');
+        $student = $this->createStudent();
+        $alert = SosAlert::create([
+            'student_id' => $student->id,
+            'description' => 'Resolved directly without a separate acknowledgement.',
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->post("/notifications/{$alert->id}/resolve")
+            ->assertSessionHas('success');
+
+        $alert->refresh();
+        $this->assertSame('resolved', $alert->status);
+        $this->assertSame($admin->id, $alert->acknowledged_by_admin_id);
+        $this->assertNotNull($alert->acknowledged_at);
+        $this->assertSame($admin->id, $alert->resolved_by_admin_id);
+        $this->assertNotNull($alert->resolved_at);
+    }
+
     public function test_staff_can_load_conversation_messages_and_mark_student_messages_read(): void
     {
         $staff = $this->createAdmin('education');

@@ -1086,7 +1086,7 @@
                                         style="width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #f8fafc;">
                                         <option value="all">All Students</option>
                                         @foreach($classes as $c)
-                                            <option value="{{ $c->name }}">Class {{ $c->name }}</option>
+                                                <option value="{{ $c->year }}">Class {{ $c->year }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -1141,11 +1141,11 @@
             <div class="messages">
 @forelse($notifications as $notification)
                         <div class='message-item broadcast-item-clickable'
-                            onclick="showBroadcastDetails('{{ addslashes($notification->subject ?? 'Broadcast Notification') }}', '{{ addslashes($notification->message) }}', '{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}', '{{ addslashes($notification->sender_name ?? ($notification->sender_type === 'admin' ? 'Admin' : 'System')) }}')"
+                            onclick="showBroadcastDetails(@js($notification->subject), @js($notification->message), @js(\Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A')), @js($notification->sender_name))"
                             style="border-left: 4px solid var(--yellow);">
                             <div class='message-head'>
                                 <p class='message-title'>
-                                    {{ $notification->subject ?? 'No Subject' }}
+                                    {{ $notification->subject ?: 'No Subject' }}
                                     <span class='badge-pill'
                                         style='background:rgba(255, 153, 51, 0.16);color:var(--accent);border-color:rgba(255, 153, 51, 0.25);'>Outbound</span>
                                 </p>
@@ -1153,12 +1153,10 @@
                                     class='message-meta'>{{ \Carbon\Carbon::parse($notification->created_at)->format('n/j/Y, h:i A') }}</span>
                             </div>
                             <div class='message-meta' style='margin-top:8px;'>
-                                <span style='font-weight:700;color:var(--muted);'>Sent by:</span> {{ $notification->sender_name ?? ($notification->sender_type === 'admin' ? 'Admin' : 'System') }}
+                                <span style='font-weight:700;color:var(--muted);'>Sent by:</span> {{ $notification->sender_name }}
                             </div>
                             <div class='message-meta' style='margin-top:6px;'>
-                                @if($notification->class && $notification->class !== 'all') Class: {{ $notification->class }} |
-                                @endif
-                                <span class='badge-pill' style="font-size: 10px;">Sent to All</span>
+                                <span class='badge-pill' style="font-size: 10px;">{{ $notification->audience_label }}</span>
                             </div>
                         </div>
                     @empty

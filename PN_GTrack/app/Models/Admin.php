@@ -17,10 +17,18 @@ class Admin extends Authenticatable
         'email',
         'password',
         'role',
+        'must_change_password',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
-}       
+
+    protected function casts(): array
+    {
+        return [
+            'must_change_password' => 'boolean',
+        ];
+    }
+}

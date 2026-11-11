@@ -112,7 +112,7 @@
         <div class="admin-mgmt-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h2 style="margin:0; font-size:20px;">System Administrators</h2>
-                <button class="btn btn-primary" onclick="openModal('addModal')">Add New Admin</button>
+                <a class="btn btn-primary" href="{{ route('admins.create') }}">Add New Admin</a>
             </div>
 
             <div class="table-container">
@@ -120,7 +120,9 @@
                     <thead>
                         <tr>
                             <th>Staff ID</th>
-                            <th>Name</th>
+                            <th>First Name</th>
+                            <th>Middle Initial</th>
+                            <th>Last Name</th>
                             <th>Email</th>
                             <th>Role</th>
                             <th style="text-align:right;">Actions</th>
@@ -130,7 +132,9 @@
                         @foreach($admins as $admin)
                         <tr>
                             <td style="font-weight:700;">{{ $admin->staff_id }}</td>
-                            <td>{{ trim($admin->first_name . ($admin->middle_initial ? ' ' . $admin->middle_initial . '.' : '') . ' ' . $admin->last_name) }}</td>
+                            <td>{{ $admin->first_name }}</td>
+                            <td>{{ $admin->middle_initial }}</td>
+                            <td>{{ $admin->last_name }}</td>
                             <td>{{ $admin->email }}</td>
                             <td>
                                 <span class="role-badge {{ $admin->role === 'main' ? 'role-main' : 'role-education' }}">
@@ -138,11 +142,11 @@
                                 </span>
                             </td>
                             <td style="text-align:right; white-space:nowrap;">
-                                <button class="btn btn-success" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" 
-                                    onclick="editAdmin({{ json_encode($admin) }})">
+                                <a class="btn btn-success" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;"
+                                    href="{{ route('admins.edit', $admin) }}">
                                     <i data-lucide="edit-3" style="width:13px; height:13px;"></i>
                                     Edit
-                                </button>
+                                </a>
                                 @if($admin->id !== Auth::guard('admin')->id())
                                 <button type="button" class="btn btn-danger" style="padding:5px 10px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" onclick="confirmDelete('{{ $admin->id }}')">
                                     <i data-lucide="trash-2" style="width:13px; height:13px;"></i>

@@ -15,8 +15,6 @@ class LocationController extends Controller
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'sos_status' => 'nullable|in:safe,help',
-            'battery_level' => 'nullable|integer',
-            'battery' => 'nullable|integer',
         ]);
 
         $student = Student::where('id', $validated['student_id'])
@@ -32,33 +30,14 @@ class LocationController extends Controller
             'latitude' => $validated['latitude'],
             'longitude' => $validated['longitude'],
             'recorded_at' => now(),
-            'sos_status' => $validated['sos_status'] ?? 'safe',
         ]);
 
-        $student = Student::find($student->id);
-        if ($student) {
-            $student->status = true; // Mark as online when sending GPS
-            $student->last_update = now()->format('M d, Y h:i A');
-            
-            $battery = $request->input('battery_level', $request->input('battery'));
-            if (isset($battery)) {
-                $student->battery_level = $battery;
-            }
-            
-            // Handle SOS status changes
-            if (!empty($validated['sos_status'])) {
-                $oldStatus = $student->sos_status;
-                $student->sos_status = $validated['sos_status'];
-
-                if ($validated['sos_status'] === 'safe' && $oldStatus === 'help') {
-                    // If moving from help to safe, resolve any active alerts
-                    \App\Models\SosAlert::where('student_id', $student->id)
-                        ->where('status', '!=', 'resolved')
-                        ->update(['status' => 'resolved', 'read' => true]);
-                }
-                // SOS notification creation (with video) is handled by SosAlertController.
-            }
-            $student->save();
+        $student->recordStatus('online', $validated['sos_status'] ?? null);
+        if (($validated['sos_status'] ?? null) === 'safe') {
+            \DB::table('emergency_alerts')
+                ->where('student_id', $student->id)
+                ->where('status', '!=', 'resolved')
+                ->update(['status' => 'resolved', 'resolved_at' => now(), 'updated_at' => now()]);
         }
 
         return response()->json([
@@ -75,39 +54,26 @@ class LocationController extends Controller
             'sos_status' => 'required|in:safe,help',
             'latitude'   => 'nullable|numeric',
             'longitude'  => 'nullable|numeric',
-            'battery'    => 'nullable|integer',
-            'battery_level' => 'nullable|integer',
-            'signal'     => 'nullable|string',
         ]);
 
         $student = Student::where('id', $request->student_id)
             ->orWhere('student_id', $request->student_id)
             ->firstOrFail();
-        $student->sos_status = $request->sos_status;
-        
-        // Update live telemetry if provided
-        if ($request->latitude)  $student->latitude  = $request->latitude;
-        if ($request->longitude) $student->longitude = $request->longitude;
-        $battery = $request->input('battery_level', $request->input('battery'));
-        if (isset($battery))     $student->battery_level = $battery;
-        if ($request->signal)    $student->signal_status = $request->signal;
-        
-        $student->last_update = now()->format('M d, Y h:i A');
-        $student->save();
+        if ($request->filled('latitude') && $request->filled('longitude')) {
+            $student->locations()->create([
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'recorded_at' => now(),
+            ]);
+        }
+        $student->recordStatus('online', $request->sos_status);
 
         // SOS notification creation (with video) is handled by SosAlertController.
         if ($request->sos_status === 'safe') {
             // Mark as resolved if student is safe
-            \App\Models\SosAlert::where('student_id', $student->id)
+            \DB::table('emergency_alerts')->where('student_id', $student->id)
                 ->where('status', '!=', 'resolved')
-                ->update(['status' => 'resolved', 'read' => true]);
-        }
-
-        // Optionally update historical location entry
-        $lastLocation = Location::where('student_id', $student->id)->latest('recorded_at')->first();
-        if ($lastLocation) {
-            $lastLocation->sos_status = $request->sos_status;
-            $lastLocation->save();
+                ->update(['status' => 'resolved', 'resolved_at' => now(), 'updated_at' => now()]);
         }
 
         return response()->json([
@@ -147,7 +113,7 @@ class LocationController extends Controller
                 'longitude' => $latest->longitude,
                 'recorded_at' => $latest->recorded_at,
                 // CRITICAL: Always use the Student's CURRENT SOS status, not historical log data
-                'sos_status' => $student->sos_status ?? 'safe', 
+                'sos_status' => $student->sos_status,
                 'student' => [
                     'student_id' => $student->student_id,
                     'name' => $student->name ?? 'Unknown',
@@ -155,7 +121,7 @@ class LocationController extends Controller
                     'class' => $student->class ?? 'N/A',
                     'email' => $student->email ?? 'N/A',
                     'phone' => $student->phone ?? null,
-                    'sos_status' => $student->sos_status ?? 'safe',
+                    'sos_status' => $student->sos_status,
                 ]
             ];
         })->filter()->values();

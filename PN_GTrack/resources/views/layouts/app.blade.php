@@ -414,6 +414,104 @@
             box-shadow: var(--card-shadow);
         }
 
+        .global-sos-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.62);
+        }
+        .global-sos-backdrop.show {
+            display: flex;
+        }
+        .global-sos-dialog {
+            width: min(100%, 480px);
+            max-height: min(80vh, 640px);
+            overflow-y: auto;
+            padding: 28px;
+            border: 1px solid #fecaca;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.3);
+        }
+        .global-sos-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            color: #b91c1c;
+        }
+        .global-sos-heading i {
+            width: 28px;
+            height: 28px;
+            flex: 0 0 auto;
+        }
+        .global-sos-heading h2 {
+            font-size: 21px;
+        }
+        .global-sos-description {
+            margin-bottom: 18px;
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .global-sos-list {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .global-sos-item {
+            padding: 13px 14px;
+            border: 1px solid #fee2e2;
+            border-radius: 10px;
+            background: #fff7f7;
+        }
+        .global-sos-student {
+            margin-bottom: 4px;
+            color: #7f1d1d;
+            font-size: 14px;
+            font-weight: 800;
+        }
+        .global-sos-message {
+            color: #52525b;
+            font-size: 13px;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+        }
+        .global-sos-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px;
+        }
+        .global-sos-actions button {
+            min-height: 42px;
+            padding: 10px 15px;
+            border-radius: 9px;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .global-sos-cancel {
+            border: 1px solid #d1d5db;
+            background: #fff;
+            color: #374151;
+        }
+        .global-sos-open {
+            border: 1px solid #b91c1c;
+            background: #dc2626;
+            color: #fff;
+        }
+        .global-sos-open:hover {
+            background: #b91c1c;
+        }
+
     </style>
 </head>
 <body>
@@ -500,15 +598,21 @@
                     $currentAdminId = $currentUser ? $currentUser->getKey() : null;
                     $currentAdminRole = $currentUser->role ?? null;
 
-                    $broadcastCountHeader = \App\Models\BroadcastNotification::where('read', false)->count();
-                    $sosCountHeader = \App\Models\SosAlert::where('status', '!=', 'resolved')->where('read', false)->count();
+                    $broadcastCountHeader = \Illuminate\Support\Facades\DB::table('broadcast_recipients')
+                        ->whereNull('read_at')
+                        ->count();
+                    $sosCountHeader = \Illuminate\Support\Facades\DB::table('emergency_alerts')
+                        ->where('status', '!=', 'resolved')
+                        ->whereNull('read_at')
+                        ->count();
                     
-                    $studentMessagesQueryHeader = \App\Models\StudentMessage::query()
-                        ->where('sender_type', 'student')
-                        ->where('read', false);
+                    $studentMessagesQueryHeader = \Illuminate\Support\Facades\DB::table('messages')
+                        ->join('conversations', 'conversations.id', '=', 'messages.conversation_id')
+                        ->where('messages.sender_type', 'student')
+                        ->whereNull('messages.read_at');
                         
                     if ($currentAdminId && in_array($currentAdminRole, ['education', 'main'], true)) {
-                        $studentMessagesQueryHeader->where('admin_id', $currentAdminId);
+                        $studentMessagesQueryHeader->where('conversations.admin_id', $currentAdminId);
                     }
                     
                     $studentMessagesCountHeader = $studentMessagesQueryHeader->count();
@@ -579,6 +683,23 @@
             @yield('content')
         </div>
     </main>
+
+    @if(Auth::guard('admin')->check())
+        <div id="globalSosBackdrop" class="global-sos-backdrop" aria-hidden="true">
+            <section class="global-sos-dialog" role="alertdialog" aria-modal="true" aria-labelledby="globalSosTitle" aria-describedby="globalSosDescription">
+                <div class="global-sos-heading">
+                    <i data-lucide="siren"></i>
+                    <h2 id="globalSosTitle">New SOS alert</h2>
+                </div>
+                <p id="globalSosDescription" class="global-sos-description">A student needs assistance. Open the SOS screen to respond. Cancel only dismisses this popup.</p>
+                <ul id="globalSosList" class="global-sos-list"></ul>
+                <div class="global-sos-actions">
+                    <button id="globalSosCancel" class="global-sos-cancel" type="button">Cancel (remind in 1 minute)</button>
+                    <button id="globalSosOpen" class="global-sos-open" type="button">Open SOS Screen</button>
+                </div>
+            </section>
+        </div>
+    @endif
 
     @if(Auth::guard('admin')->check())
         @if($user->role === 'education')
@@ -842,6 +963,176 @@
             }
         });
     </script>
+
+    @if(Auth::guard('admin')->check())
+        <script>
+            (function () {
+                const backdrop = document.getElementById('globalSosBackdrop');
+                const list = document.getElementById('globalSosList');
+                const title = document.getElementById('globalSosTitle');
+                const cancelButton = document.getElementById('globalSosCancel');
+                const openButton = document.getElementById('globalSosOpen');
+                const dismissedStorageKey = @json('gtrack:dismissed-sos:' . $currentAdminId);
+                const alertsUrl = @json(route('notifications.screen', ['screen' => 'alerts']));
+                const pendingAlerts = new Map();
+                const snoozedAlerts = new Map();
+                let pollInProgress = false;
+                let reminderTimeout = null;
+
+                try {
+                    const savedSnoozes = JSON.parse(localStorage.getItem(dismissedStorageKey) || '{}');
+                    if (savedSnoozes && typeof savedSnoozes === 'object' && !Array.isArray(savedSnoozes)) {
+                        for (const [key, expiresAt] of Object.entries(savedSnoozes)) {
+                            if (Number.isFinite(expiresAt) && expiresAt > Date.now()) {
+                                snoozedAlerts.set(key, expiresAt);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Unable to read SOS reminder times from browser storage.', error);
+                }
+
+                function saveSnoozedAlerts() {
+                    try {
+                        localStorage.setItem(dismissedStorageKey, JSON.stringify(Object.fromEntries(snoozedAlerts)));
+                    } catch (error) {
+                        console.error('Unable to save SOS reminder times to browser storage.', error);
+                    }
+                }
+
+                function scheduleReminder() {
+                    if (reminderTimeout !== null) {
+                        window.clearTimeout(reminderTimeout);
+                        reminderTimeout = null;
+                    }
+
+                    const nextReminderAt = Math.min(...snoozedAlerts.values());
+                    if (Number.isFinite(nextReminderAt)) {
+                        reminderTimeout = window.setTimeout(
+                            pollActiveSosAlerts,
+                            Math.max(0, nextReminderAt - Date.now())
+                        );
+                    }
+                }
+
+                function setPopupVisible(visible) {
+                    const wasVisible = backdrop.classList.contains('show');
+                    backdrop.classList.toggle('show', visible);
+                    backdrop.setAttribute('aria-hidden', visible ? 'false' : 'true');
+                    const anotherDialogOpen = document.querySelector(
+                        '.profile-dialog-backdrop.show, .password-dialog-backdrop.show'
+                    );
+                    document.body.style.overflow = visible || anotherDialogOpen ? 'hidden' : '';
+                    if (visible && !wasVisible) {
+                        openButton.focus();
+                    }
+                }
+
+                function renderAlerts() {
+                    list.replaceChildren();
+
+                    for (const alert of pendingAlerts.values()) {
+                        const item = document.createElement('li');
+                        item.className = 'global-sos-item';
+
+                        const student = document.createElement('div');
+                        student.className = 'global-sos-student';
+                        student.textContent = alert.student_name || 'Unknown student';
+
+                        const message = document.createElement('div');
+                        message.className = 'global-sos-message';
+                        message.textContent = alert.description || 'SOS assistance requested.';
+
+                        item.append(student, message);
+                        list.append(item);
+                    }
+
+                    const count = pendingAlerts.size;
+                    title.textContent = count === 1 ? 'New SOS alert' : `${count} new SOS alerts`;
+                    setPopupVisible(count > 0);
+                }
+
+                function dismissCurrentAlerts() {
+                    const remindAt = Date.now() + 60 * 1000;
+                    for (const key of pendingAlerts.keys()) {
+                        snoozedAlerts.set(key, remindAt);
+                    }
+                    pendingAlerts.clear();
+                    saveSnoozedAlerts();
+                    renderAlerts();
+                    scheduleReminder();
+                }
+
+                async function pollActiveSosAlerts() {
+                    if (pollInProgress) {
+                        return;
+                    }
+
+                    pollInProgress = true;
+                    try {
+                        const response = await fetch(@json(route('notifications.sos.active')), {
+                            headers: { 'Accept': 'application/json' },
+                            credentials: 'same-origin'
+                        });
+                        if (!response.ok) {
+                            throw new Error(`SOS alert polling failed with status ${response.status}.`);
+                        }
+
+                        const data = await response.json();
+                        const alerts = Array.isArray(data.alerts) ? data.alerts : [];
+                        const activeKeys = new Set(alerts.map((alert) => alert.notification_key));
+
+                        for (const key of pendingAlerts.keys()) {
+                            if (!activeKeys.has(key)) {
+                                pendingAlerts.delete(key);
+                            }
+                        }
+                        for (const key of snoozedAlerts.keys()) {
+                            if (!activeKeys.has(key)) {
+                                snoozedAlerts.delete(key);
+                            }
+                        }
+
+                        for (const alert of alerts) {
+                            const remindAt = snoozedAlerts.get(alert.notification_key);
+                            if (remindAt && remindAt > Date.now()) {
+                                continue;
+                            }
+                            snoozedAlerts.delete(alert.notification_key);
+                            pendingAlerts.set(alert.notification_key, alert);
+                        }
+
+                        saveSnoozedAlerts();
+                        renderAlerts();
+                        scheduleReminder();
+                    } catch (error) {
+                        console.error('Unable to check for active SOS alerts.', error);
+                    } finally {
+                        pollInProgress = false;
+                    }
+                }
+
+                cancelButton.addEventListener('click', dismissCurrentAlerts);
+                openButton.addEventListener('click', function () {
+                    dismissCurrentAlerts();
+                    window.location.assign(alertsUrl);
+                });
+                backdrop.addEventListener('click', function (event) {
+                    if (event.target === backdrop) {
+                        dismissCurrentAlerts();
+                    }
+                });
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape' && backdrop.classList.contains('show')) {
+                        dismissCurrentAlerts();
+                    }
+                });
+
+                pollActiveSosAlerts();
+                window.setInterval(pollActiveSosAlerts, 10000);
+            })();
+        </script>
+    @endif
     
     @stack('scripts')
 </body>

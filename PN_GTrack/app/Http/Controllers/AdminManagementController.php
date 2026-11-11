@@ -15,6 +15,18 @@ class AdminManagementController extends Controller
         return view('admin.admins.index', compact('admins'));
     }
 
+    public function create()
+    {
+        return view('admin.admins.form');
+    }
+
+    public function edit($id)
+    {
+        $admin = Admin::findOrFail($id);
+
+        return view('admin.admins.form', compact('admin'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -39,6 +51,7 @@ class AdminManagementController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => $request->role,
+                'must_change_password' => $request->role === 'education',
             ]);
 
             $rolePrefix = $admin->role === 'education' ? 'EDU' : 'MAIN';
@@ -52,7 +65,7 @@ class AdminManagementController extends Controller
             $admin->update(['staff_id' => $staffId]);
         });
 
-        return redirect()->back()->with('success', 'Admin added successfully.');
+        return redirect()->route('admins.index')->with('success', 'Admin added successfully.');
     }
 
     public function update(Request $request, $id)
@@ -81,7 +94,7 @@ class AdminManagementController extends Controller
             $admin->save();
         }
 
-        return redirect()->back()->with('success', 'Admin updated successfully.');
+        return redirect()->route('admins.index')->with('success', 'Admin updated successfully.');
     }
 
     public function destroy($id)
