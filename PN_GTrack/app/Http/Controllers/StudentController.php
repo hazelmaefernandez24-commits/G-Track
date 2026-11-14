@@ -37,6 +37,48 @@ class StudentController extends Controller
         ]);
     }
 
+    public function apiResetPassword(Request $request)
+    {
+        $request->merge([
+            'new_password' => $request->input('new_password') ?? $request->input('password'),
+        ]);
+
+        $validated = $request->validate([
+            'student_id' => ['required', 'string'],
+            'current_password' => ['required', 'string'],
+            'new_password' => ['required', 'string', 'min:6', 'different:current_password'],
+        ]);
+
+        $student = Student::where('student_id', $validated['student_id'])
+            ->orWhere('id', $validated['student_id'])
+            ->first();
+        $studentAuth = $student
+            ? StudentAuth::where('student_id', $student->student_id)->first()
+            : null;
+
+        if (! $studentAuth) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Student account not found.',
+            ], 404);
+        }
+
+        if (! Hash::check($validated['current_password'], $studentAuth->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The current password is incorrect.',
+            ], 401);
+        }
+
+        $studentAuth->password = Hash::make($validated['new_password']);
+        $studentAuth->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset successfully.',
+        ]);
+    }
+
     /**
      * Called by mobile app every ~30 seconds while open.
      * Keeps the student marked as online and updates device info.

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Location extends Model
 {
+    public $timestamps = false;
+
     protected $fillable = ['student_id', 'latitude', 'longitude', 'recorded_at', 'sos_status'];
 
     protected $casts = [

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\SosAlert;
 class DeviceController extends Controller
 {
  public function update(Request $request)
@@ -155,21 +156,17 @@ public function apiStats(Request $request)
 
 private function currentSosAlerts()
 {
-    return DB::table('emergency_alerts')
-        ->join('students', 'students.id', '=', 'emergency_alerts.student_id')
-        ->join('student_classes', 'student_classes.id', '=', 'students.student_class_id')
-        ->where('emergency_alerts.status', '!=', 'resolved')
-        ->orderByDesc('emergency_alerts.created_at')
-        ->get([
-            'students.first_name',
-            'students.last_name',
-            'student_classes.year as class',
-        ])
-        ->map(fn ($alert) => [
-            'last_name' => $alert->last_name,
-            'first_name' => $alert->first_name,
-            'class' => (string) $alert->class,
+    return SosAlert::with(['student.studentClass', 'media'])
+        ->where('status', '!=', 'resolved')
+        ->orderByDesc('created_at')
+        ->get()
+        ->map(fn (SosAlert $alert) => [
+            'id' => $alert->id,
+            'last_name' => $alert->student?->last_name,
+            'first_name' => $alert->student?->first_name,
+            'class' => (string) ($alert->student?->studentClass?->year ?? ''),
             'alert' => 'SOS ALERT',
+            'video_url' => $alert->video_url,
         ]);
 }
 

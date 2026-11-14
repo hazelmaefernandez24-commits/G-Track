@@ -1068,7 +1068,7 @@
                                 $activeSosList = $notifications->where('type', 'sos')->where('status', '!=', 'resolved');
                             @endphp
                             @forelse($activeSosList as $notification)
-                                <div class='message-item'
+                                <div class='message-item' data-sos-alert-id="{{ $notification->id }}"
                                     style="{{ $notification->status === 'resolved' ? 'opacity: 0.7; border-left: 4px solid var(--muted);' : 'border-left: 4px solid var(--red);' }}">
                                     <div class='message-head'>
                                         <p class='message-title'>
@@ -1113,12 +1113,12 @@
                                                     style="position: absolute; top: 12px; left: 12px; background: rgba(220, 38, 38, 0.9); color: #fff; font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; z-index: 10; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                                                     <span
                                                         style="width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulse 1s infinite;"></span>
-                                                    Live Video Feed
+                                                    Uploaded SOS Video
                                                 </div>
 
                                                 @if($notification->video_url || (isset($notification->media_url) && !Str::endsWith($notification->media_url, ['.mp3', '.wav'])))
                                                     <div style="position: relative;">
-                                                        <video controls style="width: 100%; border-radius: 6px; max-height: 400px; background: #000;">
+                                                        <video data-sos-video-player controls style="width: 100%; border-radius: 6px; max-height: 400px; background: #000;">
                                                             <source src="{{ $notification->video_url ?? $notification->media_url }}"
                                                                 type="video/mp4">
                                                         </video>
@@ -1266,7 +1266,7 @@
                         $resolvedSosList = $notifications->where('type', 'sos')->where('status', 'resolved');
                     @endphp
                     @forelse($resolvedSosList as $notification)
-                        <div class='message-item' style="border-left: 4px solid var(--muted); opacity: 0.8; margin-bottom: 12px; background: #fff;">
+                        <div class='message-item' data-sos-alert-id="{{ $notification->id }}" style="border-left: 4px solid var(--muted); opacity: 0.8; margin-bottom: 12px; background: #fff;">
                             <div class='message-head'>
                                 <p class='message-title'>
                                     SOS Alert: {{ optional($notification->student)->name ?? 'Unknown Student' }}
@@ -1311,12 +1311,12 @@
                                                     style="position: absolute; top: 12px; left: 12px; background: rgba(220, 38, 38, 0.9); color: #fff; font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; z-index: 10; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                                                     <span
                                                         style="width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulse 1s infinite;"></span>
-                                                    Live Video Feed
+                                                    Uploaded SOS Video
                                                 </div>
 
                                                 @if($notification->video_url || (isset($notification->media_url) && !Str::endsWith($notification->media_url, ['.mp3', '.wav'])))
                                                     <div style="position: relative;">
-                                                        <video controls style="width: 100%; border-radius: 6px; max-height: 400px; background: #000;">
+                                                        <video data-sos-video-player controls style="width: 100%; border-radius: 6px; max-height: 400px; background: #000;">
                                                             <source src="{{ $notification->video_url ?? $notification->media_url }}"
                                                                 type="video/mp4">
                                                         </video>
@@ -1472,7 +1472,20 @@
                         const newMessages = doc.querySelector('.messages');
                         const messagesEl = document.querySelector('.messages');
                         if (newMessages && messagesEl) {
-                            messagesEl.innerHTML = newMessages.innerHTML;
+                            const newSosCards = Array.from(newMessages.querySelectorAll('[data-sos-alert-id]'));
+                            messagesEl.querySelectorAll('video[data-sos-video-player]').forEach(currentVideo => {
+                                const alertId = currentVideo.closest('[data-sos-alert-id]')?.dataset.sosAlertId;
+                                const nextCard = newSosCards.find(card => card.dataset.sosAlertId === alertId);
+                                const nextVideo = nextCard?.querySelector('video[data-sos-video-player]');
+                                const currentSource = currentVideo.querySelector('source')?.getAttribute('src');
+                                const nextSource = nextVideo?.querySelector('source')?.getAttribute('src');
+
+                                if (currentSource && currentSource === nextSource) {
+                                    // Keep the existing media element so polling doesn't restart playback.
+                                    nextVideo.replaceWith(currentVideo);
+                                }
+                            });
+                            messagesEl.replaceWith(newMessages);
                         }
                     } catch (err) {
                         console.error('Error parsing notifications HTML:', err);

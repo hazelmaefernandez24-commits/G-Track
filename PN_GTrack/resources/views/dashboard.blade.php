@@ -441,6 +441,7 @@
                     <th scope="col">Last Name</th>
                     <th scope="col">First Name</th>
                     <th scope="col">Status</th>
+                    <th scope="col">Video</th>
                 </tr>
             </thead>
             <tbody id="current-sos-alert-rows">
@@ -449,10 +450,11 @@
                         <td>{{ $alert['last_name'] }}</td>
                         <td>{{ $alert['first_name'] }}</td>
                         <td class="sos-alert-status">{{ $alert['alert'] }}</td>
+                        <td>{{ $alert['video_url'] ? 'Play video' : 'Waiting for video' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td class="active-students-empty" colspan="3">NO SOS ALERT</td>
+                        <td class="active-students-empty" colspan="4">NO SOS ALERT</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -460,6 +462,15 @@
     </div>
 </section>
 </div>
+
+<dialog id="sos-video-modal" aria-labelledby="sos-video-title" style="width: min(92vw, 760px); max-width: 760px; border: 0; border-radius: 14px; padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px;">
+        <h2 id="sos-video-title" style="margin: 0;">SOS Video</h2>
+        <button type="button" id="close-sos-video" aria-label="Close video" style="border: 0; background: transparent; font-size: 24px; cursor: pointer;">&times;</button>
+    </div>
+    <video id="sos-video-player" controls playsinline style="width: 100%; max-height: 70vh; background: #000; border-radius: 8px; display: none;"></video>
+    <p id="sos-video-waiting" role="status" style="margin: 0; color: var(--text-muted);">The student has not uploaded a video yet.</p>
+</dialog>
 
 @endsection
 
@@ -475,6 +486,30 @@
     const currentSosAlertLabel = document.getElementById('current-sos-alert-label');
     const currentSosAlertBatch = document.getElementById('current-sos-alert-batch');
     let dashboardSosAlerts = @json($currentSosAlerts);
+    const sosVideoModal = document.getElementById('sos-video-modal');
+    const sosVideoPlayer = document.getElementById('sos-video-player');
+    const sosVideoWaiting = document.getElementById('sos-video-waiting');
+    let activeVideoAlertId = null;
+
+    function syncSosVideoModal() {
+        if (activeVideoAlertId === null || !sosVideoModal.open) return;
+
+        const alert = dashboardSosAlerts.find(item => String(item.id) === String(activeVideoAlertId));
+        if (!alert) {
+            sosVideoModal.close();
+            return;
+        }
+
+        const videoUrl = alert.video_url || '';
+        if (sosVideoPlayer.dataset.url !== videoUrl) {
+            sosVideoPlayer.pause();
+            sosVideoPlayer.dataset.url = videoUrl;
+            sosVideoPlayer.src = videoUrl;
+            sosVideoPlayer.load();
+        }
+        sosVideoPlayer.style.display = videoUrl ? 'block' : 'none';
+        sosVideoWaiting.style.display = videoUrl ? 'none' : 'block';
+    }
 
     function renderCurrentSosAlerts() {
         currentSosAlertRows.replaceChildren();
@@ -488,11 +523,12 @@
         if (!visibleAlerts.length) {
             const row = document.createElement('tr');
             const cell = document.createElement('td');
-            cell.colSpan = 3;
+            cell.colSpan = 4;
             cell.className = 'active-students-empty';
             cell.textContent = 'NO SOS ALERT';
             row.appendChild(cell);
             currentSosAlertRows.appendChild(row);
+            syncSosVideoModal();
             return;
         }
 
@@ -508,8 +544,18 @@
             detailsCell.className = 'sos-alert-status';
             detailsCell.textContent = alert.alert || 'SOS ALERT';
             row.appendChild(detailsCell);
+
+            const videoCell = document.createElement('td');
+            const videoButton = document.createElement('button');
+            videoButton.type = 'button';
+            videoButton.textContent = alert.video_url ? 'Play video' : 'Waiting for video';
+            videoButton.disabled = !alert.video_url;
+            videoButton.dataset.sosVideoAlert = alert.id;
+            videoCell.appendChild(videoButton);
+            row.appendChild(videoCell);
             currentSosAlertRows.appendChild(row);
         });
+        syncSosVideoModal();
     }
 
     function renderActiveStudents() {
@@ -575,6 +621,21 @@
     activeStudentsSearch.addEventListener('input', renderActiveStudents);
     activeStudentsBatch.addEventListener('change', renderActiveStudents);
     currentSosAlertBatch.addEventListener('change', renderCurrentSosAlerts);
+    currentSosAlertRows.addEventListener('click', event => {
+        const button = event.target.closest('[data-sos-video-alert]');
+        if (!button || button.disabled) return;
+
+        activeVideoAlertId = button.dataset.sosVideoAlert;
+        sosVideoModal.showModal();
+        syncSosVideoModal();
+    });
+    document.getElementById('close-sos-video').addEventListener('click', () => sosVideoModal.close());
+    sosVideoModal.addEventListener('close', () => {
+        sosVideoPlayer.pause();
+        sosVideoPlayer.removeAttribute('src');
+        delete sosVideoPlayer.dataset.url;
+        activeVideoAlertId = null;
+    });
 
     // Poll just for the dashboard stats
     function updateDashboardStats() {

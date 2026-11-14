@@ -71,6 +71,49 @@ class StudentManagementFeatureTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_deleted_student_id_is_reused_when_adding_another_student_to_the_same_class(): void
+    {
+        $admin = $this->createAdmin('main');
+
+        $this->actingAs($admin, 'admin');
+
+        foreach (['first@example.com', 'second@example.com'] as $email) {
+            $this->post(route('students.store'), [
+                'first_name' => 'Test',
+                'middle_initial' => '',
+                'last_name' => 'Student',
+                'email' => $email,
+                'class' => '2026',
+                'gender' => 'Female',
+                'contact' => '09123456789',
+                'password' => 'student123',
+                'password_confirmation' => 'student123',
+            ])->assertSessionHas('success');
+        }
+
+        $deletedStudent = Student::where('email', 'second@example.com')->firstOrFail();
+        $reusableStudentId = $deletedStudent->student_id;
+        $this->delete(route('students.destroy', $deletedStudent))
+            ->assertSessionHas('success');
+
+        $this->post(route('students.store'), [
+            'first_name' => 'Replacement',
+            'middle_initial' => '',
+            'last_name' => 'Student',
+            'email' => 'replacement@example.com',
+            'class' => '2026',
+            'gender' => 'Female',
+            'contact' => '09987654321',
+            'password' => 'student123',
+            'password_confirmation' => 'student123',
+        ])->assertSessionHas('success');
+
+        $this->assertSame(
+            $reusableStudentId,
+            Student::where('email', 'replacement@example.com')->value('student_id')
+        );
+    }
+
     private function createAdmin(string $role): Admin
     {
         return Admin::create([

@@ -21,7 +21,7 @@ class SosAlertController extends NotificationScreenController
 
     public function activeForAdmin()
     {
-        $alerts = SosAlert::with('student:id,student_id,first_name,middle_initial,last_name')
+        $alerts = SosAlert::with(['student:id,student_id,first_name,middle_initial,last_name', 'media'])
             ->where('status', '!=', 'resolved')
             ->orderByDesc('updated_at')
             ->get()
@@ -32,6 +32,7 @@ class SosAlertController extends NotificationScreenController
                 'student_id' => $alert->student?->student_id,
                 'description' => $alert->description,
                 'created_at' => $alert->created_at?->toISOString(),
+                'video_url' => $alert->video_url,
             ]);
 
         return response()->json(['alerts' => $alerts]);
@@ -123,8 +124,8 @@ class SosAlertController extends NotificationScreenController
             'battery' => 'nullable|integer|between:0,100',
             'signal' => 'nullable|string',
             'location' => 'nullable|string',
-            'media' => 'nullable|file|mimes:mp4,mov,avi,jpg,png,jpeg|max:25600',
-            'video' => 'nullable|file|mimes:mp4,mov,avi|max:25600',
+            'media' => 'nullable|file|mimes:mp4,mov,avi,jpg,png,jpeg|max:1048576',
+            'video' => 'nullable|file|mimes:mp4,mov,avi|max:1048576',
         ]);
 
         $student = Student::where('student_id', $validated['student_id'])
@@ -143,9 +144,32 @@ class SosAlertController extends NotificationScreenController
 
             try {
                 $file = $request->file($field);
+                $mimeType = $file->getMimeType() ?: 'application/octet-stream';
+                $isVideo = $field === 'video' || str_starts_with($mimeType, 'video/');
+                if ($isVideo) {
+                    $classYear = $student->studentClass?->year ?? $student->getRawOriginal('class');
+                    $classYear = preg_replace('/^Class\s+/i', '', trim((string) $classYear));
+                    $classYear = preg_replace('/[^A-Za-z0-9_-]+/', '_', $classYear);
+                    $classFolder = $classYear === '' ? 'Unassigned' : 'Class ' . $classYear;
+                    $studentId = preg_replace('/[^A-Za-z0-9_-]+/', '_', $student->student_id);
+                    $dateSent = now()->format('Y-m-d_H-i-s-u');
+                    $extension = preg_replace('/[^A-Za-z0-9]+/', '', $file->extension()) ?: 'bin';
+                    $filePath = $file->storeAs(
+                        'recordings/videos/' . $classFolder,
+                        $studentId . '_' . $dateSent . '_' . Str::random(6) . '.' . $extension,
+                        'public'
+                    );
+                } else {
+                    $filePath = $file->store('recordings/media', 'public');
+                }
+
+                if ($filePath === false) {
+                    throw new \RuntimeException('The uploaded file could not be stored.');
+                }
+
                 $uploadedMedia[] = [
-                    'file_path' => $file->store('recordings/' . ($field === 'video' ? 'videos' : 'media'), 'public'),
-                    'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+                    'file_path' => $filePath,
+                    'mime_type' => $mimeType,
                 ];
             } catch (\Exception $exception) {
                 Log::error('Failed to upload SOS media.', ['field' => $field, 'error' => $exception->getMessage()]);
@@ -272,13 +296,13 @@ class SosAlertController extends NotificationScreenController
 
     private function extractVideoUrl(SosAlert $alert): ?string
     {
-        $video = $alert->media->first(fn ($media) => str_starts_with($media->mime_type, 'video/'));
+        $video = $alert->media->last(fn ($media) => str_starts_with($media->mime_type, 'video/'));
 
         if ($video) {
             return $video->url;
         }
 
-        $media = $alert->media->first(fn ($item) => !Str::endsWith($item->file_path, ['.mp3', '.wav']));
+        $media = $alert->media->last(fn ($item) => !Str::endsWith($item->file_path, ['.mp3', '.wav']));
 
         return $media?->url;
     }

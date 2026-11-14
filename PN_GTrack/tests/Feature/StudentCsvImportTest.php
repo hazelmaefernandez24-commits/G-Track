@@ -28,9 +28,15 @@ class StudentCsvImportTest extends TestCase
             ->post(route('students.import'), [
                 'students_csv' => UploadedFile::fake()->createWithContent('students.csv', $csv),
             ])
-            ->assertRedirect(route('students.create'))
+            ->assertRedirect(route('students.index'))
+            ->assertSessionHas('success', 'Successfully added 1 student(s).')
             ->assertSessionHas('csv_import.imported', 1)
             ->assertSessionHas('csv_import.skipped', 2);
+
+        $this->get(route('students.index'))
+            ->assertSee('Successfully added 1 student(s)')
+            ->assertSee('Skipped 2 row(s) during CSV upload.')
+            ->assertSee('The contact field must be 11 digits.');
 
         $student = Student::where('email', 'jamie@example.com')->firstOrFail();
         $studentAuth = StudentAuth::where('email', 'jamie@example.com')->firstOrFail();

@@ -190,11 +190,19 @@ class StudentManagementController extends Controller
             $imported++;
         }
 
-        return redirect()->route('students.create')->with('csv_import', [
+        $importSummary = [
             'imported' => $imported,
             'skipped' => count($rowErrors),
             'errors' => $rowErrors,
-        ]);
+        ];
+
+        if ($imported === 0) {
+            return redirect()->route('students.create')->with('csv_import', $importSummary);
+        }
+
+        return redirect()->route('students.index')
+            ->with('success', "Successfully added {$imported} student(s).")
+            ->with('csv_import', $importSummary);
     }
 
     public function update(Request $request, $id)
@@ -280,7 +288,7 @@ class StudentManagementController extends Controller
     {
         DB::transaction(function () use ($data) {
             $middleInitial = $data['middle_initial'] ?? null;
-            $class = BatchClass::where('year', $data['class'])->firstOrFail();
+            $class = BatchClass::where('year', $data['class'])->lockForUpdate()->firstOrFail();
 
             $student = Student::create(array_merge(
                 array_intersect_key($data, array_flip(['email', 'gender', 'contact'])),
@@ -293,13 +301,11 @@ class StudentManagementController extends Controller
                 ]
             ));
 
-            $classCode = Str::upper(preg_replace('/[^A-Za-z0-9]/', '', $student->class) ?? '') ?: 'CLASS';
-            $sequence = $student->id;
-            $studentId = 'STU' . $classCode . str_pad((string) $sequence, 3, '0', STR_PAD_LEFT);
-
-            while (Student::where('student_id', $studentId)->exists()) {
-                $studentId = 'STU' . $classCode . str_pad((string) ++$sequence, 3, '0', STR_PAD_LEFT);
-            }
+            $classCode = Str::upper(preg_replace('/[^A-Za-z0-9]/', '', $class->year) ?? '') ?: 'CLASS';
+            $sequence = 1;
+            do {
+                $studentId = 'STU' . $classCode . str_pad((string) $sequence++, 3, '0', STR_PAD_LEFT);
+            } while (Student::where('student_id', $studentId)->exists());
 
             $student->update(['student_id' => $studentId]);
 

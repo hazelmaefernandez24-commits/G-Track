@@ -13,7 +13,7 @@ class StatusController extends Controller
     $students = Student::with('locations')->get();
 
     foreach ($students as $student) {
-        $lastLocation = $student->locations()->latest()->first();
+        $lastLocation = $student->locations()->latest('recorded_at')->first();
 
         if ($lastLocation) {
             $diff = now()->diffInMinutes($lastLocation->recorded_at);

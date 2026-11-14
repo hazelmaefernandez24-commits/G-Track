@@ -79,12 +79,12 @@
         box-sizing: border-box;
     }
     .alert {
-        padding: 12px;
+        padding: 12px 16px;
         border-radius: 8px;
         margin-bottom: 16px;
         font-size: 14px;
     }
-    .alert-success { background: #dcfce7; color: #166534; }
+    .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     .alert-danger { background: #fee2e2; color: #991b1b; }
     .role-badge{
         padding:2px 8px;
@@ -101,7 +101,7 @@
 @section('content')
     <div style="max-width: 1000px;">
         @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
+            <div class="alert alert-success" role="status">{{ session('success') }}</div>
         @endif
         @if(session('error'))
             <div class="alert alert-danger">{{ session('error') }}</div>

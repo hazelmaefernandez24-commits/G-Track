@@ -55,12 +55,10 @@ class AdminManagementController extends Controller
             ]);
 
             $rolePrefix = $admin->role === 'education' ? 'EDU' : 'MAIN';
-            $sequence = $admin->id;
-            $staffId = $rolePrefix . str_pad((string) $sequence, 3, '0', STR_PAD_LEFT);
-
-            while (Admin::where('staff_id', $staffId)->exists()) {
-                $staffId = $rolePrefix . str_pad((string) ++$sequence, 3, '0', STR_PAD_LEFT);
-            }
+            $sequence = 1;
+            do {
+                $staffId = $rolePrefix . str_pad((string) $sequence++, 3, '0', STR_PAD_LEFT);
+            } while (Admin::where('staff_id', $staffId)->exists());
 
             $admin->update(['staff_id' => $staffId]);
         });

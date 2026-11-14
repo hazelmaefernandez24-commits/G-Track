@@ -176,6 +176,77 @@ class MobileApiFeatureCoverageTest extends TestCase
         ]);
     }
 
+    public function test_sos_status_creates_an_admin_alert_and_later_video_upload_is_playable(): void
+    {
+        Storage::fake('public');
+        $student = $this->createStudent();
+
+        $this->postJson('/api/location/sos', [
+            'student_id' => $student->student_id,
+            'sos_status' => 'help',
+            'latitude' => 14.5,
+            'longitude' => 121.0,
+        ])->assertOk()
+            ->assertJsonPath('success', true);
+
+        $alertId = \Illuminate\Support\Facades\DB::table('emergency_alerts')
+            ->where('student_id', $student->id)
+            ->value('id');
+        $this->assertNotNull($alertId);
+
+        $this->postJson('/api/location/update', [
+            'student_id' => $student->student_id,
+            'sos_status' => 'help',
+            'latitude' => 14.6,
+            'longitude' => 121.1,
+        ])->assertOk();
+
+        $this->assertSame(
+            1,
+            \Illuminate\Support\Facades\DB::table('emergency_alerts')
+                ->where('student_id', $student->id)
+                ->where('status', '!=', 'resolved')
+                ->count()
+        );
+
+        $this->post('/api/notifications/send', [
+            'student_id' => $student->student_id,
+            'target' => 'sos',
+            'type' => 'sos',
+            'message' => 'Emergency Live Video Feed',
+            'latitude' => 14.6,
+            'longitude' => 121.1,
+            'video' => UploadedFile::fake()->create('incident.mp4', 100, 'video/mp4'),
+        ])->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('video_uploaded', true)
+            ->assertJsonPath('notification_id', $alertId);
+
+        $firstVideoResponse = $this->getJson('/api/notification/'.$alertId.'/video')
+            ->assertOk()
+            ->assertJsonPath('success', true);
+
+        $firstVideoUrl = $firstVideoResponse->json('video_url');
+        $this->post('/api/notifications/send', [
+            'student_id' => $student->student_id,
+            'target' => 'sos',
+            'message' => 'Second emergency video clip',
+            'video' => UploadedFile::fake()->create('incident-follow-up.mp4', 100, 'video/mp4'),
+        ])->assertOk()
+            ->assertJsonPath('notification_id', $alertId);
+
+        $latestVideoUrl = \App\Models\SosAlert::findOrFail($alertId)->video_url;
+        $this->assertNotSame($firstVideoUrl, $latestVideoUrl);
+        $this->getJson('/api/notification/'.$alertId.'/video')
+            ->assertOk()
+            ->assertJsonPath('video_url', $latestVideoUrl);
+
+        $this->getJson('/api/dashboard/stats')
+            ->assertOk()
+            ->assertJsonPath('currentSosAlerts.0.id', $alertId)
+            ->assertJsonPath('currentSosAlerts.0.video_url', $latestVideoUrl);
+    }
+
     public function test_student_notification_api_sends_and_reads_notifications(): void
     {
         $student = $this->createStudent();
@@ -223,6 +294,13 @@ class MobileApiFeatureCoverageTest extends TestCase
             'video' => UploadedFile::fake()->create('incident.mp4', 100, 'video/mp4'),
         ])->assertOk()
             ->assertJsonPath('success', true);
+
+        $videoFiles = Storage::disk('public')->allFiles('recordings/videos/Class 2026');
+        $this->assertCount(1, $videoFiles);
+        $this->assertMatchesRegularExpression(
+            '/^recordings\/videos\/Class 2026\/STU2026001_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}-\d{6}_[A-Za-z0-9]{6}\.mp4$/',
+            $videoFiles[0]
+        );
 
         $alert = Notification::where('student_id', $student->id)->where('type', 'sos')->firstOrFail();
         $this->assertNotEmpty($alert->video_url);

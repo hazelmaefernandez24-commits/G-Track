@@ -186,6 +186,49 @@ class AuthController extends Controller
     return response()->json(['message' => 'Please use the correct endpoint for student login'], 400);
 }
 
+    public function apiResetPassword(Request $request)
+    {
+        $request->merge([
+            'new_password' => $request->input('new_password') ?? $request->input('password'),
+        ]);
+
+        $validated = $request->validate([
+            'staff_id' => ['required', 'string'],
+            'current_password' => ['required', 'string'],
+            'new_password' => ['required', 'string', 'min:6', 'different:current_password'],
+        ]);
+
+        $admin = Admin::query()
+            ->where('staff_id', $validated['staff_id'])
+            ->orWhere('id', $validated['staff_id'])
+            ->orWhere('email', $validated['staff_id'])
+            ->first();
+
+        if (! $admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Admin account not found.',
+            ], 404);
+        }
+
+        if (! Hash::check($validated['current_password'], $admin->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The current password is incorrect.',
+            ], 401);
+        }
+
+        $admin->password = Hash::make($validated['new_password']);
+        $admin->must_change_password = false;
+        $admin->password_changed_at = now();
+        $admin->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset successfully.',
+        ]);
+    }
+
     public function apiLogout(Request $request)
     {
         // For tokenless authentication, logging out is just handled on the mobile device by removing user data context.

@@ -79,12 +79,12 @@
         box-sizing: border-box;
     }
     .alert {
-        padding: 12px;
+        padding: 12px 16px;
         border-radius: 8px;
         margin-bottom: 16px;
         font-size: 14px;
     }
-    .alert-success { background: #dcfce7; color: #166534; }
+    .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     .alert-danger { background: #fee2e2; color: #991b1b; }
 </style>
 @endpush
@@ -92,7 +92,19 @@
 @section('content')
     <div style="max-width: 1200px;">
         @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
+            <div class="alert alert-success" role="status">{{ session('success') }}</div>
+        @endif
+        @if(session('csv_import.skipped'))
+            <div class="alert alert-danger" role="alert">
+                Skipped {{ session('csv_import.skipped') }} row(s) during CSV upload.
+                @if(session('csv_import.errors'))
+                    <ul style="margin:8px 0 0; padding-left:20px;">
+                        @foreach(session('csv_import.errors') as $rowError)
+                            <li>{{ $rowError }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
         @endif
         @if($errors->any())
             <div class="alert alert-danger" role="alert">

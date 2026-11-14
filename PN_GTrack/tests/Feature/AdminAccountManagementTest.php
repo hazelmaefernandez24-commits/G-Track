@@ -89,6 +89,47 @@ class AdminAccountManagementTest extends TestCase
         $this->assertDatabaseMissing('admins', ['id' => $target->id]);
     }
 
+    public function test_deleted_admin_staff_id_is_reused_when_adding_an_admin_with_the_same_role(): void
+    {
+        $mainAdmin = $this->createAdmin('main');
+        $this->actingAs($mainAdmin, 'admin');
+
+        foreach ([
+            'first.education@example.com',
+            'second.education@example.com',
+        ] as $email) {
+            $this->post(route('admins.store'), [
+                'first_name' => 'Education',
+                'middle_initial' => '',
+                'last_name' => 'Staff',
+                'email' => $email,
+                'password' => 'temporary1',
+                'password_confirmation' => 'temporary1',
+                'role' => 'education',
+            ])->assertSessionHas('success');
+        }
+
+        $deletedAdmin = Admin::where('email', 'second.education@example.com')->firstOrFail();
+        $reusableStaffId = $deletedAdmin->staff_id;
+        $this->delete(route('admins.destroy', $deletedAdmin))
+            ->assertSessionHas('success');
+
+        $this->post(route('admins.store'), [
+            'first_name' => 'Replacement',
+            'middle_initial' => '',
+            'last_name' => 'Staff',
+            'email' => 'replacement.education@example.com',
+            'password' => 'temporary1',
+            'password_confirmation' => 'temporary1',
+            'role' => 'education',
+        ])->assertSessionHas('success');
+
+        $this->assertSame(
+            $reusableStaffId,
+            Admin::where('email', 'replacement.education@example.com')->value('staff_id')
+        );
+    }
+
     public function test_admin_management_page_keeps_edit_control_available_after_password_change(): void
     {
         $mainAdmin = $this->createAdmin('main');

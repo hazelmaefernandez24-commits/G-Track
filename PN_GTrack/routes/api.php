@@ -16,6 +16,8 @@ Route::middleware('api')->group(function () {
     // 🔵 AUTH: Using the API methods
     Route::post('/login', [AuthController::class, 'apiLogin']); // Admin login
     Route::post('/student/login', [\App\Http\Controllers\StudentController::class, 'apiLogin']); // Student login
+    Route::post('/reset-password', [AuthController::class, 'apiResetPassword'])->middleware('throttle:5,1');
+    Route::post('/student/reset-password', [\App\Http\Controllers\StudentController::class, 'apiResetPassword'])->middleware('throttle:5,1');
     Route::post('/logout', [AuthController::class, 'apiLogout']);
 
     // 📡 STUDENT REAL-TIME STATUS

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Location;
+use App\Models\SosAlert;
 use App\Models\Student;
 
 class LocationController extends Controller
@@ -38,6 +39,8 @@ class LocationController extends Controller
                 ->where('student_id', $student->id)
                 ->where('status', '!=', 'resolved')
                 ->update(['status' => 'resolved', 'resolved_at' => now(), 'updated_at' => now()]);
+        } elseif (($validated['sos_status'] ?? null) === 'help') {
+            $this->ensureActiveSosAlert($student, $location);
         }
 
         return response()->json([
@@ -59,16 +62,20 @@ class LocationController extends Controller
         $student = Student::where('id', $request->student_id)
             ->orWhere('student_id', $request->student_id)
             ->firstOrFail();
+        $location = null;
         if ($request->filled('latitude') && $request->filled('longitude')) {
-            $student->locations()->create([
+            $location = $student->locations()->create([
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
                 'recorded_at' => now(),
             ]);
         }
         $student->recordStatus('online', $request->sos_status);
+        if ($request->sos_status === 'help') {
+            $this->ensureActiveSosAlert($student, $location);
+        }
 
-        // SOS notification creation (with video) is handled by SosAlertController.
+        // The video upload later updates the active alert through SosAlertController.
         if ($request->sos_status === 'safe') {
             // Mark as resolved if student is safe
             \DB::table('emergency_alerts')->where('student_id', $student->id)
@@ -81,6 +88,29 @@ class LocationController extends Controller
             'message' => 'SOS status updated and Admin notified.',
             'sos_status' => $request->sos_status
         ]);
+    }
+
+    private function ensureActiveSosAlert(Student $student, ?Location $location): void
+    {
+        $alert = SosAlert::where('student_id', $student->id)
+            ->where('status', '!=', 'resolved')
+            ->latest()
+            ->first();
+
+        if (!$alert) {
+            SosAlert::create([
+                'student_id' => $student->id,
+                'location_id' => $location?->id,
+                'description' => 'SOS alert',
+                'status' => 'pending',
+            ]);
+
+            return;
+        }
+
+        if ($location) {
+            $alert->update(['location_id' => $location->id]);
+        }
     }
 
     public function getAll(Request $request)

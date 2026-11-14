@@ -60,19 +60,19 @@ class SosAlert extends Model
 
     public function media(): HasMany
     {
-        return $this->hasMany(AlertMedia::class, 'emergency_alert_id');
+        return $this->hasMany(AlertMedia::class, 'emergency_alert_id')->orderBy('id');
     }
 
     public function getVideoUrlAttribute(): ?string
     {
-        $media = $this->media->first(fn (AlertMedia $item) => str_starts_with($item->mime_type, 'video/'));
+        $media = $this->media->last(fn (AlertMedia $item) => str_starts_with($item->mime_type, 'video/'));
 
         return $media?->url;
     }
 
     public function getMediaUrlAttribute(): ?string
     {
-        return $this->media->first()?->url;
+        return $this->media->last()?->url;
     }
 
     public function getLocationAttribute(): ?string

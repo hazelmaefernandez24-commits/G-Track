@@ -217,7 +217,7 @@
 
     @if(session('csv_import'))
         <div class="{{ session('csv_import.skipped') ? 'alert-danger' : 'alert-success' }}" role="status" style="margin-top:20px;">
-            Imported {{ session('csv_import.imported') }} student(s); skipped {{ session('csv_import.skipped') }} row(s).
+            Successfully added {{ session('csv_import.imported') }} student(s); skipped {{ session('csv_import.skipped') }} row(s).
             @if(session('csv_import.errors'))
                 <ul class="csv-import-errors">
                     @foreach(session('csv_import.errors') as $rowError)
